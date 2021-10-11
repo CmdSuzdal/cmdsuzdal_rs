@@ -1,4 +1,5 @@
-//! First experiments to write chess software in Rust trying to start as structured as possible.
-//! This is **experimental work** that will be sooner or later moved in the `cmdsuzdal_rs` project.
+//! Abba-dingo is a library with the implementation of several components useful to
+//! implement chess related software (e.g. engines). The library defines structures
+//! that can be used represent a chessboard using a bitboard-based approach.
 
 pub mod bitboard;

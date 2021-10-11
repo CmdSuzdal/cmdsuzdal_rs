@@ -1,6 +1,11 @@
 const EMPTY_STATE: u64 = 0;
 
 #[rustfmt::skip]
+    /// A vertical file (or column) inside an 8x8 board.
+    ///
+    /// Traditionally, in the chess game the vertical files are represented
+    /// from left to right using the letters from 'A' to 'H', so the "File A"
+    /// is the leftmost column, whereas the "File H" is the rightmost one.
     pub enum File {
         FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH,
     }
@@ -28,6 +33,11 @@ const FILES_BBS: [u64; 8] = [
 ];
 
 #[rustfmt::skip]
+    /// An horizontal rank (or row) inside an 8x8 board.
+    ///
+    /// Traditionally, in the chess game the horizontal files are represented
+    /// from bottom to top using the numbers from '1' to '8', so the "Rank 1"
+    /// is the bottom row, whereas the "Rank 8" is the top one.
     pub enum Rank {
         Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8,
     }
@@ -55,6 +65,7 @@ const RANKS_BBS: [u64; 8] = [
 ];
 
 #[rustfmt::skip]
+    /// A cell inside an 8x8 board
     #[derive(Clone, Copy)]
     pub enum Cell {
         A1, B1, C1, D1, E1, F1, G1, H1,
@@ -67,40 +78,74 @@ const RANKS_BBS: [u64; 8] = [
         A8, B8, C8, D8, E8, F8, G8, H8,
     }
 
+/// Structure used to represent the 8x8 board inside a chess program in a piece centric manner.
+///
+/// It is a general purpose, set-wise data-structure fitting in one 64-bit register.
+/// Each bit represent the "status" of a cell inside the board. For example, a bitboard can
+/// represent occupation of a cell by a piece, but also more abstract things like attack and
+/// defend sets, move-target sets and so on.
+///
+/// See the [Bitboard entry page](https://www.chessprogramming.org/Bitboards)
+/// in the chess programming wiki for additional details.
+///
 #[derive(Default, Debug, PartialEq, Eq)]
 pub struct BitBoard {
     state: u64,
 }
 impl BitBoard {
+    /// Default constructor for the BitBoard struct: instantiate an empty BitBoard
     pub fn new() -> BitBoard {
         BitBoard { state: EMPTY_STATE }
     }
+
+    /// Returns `true` if the BitBoard is empty.
+    ///
+    /// A cell inside a BitBoard can be free (or empty) or busy.
+    /// A BitBoard is empty if all its cells are empty.
+    ///
+    ///     use abbadingo::bitboard::*;
+    ///
+    ///     // The default constructor returns an empty bitboard:
+    ///     assert_eq!(BitBoard::new().is_empty(), true);
+    ///
+    ///     // Builds a BitBoard with the E1 cell busy
+    ///     let bb = BitBoard::from([Cell::E1]);
+    ///     assert_eq!(bb.is_empty(), false);
+    ///
     pub fn is_empty(&self) -> bool {
         self.state == EMPTY_STATE
     }
+
     pub fn set_cell(&mut self, c: Cell) {
         self.state |= 1 << c as usize;
     }
+
     pub fn reset_cell(&mut self, c: Cell) {
         self.state &= !(1 << c as usize);
     }
+
     pub fn set_rank(&mut self, r: Rank) {
         self.state |= RANKS_BBS[r as usize];
     }
+
     pub fn reset_rank(&mut self, r: Rank) {
         self.state &= !(RANKS_BBS[r as usize]);
     }
+
     pub fn set_file(&mut self, f: File) {
         self.state |= FILES_BBS[f as usize];
     }
+
     pub fn reset_file(&mut self, f: File) {
         self.state &= !(FILES_BBS[f as usize]);
     }
+
     pub fn set_cells(&mut self, cells: &[Cell]) {
         for c in cells {
             self.set_cell(*c);
         }
     }
+
     pub fn reset_cells(&mut self, cells: &[Cell]) {
         for c in cells {
             self.reset_cell(*c);
