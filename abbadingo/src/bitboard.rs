@@ -32,7 +32,7 @@ const FILES_BBS: [u64; 8] = [
         Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8,
     }
 // Ranks Masks --- These are the rank indexes of the board:
-//     _________________________
+//    _________________________
 // r8|  7  7  7  7  7  7  7  7 |
 // r7|  6  6  6  6  6  6  6  6 |
 // r6|  5  5  5  5  5  5  5  5 |
@@ -55,7 +55,7 @@ const RANKS_BBS: [u64; 8] = [
 ];
 
 #[rustfmt::skip]
-    #[derive(Clone)]
+    #[derive(Clone, Copy)]
     pub enum Cell {
         A1, B1, C1, D1, E1, F1, G1, H1,
         A2, B2, C2, D2, E2, F2, G2, H2,
@@ -95,6 +95,16 @@ impl BitBoard {
     }
     pub fn reset_file(&mut self, f: File) {
         self.state &= !(FILES_BBS[f as usize]);
+    }
+    pub fn set_cells(&mut self, cells: &[Cell]) {
+        for c in cells {
+            self.set_cell(*c);
+        }
+    }
+    pub fn reset_cells(&mut self, cells: &[Cell]) {
+        for c in cells {
+            self.reset_cell(*c);
+        }
     }
 }
 
@@ -236,5 +246,90 @@ mod tests {
                 | FILES_BBS[File::FileG as usize]
         );
         assert_eq!(bb.state, 0x55_55_55_55_55_55_55_55);
+    }
+
+    #[test]
+    fn set_cells_in_bitboard() {
+        let mut bb = BitBoard::new();
+        bb.set_cells(&[
+            Cell::D1,
+            Cell::D2,
+            Cell::D3,
+            Cell::D4,
+            Cell::D5,
+            Cell::D6,
+            Cell::D7,
+            Cell::D8,
+            Cell::A3,
+            Cell::B3,
+            Cell::C3,
+            Cell::E3,
+            Cell::F3,
+            Cell::G3,
+            Cell::H3,
+        ]);
+        //    _________________________
+        // r8|  .  .  .  o  .  .  .  . |
+        // r7|  .  .  .  o  .  .  .  . |
+        // r6|  .  .  .  o  .  .  .  . |
+        // r5|  .  .  .  o  .  .  .  . |
+        // r4|  .  .  .  o  .  .  .  . |
+        // r3|  o  o  o  o  o  o  o  o |
+        // r2|  .  .  .  o  .  .  .  . |
+        // r1|  .  .  .  o  .  .  .  . |
+        //     -------------------------
+        //     fa fb fc fd fe ff fg fh
+        assert_eq!(bb.state, 0x08_08_08_08_08_FF_08_08);
+
+        bb.set_cells(&[
+            Cell::B1,
+            Cell::C2,
+            Cell::E4,
+            Cell::F5,
+            Cell::G6,
+            Cell::H7,
+            Cell::F1,
+            Cell::E2,
+            Cell::C4,
+            Cell::B5,
+            Cell::A6,
+        ]);
+        //    _________________________
+        // r8|  .  .  .  o  .  .  .  . |
+        // r7|  .  .  .  o  .  .  .  x |
+        // r6|  x  .  .  o  .  .  x  . |
+        // r5|  .  x  .  o  .  x  .  . |
+        // r4|  .  .  x  o  x  .  .  . |
+        // r3|  o  o  o  o  o  o  o  o |
+        // r2|  .  .  x  o  x  .  .  . |
+        // r1|  .  x  .  o  .  x  .  . |
+        //     -------------------------
+        //     fa fb fc fd fe ff fg fh
+        assert_eq!(bb.state, 0x08_88_49_2A_1C_FF_1C_2A);
+
+        bb.reset_cells(&[
+            Cell::D2,
+            Cell::D4,
+            Cell::D5,
+            Cell::D6,
+            Cell::D7,
+            Cell::B3,
+            Cell::C3,
+            Cell::E3,
+            Cell::F3,
+            Cell::G3,
+        ]);
+        //    _________________________
+        // r8|  .  .  .  o  .  .  .  . |
+        // r7|  .  .  .  .  .  .  .  x |
+        // r6|  x  .  .  .  .  .  x  . |
+        // r5|  .  x  .  .  .  x  .  . |
+        // r4|  .  .  x  .  x  .  .  . |
+        // r3|  o  .  .  o  .  .  .  o |
+        // r2|  .  .  x  .  x  .  .  . |
+        // r1|  .  x  .  o  .  x  .  . |
+        //     -------------------------
+        //     fa fb fc fd fe ff fg fh
+        assert_eq!(bb.state, 0x08_80_41_22_14_89_14_2A);
     }
 }
