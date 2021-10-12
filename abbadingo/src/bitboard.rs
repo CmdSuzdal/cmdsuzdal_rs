@@ -129,10 +129,32 @@ impl BitBoard {
     /// # use abbadingo::bitboard::*;
     ///
     /// // The default constructor returns an empty bitboard:
+    /// //    _________________________
+    /// // r8|  .  .  .  .  .  .  .  . |
+    /// // r7|  .  .  .  .  .  .  .  . |
+    /// // r6|  .  .  .  .  .  .  .  . |
+    /// // r5|  .  .  .  .  .  .  .  . |
+    /// // r4|  .  .  .  .  .  .  .  . |
+    /// // r3|  .  .  .  .  .  .  .  . |
+    /// // r2|  .  .  .  .  .  .  .  . |
+    /// // r1|  .  .  .  .  .  .  .  . |
+    /// //     -------------------------
+    /// //     fa fb fc fd fe ff fg fh
     /// assert_eq!(BitBoard::new().is_empty(), true);
     ///
     /// // Builds a BitBoard with the E1 cell busy
     /// let bb = BitBoard::from([Cell::E1]);
+    /// //    _________________________
+    /// // r8|  .  .  .  .  .  .  .  . |
+    /// // r7|  .  .  .  .  .  .  .  . |
+    /// // r6|  .  .  .  .  .  .  .  . |
+    /// // r5|  .  .  .  .  .  .  .  . |
+    /// // r4|  .  .  .  .  .  .  .  . |
+    /// // r3|  .  .  .  .  .  .  .  . |
+    /// // r2|  .  .  .  .  .  .  .  . |
+    /// // r1|  .  .  .  .  o  .  .  . |
+    /// //     -------------------------
+    /// //     fa fb fc fd fe ff fg fh
     /// assert_eq!(bb.is_empty(), false);
     ///```
     pub fn is_empty(&self) -> bool {
@@ -161,6 +183,17 @@ impl BitBoard {
     /// # use abbadingo::bitboard::*;
     ///
     /// let mut bb = BitBoard::from([Cell::A1, Cell::H8]);
+    /// //    _________________________
+    /// // r8|  .  .  .  .  .  .  .  o |
+    /// // r7|  .  .  .  .  .  .  .  . |
+    /// // r6|  .  .  .  .  .  .  .  . |
+    /// // r5|  .  .  .  .  .  .  .  . |
+    /// // r4|  .  .  .  .  .  .  .  . |
+    /// // r3|  .  .  .  .  .  .  .  . |
+    /// // r2|  .  .  .  .  .  .  .  . |
+    /// // r1|  o  .  .  .  .  .  .  . |
+    /// //     -------------------------
+    /// //     fa fb fc fd fe ff fg fh
     /// assert_eq!(bb.is_empty(), false);
     /// bb.reset_cell(Cell::A1);
     /// bb.reset_cell(Cell::H8);
@@ -211,6 +244,38 @@ impl BitBoard {
         for c in cells {
             self.reset_cell(*c);
         }
+    }
+
+    /// Evaluate the number of active (busy) cells in a [BitBoard]
+    ///
+    /// # Example
+    /// ```
+    /// # use abbadingo::bitboard::*;
+    ///
+    /// let mut bb = BitBoard::from([Cell::B2, Cell::G7]);
+    /// bb.set_file(File::FileD);
+    /// //    _________________________
+    /// // r8|  .  .  .  o  .  .  .  . |
+    /// // r7|  .  .  .  o  .  .  o  . |
+    /// // r6|  .  .  .  o  .  .  .  . |
+    /// // r5|  .  .  .  o  .  .  .  . |
+    /// // r4|  .  .  .  o  .  .  .  . |
+    /// // r3|  .  .  .  o  .  .  .  . |
+    /// // r2|  .  o  .  o  .  .  .  . |
+    /// // r1|  .  .  .  o  .  .  .  . |
+    /// //     -------------------------
+    /// //     fa fb fc fd fe ff fg fh
+    /// assert_eq!(bb.pop_count(), 10);
+    ///```
+    ///
+    pub fn pop_count(&self) -> usize {
+        let mut cnt = 0;
+        let mut bbs = self.state;
+        while bbs != 0 {
+            cnt += 1;
+            bbs &= bbs -1; // Reset LS1B
+        }
+        cnt
     }
 }
 
@@ -276,12 +341,14 @@ mod tests {
         let bb = BitBoard::new();
         assert_eq!(bb.state, EMPTY_STATE);
         assert_eq!(bb.is_empty(), true);
+        assert_eq!(bb.pop_count(), 0);
     }
     #[test]
     fn init_bitboard_using_a_vector_with_a_cell_in_h8() {
         let bb = BitBoard::from([Cell::H8]);
         assert_eq!(bb.is_empty(), false);
         assert_eq!(bb.state, 0x80_00_00_00_00_00_00_00);
+        assert_eq!(bb.pop_count(), 1);
     }
     #[test]
     fn init_bitboard_using_a_cells_vector_with_active_cell_in_diagonal() {
@@ -298,6 +365,7 @@ mod tests {
         ]);
         assert_eq!(bb.is_empty(), false);
         assert_eq!(bb.state, BBS_DIAGONAL);
+        assert_eq!(bb.pop_count(), 8);
     }
 
     #[test]
@@ -315,6 +383,7 @@ mod tests {
         ]);
         assert_eq!(bb.is_empty(), false);
         assert_eq!(bb.state, BBS_ANTIDIAGONAL);
+        assert_eq!(bb.pop_count(), 8);
     }
 
     #[test]
@@ -331,6 +400,7 @@ mod tests {
         ]);
         bb.reset_cell(Cell::E5);
         assert_eq!(bb.state, 0x80_40_20_00_08_04_02_01);
+        assert_eq!(bb.pop_count(), 7);
     }
 
     #[test]
@@ -349,6 +419,7 @@ mod tests {
                 | RANKS_BBS[Rank::Rank8 as usize]
         );
         assert_eq!(bb.state, 0xFF_00_FF_00_FF_00_FF_00);
+        assert_eq!(bb.pop_count(), 32);
     }
 
     #[test]
@@ -367,6 +438,7 @@ mod tests {
                 | FILES_BBS[File::FileG as usize]
         );
         assert_eq!(bb.state, 0x55_55_55_55_55_55_55_55);
+        assert_eq!(bb.pop_count(), 32);
     }
 
     #[test]
@@ -401,6 +473,7 @@ mod tests {
         //     -------------------------
         //     fa fb fc fd fe ff fg fh
         assert_eq!(bb.state, 0x08_08_08_08_08_FF_08_08);
+        assert_eq!(bb.pop_count(), 15);
 
         bb.set_cells(&[
             Cell::B1,
@@ -427,6 +500,7 @@ mod tests {
         //     -------------------------
         //     fa fb fc fd fe ff fg fh
         assert_eq!(bb.state, 0x08_88_49_2A_1C_FF_1C_2A);
+        assert_eq!(bb.pop_count(), 26);
 
         bb.reset_cells(&[
             Cell::D2,
@@ -452,5 +526,6 @@ mod tests {
         //     -------------------------
         //     fa fb fc fd fe ff fg fh
         assert_eq!(bb.state, 0x08_80_41_22_14_89_14_2A);
+        assert_eq!(bb.pop_count(), 16);
     }
 }
