@@ -65,7 +65,11 @@ const RANKS_BBS: [u64; 8] = [
 ];
 
 #[rustfmt::skip]
-    /// A cell inside an 8x8 board
+    /// Enumeration that lists all the cells inside an 8x8
+    /// square board.
+    ///
+    /// The cells starts from A1 on bottom left (bit index 0) to H8 on top right (bit index 63).
+    ///
     #[derive(Clone, Copy)]
     pub enum Cell {
         A1, B1, C1, D1, E1, F1, G1, H1,
@@ -78,74 +82,131 @@ const RANKS_BBS: [u64; 8] = [
         A8, B8, C8, D8, E8, F8, G8, H8,
     }
 
-/// Structure used to represent the 8x8 board in a piece centric manner.
+/// Structure used to represent an 8x8 square board in a piece centric manner.
 ///
 /// It is a general purpose, set-wise data-structure fitting in one 64-bit register.
-/// Each bit represent the "status" of a cell inside the board. For example, a bitboard can
-/// represent occupation of a cell by a piece, but also more abstract things like attack and
-/// defend sets, move-target sets and so on.
+/// Each bit represent the "status" of a [Cell] inside the board. For example, a bitboard
+/// can represent occupation of a cell by a piece, but also more abstract things like
+/// attack and defend sets, move-target sets and so on.
 ///
 /// See the [Bitboard entry page](https://www.chessprogramming.org/Bitboards)
 /// in the chess programming wiki for additional details.
+///
+/// The BitBoard is composed by 8 horizontal rows numbered from 1 to 8, each row called "[Rank]",
+/// and 8 vertical columns numbered from A to H, with each column called "[File]".
+/// The cells inside the bitboard are identified by the [File]+[Rank] combination. For example
+/// the bottom left cell is "A1", and the top right cell is "H8". Each [Cell] is indexed using
+/// a number starting from A1 = 0 to H8= 63.
+///
+/// |            | File A | File B | File C | File D | File E | File F | File G | File H |
+/// |         --:|   :-:  |   :-:  |   :-:  |   :-:  |   :-:  |   :-:  |   :-:  |   :-:  |
+/// | **Rank 8** | A8 = 56| B8     | C8     | D8     | E8     | F8     | G8     | H8 = 63|
+/// | **Rank 7** | A7 = 48| B7     | C7     | D7     | E7     | F7     | G7     | H7     |
+/// | **Rank 6** | A6 = 40| B6     | C6     | D6     | E6     | F6     | G6     | H6     |
+/// | **Rank 5** | A5 = 32| B5     | C5     | D5     | E5     | F5     | G5     | H5     |
+/// | **Rank 4** | A4 = 24| B4     | C4     | D4     | E4     | F4     | G4     | H4     |
+/// | **Rank 3** | A3 = 16| B3     | C3     | D3     | E3     | F3     | G3     | H3     |
+/// | **Rank 2** | A2 = 8 | B2     | C2     | D2     | E2     | F2     | G2     | H2 = 15|
+/// | **Rank 1** | A1 = 0 | B1 = 1 | C1 = 2 | D1 = ..| E1     | F1     | G1     | H1 = 7 |
 ///
 #[derive(Default, Debug, PartialEq, Eq)]
 pub struct BitBoard {
     state: u64,
 }
 impl BitBoard {
-    /// Default constructor for the BitBoard struct: instantiate an empty BitBoard
+    /// Default constructor for the [BitBoard] struct: instantiate an empty [BitBoard]
     pub fn new() -> BitBoard {
         BitBoard { state: EMPTY_STATE }
     }
 
-    /// Returns `true` if the BitBoard is empty.
+    /// Returns `true` if the [BitBoard] is empty.
     ///
-    /// A cell inside a BitBoard can be free (or empty) or busy.
-    /// A BitBoard is empty if all its cells are empty.
+    /// A [Cell] inside a [BitBoard] can be free (or empty) or busy.
+    /// A  [BitBoard] is empty if all its cells are empty.
     ///
-    ///     use abbadingo::bitboard::*;
+    /// # Example
+    /// ```
+    /// # use abbadingo::bitboard::*;
     ///
-    ///     // The default constructor returns an empty bitboard:
-    ///     assert_eq!(BitBoard::new().is_empty(), true);
+    /// // The default constructor returns an empty bitboard:
+    /// assert_eq!(BitBoard::new().is_empty(), true);
     ///
-    ///     // Builds a BitBoard with the E1 cell busy
-    ///     let bb = BitBoard::from([Cell::E1]);
-    ///     assert_eq!(bb.is_empty(), false);
-    ///
+    /// // Builds a BitBoard with the E1 cell busy
+    /// let bb = BitBoard::from([Cell::E1]);
+    /// assert_eq!(bb.is_empty(), false);
+    ///```
     pub fn is_empty(&self) -> bool {
         self.state == EMPTY_STATE
     }
 
+    /// Sets a [BitBoard] [Cell] to busy state, i.e. set the [Cell] bit to 1.
+    ///
+    /// # Example
+    /// ```
+    /// # use abbadingo::bitboard::*;
+    ///
+    /// let mut bb = BitBoard::new();
+    /// bb.set_cell(Cell::E5);
+    /// assert_eq!(bb.is_empty(), false);
+    ///```
+    ///
     pub fn set_cell(&mut self, c: Cell) {
         self.state |= 1 << c as usize;
     }
 
+    /// Resets a [BitBoard] [Cell] to free state, i.e. reset the [Cell] bit to 0.
+    ///
+    /// # Example
+    /// ```
+    /// # use abbadingo::bitboard::*;
+    ///
+    /// let mut bb = BitBoard::from([Cell::A1, Cell::H8]);
+    /// assert_eq!(bb.is_empty(), false);
+    /// bb.reset_cell(Cell::A1);
+    /// bb.reset_cell(Cell::H8);
+    /// assert_eq!(bb.is_empty(), true);
+    ///```
+    ///
     pub fn reset_cell(&mut self, c: Cell) {
         self.state &= !(1 << c as usize);
     }
 
+    /// Sets all the cells of a [Rank] to busy state, i.e. set all the bits
+    /// for the cells of the [Rank] to the value 1.
+    ///
     pub fn set_rank(&mut self, r: Rank) {
         self.state |= RANKS_BBS[r as usize];
     }
 
+    /// Resets all the cells of a [Rank] to free state, i.e. reset all the bits
+    /// for the cells of the [Rank] to the value 0.
+    ///
     pub fn reset_rank(&mut self, r: Rank) {
         self.state &= !(RANKS_BBS[r as usize]);
     }
 
+    /// Sets all the cells of a [File] to busy state.
+    ///
     pub fn set_file(&mut self, f: File) {
         self.state |= FILES_BBS[f as usize];
     }
 
+    /// Resets all the cells of a [File] to free state.
+    ///
     pub fn reset_file(&mut self, f: File) {
         self.state &= !(FILES_BBS[f as usize]);
     }
 
+    /// Sets all the cells specified in a slice to busy state.
+    ///
     pub fn set_cells(&mut self, cells: &[Cell]) {
         for c in cells {
             self.set_cell(*c);
         }
     }
 
+    /// Resets all the cells specified in a slice to free state.
+    ///
     pub fn reset_cells(&mut self, cells: &[Cell]) {
         for c in cells {
             self.reset_cell(*c);
@@ -153,9 +214,37 @@ impl BitBoard {
     }
 }
 
+/// From trait for the BitBoard struct starting from a slice of [Cell]s.
+///
+/// Converts a slice of cells to a [BitBoard] with all the cells of the slice set to busy (1) status.
+///
+/// # Arguments
+///
+/// * `cells` - A [Cell] slice with the cells to be set on the [BitBoard]
+/// # Example
+///```
+/// # use abbadingo::bitboard::*;
+/// let mut bb = BitBoard::new();
+/// bb.set_file(File::FileD);
+/// assert_eq!(bb, BitBoard::from([Cell::D1, Cell::D2, Cell::D3, Cell::D4,
+///                                Cell::D5, Cell::D6, Cell::D7, Cell::D8]));
+///```
+// The following implementation is the only way I found to work with
+// arrays, vectors and slices, but onestly I still do not understand
+// it. See:
+// https://www.reddit.com/r/rust/comments/70xqpw/using_the_from_trait_not_as_easy_as_i_thought/
+impl<'a, T: AsRef<[Cell]>> From<T> for BitBoard {
+    fn from(cells: T) -> Self {
+        let mut bb = BitBoard::new();
+        for c in cells.as_ref().to_vec() {
+            bb.set_cell(c);
+        }
+        bb
+    }
+}
 // ------------------------------------------------------------
 // FIXME --- Seems impossible to add the From trait for a single
-// Cell because conflicts with the next From trait for Cell slices.
+// Cell because conflicts with the From trait for Cell slices.
 // i.e. adding the following code cause compilation failure:
 //
 // impl From<Cell> for BitBoard {
@@ -173,19 +262,6 @@ impl BitBoard {
 // but these does not work:
 //    let bb = BitBoard::from(Cell::H8);
 //    let bb = BitBoard::from(&Cell::H8);
-// This implementation is the only way I found to work with
-// arrays, vectors and slices, but onestly I still do not understand
-// it. See:
-// https://www.reddit.com/r/rust/comments/70xqpw/using_the_from_trait_not_as_easy_as_i_thought/
-impl<'a, T: AsRef<[Cell]>> From<T> for BitBoard {
-    fn from(cells: T) -> Self {
-        let mut bb = BitBoard::new();
-        for c in cells.as_ref().to_vec() {
-            bb.set_cell(c);
-        }
-        bb
-    }
-}
 
 // ****************************************************************************
 // TESTS
