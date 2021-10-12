@@ -3,7 +3,7 @@ const EMPTY_STATE: u64 = 0;
 #[rustfmt::skip]
     /// A vertical file (or column) inside an 8x8 board.
     ///
-    /// Traditionally, in the chess game the vertical files are represented
+    /// Traditionally, in square board games the vertical files are represented
     /// from left to right using the letters from 'A' to 'H', so the "File A"
     /// is the leftmost column, whereas the "File H" is the rightmost one.
     pub enum File {
@@ -35,7 +35,7 @@ const FILES_BBS: [u64; 8] = [
 #[rustfmt::skip]
     /// An horizontal rank (or row) inside an 8x8 board.
     ///
-    /// Traditionally, in the chess game the horizontal files are represented
+    /// Traditionally, in suqare board games the horizontal files are represented
     /// from bottom to top using the numbers from '1' to '8', so the "Rank 1"
     /// is the bottom row, whereas the "Rank 8" is the top one.
     pub enum Rank {
@@ -78,7 +78,7 @@ const RANKS_BBS: [u64; 8] = [
         A8, B8, C8, D8, E8, F8, G8, H8,
     }
 
-/// Structure used to represent the 8x8 board inside a chess program in a piece centric manner.
+/// Structure used to represent the 8x8 board in a piece centric manner.
 ///
 /// It is a general purpose, set-wise data-structure fitting in one 64-bit register.
 /// Each bit represent the "status" of a cell inside the board. For example, a bitboard can
