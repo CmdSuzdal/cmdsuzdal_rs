@@ -3,4 +3,9 @@
 //! defines structures that can be used represent a chessboard, but also other types
 //! of boards, using a bitboard-based approach.
 
+extern crate num;
+#[macro_use]
+extern crate num_derive;
+
+pub mod bbdefines;
 pub mod bitboard;
