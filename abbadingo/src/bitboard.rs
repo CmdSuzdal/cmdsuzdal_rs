@@ -1,14 +1,16 @@
 const EMPTY_STATE: u64 = 0;
 
 #[rustfmt::skip]
-    /// A vertical file (or column) inside an 8x8 board.
-    ///
-    /// Traditionally, in square board games the vertical files are represented
-    /// from left to right using the letters from 'A' to 'H', so the "File A"
-    /// is the leftmost column, whereas the "File H" is the rightmost one.
-    pub enum File {
-        FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH,
-    }
+/// A vertical file (or column) inside an 8x8 board.
+///
+/// Traditionally, in square board games the vertical files are represented
+/// from left to right using the letters from 'A' to 'H', so the "File A"
+/// is the leftmost column, whereas the "File H" is the rightmost one.
+#[derive(Debug)]
+pub enum File {
+    FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH,
+}
+
 // Files Masks --- These are the files indexes of the board:
 //    _________________________
 // r8|  0  1  2  3  4  5  6  7 |
@@ -33,14 +35,16 @@ const FILES_BBS: [u64; 8] = [
 ];
 
 #[rustfmt::skip]
-    /// An horizontal rank (or row) inside an 8x8 board.
-    ///
-    /// Traditionally, in suqare board games the horizontal files are represented
-    /// from bottom to top using the numbers from '1' to '8', so the "Rank 1"
-    /// is the bottom row, whereas the "Rank 8" is the top one.
-    pub enum Rank {
-        Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8,
-    }
+/// An horizontal rank (or row) inside an 8x8 board.
+///
+/// Traditionally, in suqare board games the horizontal files are represented
+/// from bottom to top using the numbers from '1' to '8', so the "Rank 1"
+/// is the bottom row, whereas the "Rank 8" is the top one.
+#[derive(Debug)]
+pub enum Rank {
+    Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8,
+}
+
 // Ranks Masks --- These are the rank indexes of the board:
 //    _________________________
 // r8|  7  7  7  7  7  7  7  7 |
@@ -65,22 +69,22 @@ const RANKS_BBS: [u64; 8] = [
 ];
 
 #[rustfmt::skip]
-    /// Enumeration that lists all the cells inside an 8x8
-    /// square board.
-    ///
-    /// The cells starts from A1 on bottom left (bit index 0) to H8 on top right (bit index 63).
-    ///
-    #[derive(Clone, Copy)]
-    pub enum Cell {
-        A1, B1, C1, D1, E1, F1, G1, H1,
-        A2, B2, C2, D2, E2, F2, G2, H2,
-        A3, B3, C3, D3, E3, F3, G3, H3,
-        A4, B4, C4, D4, E4, F4, G4, H4,
-        A5, B5, C5, D5, E5, F5, G5, H5,
-        A6, B6, C6, D6, E6, F6, G6, H6,
-        A7, B7, C7, D7, E7, F7, G7, H7,
-        A8, B8, C8, D8, E8, F8, G8, H8,
-    }
+/// Enumeration that lists all the cells inside an 8x8
+/// square board.
+///
+/// The cells starts from A1 on bottom left (bit index 0) to H8 on top right (bit index 63).
+///
+#[derive(Debug, Clone, Copy)]
+pub enum Cell {
+    A1, B1, C1, D1, E1, F1, G1, H1,
+    A2, B2, C2, D2, E2, F2, G2, H2,
+    A3, B3, C3, D3, E3, F3, G3, H3,
+    A4, B4, C4, D4, E4, F4, G4, H4,
+    A5, B5, C5, D5, E5, F5, G5, H5,
+    A6, B6, C6, D6, E6, F6, G6, H6,
+    A7, B7, C7, D7, E7, F7, G7, H7,
+    A8, B8, C8, D8, E8, F8, G8, H8,
+}
 
 /// Structure used to represent an 8x8 square board in a piece centric manner.
 ///
@@ -273,7 +277,7 @@ impl BitBoard {
         let mut bbs = self.state;
         while bbs != 0 {
             cnt += 1;
-            bbs &= bbs -1; // Reset LS1B
+            bbs &= bbs - 1; // Reset LS1B
         }
         cnt
     }
