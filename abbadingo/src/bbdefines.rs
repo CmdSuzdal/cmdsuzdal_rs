@@ -224,6 +224,20 @@ pub fn rank(c: Cell) -> Rank {
     num::FromPrimitive::from_u32(c as u32 >> 3).unwrap()
 }
 
+/// Given a Cell, returns its (File, Rank) pair
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(coords(Cell::C7), (File::FileC, Rank::Rank7));
+/// assert_eq!(coords(Cell::E1), (File::FileE, Rank::Rank1));
+/// assert_eq!(coords(Cell::G4), (File::FileG, Rank::Rank4));
+/// ```
+///
+pub fn coords(c: Cell) -> (File, Rank) {
+    (file(c), rank(c))
+}
+
 /// Given a Cell, returns its Diagonal
 ///
 ///```text
@@ -284,17 +298,19 @@ pub fn anti_diagonal(c: Cell) -> AntiDiagonal {
     num::FromPrimitive::from_i32(file(c) as i32 + rank(c) as i32).unwrap()
 }
 
-
-// Given a cell, returns File, Rank, Diagonal, AntiDiagonal (and combinations)
-/// File file(const Cell &c);
-/// Rank rank(const Cell &c);
-/// Diagonal diag(const Cell &c);
-/// AntiDiagonal antiDiag(const Cell &c);
-/// std::pair<File, Rank> coords(const Cell &c);
-/// std::pair<Diagonal, AntiDiagonal> diagonals(const Cell &c);
-
-
-
+/// Given a Cell, returns its (Diagonal, AntiDiagonal) pair
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(diags(Cell::C6), (Diagonal::Diag4, AntiDiagonal::AntiDiag7));
+/// assert_eq!(diags(Cell::E2), (Diagonal::Diag10, AntiDiagonal::AntiDiag5));
+/// assert_eq!(diags(Cell::G7), (Diagonal::Diag7, AntiDiagonal::AntiDiag12));
+/// ```
+///
+pub fn diags(c: Cell) -> (Diagonal, AntiDiagonal) {
+    (diagonal(c), anti_diagonal(c))
+}
 
 // ****************************************************************************
 // TESTS
