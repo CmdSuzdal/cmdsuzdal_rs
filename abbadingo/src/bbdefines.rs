@@ -1,3 +1,9 @@
+// ********************************************************************************
+// ********************************************************************************
+// ENUMs, STRUCTs, DEFINEs
+// ********************************************************************************
+// ********************************************************************************
+
 #[rustfmt::skip]
 /// A vertical file (or column) inside an 8x8 board.
 ///
@@ -35,7 +41,7 @@ pub const FILES_BBS: [u64; 8] = [
 #[rustfmt::skip]
 /// An horizontal rank (or row) inside an 8x8 board.
 ///
-/// Traditionally, in suqare board games the horizontal files are represented
+/// Traditionally, in square board games the horizontal files are represented
 /// from bottom to top using the numbers from '1' to '8', so the "Rank 1"
 /// is the bottom row, whereas the "Rank 8" is the top one.
 #[derive(Debug, Clone, Copy, FromPrimitive, PartialEq, Eq)]
@@ -84,6 +90,94 @@ pub enum Cell {
     A8, B8, C8, D8, E8, F8, G8, H8,
 }
 
+/// A Diagonal inside an 8x8 board.
+///
+/// Traditionally, in square board games the first diagonal (#0) is the
+/// upper left one, composed only by the cell A8, diagonal #1 is one
+/// immediately to the right composed by the cells A7 and B8 and so on
+/// until the last diagonal #14 in the lower right corner, composed only by
+/// the H1 cell. The 'main' diagonal is the #7, starting from the lower left
+/// cell A1 to the upper right corner H8.
+///
+///```text
+///    _________________________
+/// r8|  0  1  2  3  4  5  6  7 |
+/// r7|  1  2  3  4  5  6  7  8 |
+/// r6|  2  3  4  5  6  7  8  9 |
+/// r5|  3  4  5  6  7  8  9 10 |
+/// r4|  4  5  6  7  8  9 10 11 |
+/// r3|  5  6  7  8  9 10 11 12 |
+/// r2|  6  7  8  9 10 11 12 13 |
+/// r1|  7  8  9 10 11 12 13 14 |
+///    -------------------------
+///     fa fb fc fd fe ff fg fh
+//```
+#[derive(Debug, Clone, Copy, FromPrimitive, PartialEq, Eq)]
+pub enum Diagonal {
+    Diag0,
+    Diag1,
+    Diag2,
+    Diag3,
+    Diag4,
+    Diag5,
+    Diag6,
+    Diag7,
+    Diag8,
+    Diag9,
+    Diag10,
+    Diag11,
+    Diag12,
+    Diag13,
+    Diag14,
+}
+
+/// As Anti Diagonal inside an 8x8 board.
+///
+/// Traditionally, in square board games the first anti diagonal (#0) is the
+/// lower left one, composed only by the cell A1, anti diagonal #1 is one
+/// immediately to the right composed by the cells B1 and A2 and so on
+/// until the last anti diagonal #14 in the upper right corner, composed only
+/// by the H8 cell. The 'main' anti diagonal is the #7, starting from the
+/// lower right cell H1 to the upper left cell A8.
+///
+///```text
+///    _________________________
+/// r8|  7  8  9 10 11 12 13 14 |
+/// r7|  6  7  8  9 10 11 12 13 |
+/// r6|  5  6  7  8  9 10 11 12 |
+/// r5|  4  5  6  7  8  9 10 11 |
+/// r4|  3  4  5  6  7  8  9 10 |
+/// r3|  2  3  4  5  6  7  8  9 |
+/// r2|  1  2  3  4  5  6  7  8 |
+/// r1|  0  1  2  3  4  5  6  7 |
+///    -------------------------
+///     fa fb fc fd fe ff fg fh
+//```
+#[derive(Debug, Clone, Copy, FromPrimitive, PartialEq, Eq)]
+pub enum AntiDiagonal {
+    AntiDiag0,
+    AntiDiag1,
+    AntiDiag2,
+    AntiDiag3,
+    AntiDiag4,
+    AntiDiag5,
+    AntiDiag6,
+    AntiDiag7,
+    AntiDiag8,
+    AntiDiag9,
+    AntiDiag10,
+    AntiDiag11,
+    AntiDiag12,
+    AntiDiag13,
+    AntiDiag14,
+}
+
+// ********************************************************************************
+// ********************************************************************************
+// METHODS
+// ********************************************************************************
+// ********************************************************************************
+
 /// Given a File and a Cell, returns the corresponding Cell
 ///
 /// # Example
@@ -129,6 +223,67 @@ pub fn rank(c: Cell) -> Rank {
     // and the result of the from_u32 is a valid Rank for sure
     num::FromPrimitive::from_u32(c as u32 >> 3).unwrap()
 }
+
+/// Given a Cell, returns its Diagonal
+///
+///```text
+///    _________________________
+/// r8|  0  1  2  3  4  5  6  7 |
+/// r7|  1  2  3  4  5  6  7  8 |
+/// r6|  2  3  4  5  6  7  8  9 |
+/// r5|  3  4  5  6  7  8  9 10 |
+/// r4|  4  5  6  7  8  9 10 11 |
+/// r3|  5  6  7  8  9 10 11 12 |
+/// r2|  6  7  8  9 10 11 12 13 |
+/// r1|  7  8  9 10 11 12 13 14 |
+///    -------------------------
+///     fa fb fc fd fe ff fg fh
+///
+///```
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(diagonal(Cell::B3), Diagonal::Diag6);
+/// assert_eq!(diagonal(Cell::E4), Diagonal::Diag8);
+/// assert_eq!(diagonal(Cell::G2), Diagonal::Diag12);
+/// ```
+///
+pub fn diagonal(c: Cell) -> Diagonal {
+    // It is not necessary to check for validity because c is safe
+    // and the result of the from_i32 is a valid Diagonal for sure
+    num::FromPrimitive::from_i32(file(c) as i32 - rank(c) as i32 + 7).unwrap()
+}
+
+/// Given a Cell, returns its AntiDiagonal
+///
+///```text
+///    _________________________
+/// r8|  7  8  9 10 11 12 13 14 |
+/// r7|  6  7  8  9 10 11 12 13 |
+/// r6|  5  6  7  8  9 10 11 12 |
+/// r5|  4  5  6  7  8  9 10 11 |
+/// r4|  3  4  5  6  7  8  9 10 |
+/// r3|  2  3  4  5  6  7  8  9 |
+/// r2|  1  2  3  4  5  6  7  8 |
+/// r1|  0  1  2  3  4  5  6  7 |
+///    -------------------------
+///     fa fb fc fd fe ff fg fh
+///```
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(anti_diagonal(Cell::A3), AntiDiagonal::AntiDiag2);
+/// assert_eq!(anti_diagonal(Cell::C6), AntiDiagonal::AntiDiag7);
+/// assert_eq!(anti_diagonal(Cell::H8), AntiDiagonal::AntiDiag14);
+/// ```
+///
+pub fn anti_diagonal(c: Cell) -> AntiDiagonal {
+    // It is not necessary to check for validity because c is safe
+    // and the result of the from_i32 is a valid Diagonal for sure
+    num::FromPrimitive::from_i32(file(c) as i32 + rank(c) as i32).unwrap()
+}
+
 
 // Given a cell, returns File, Rank, Diagonal, AntiDiagonal (and combinations)
 /// File file(const Cell &c);
