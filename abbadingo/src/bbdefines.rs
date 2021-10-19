@@ -4,7 +4,7 @@
 /// Traditionally, in square board games the vertical files are represented
 /// from left to right using the letters from 'A' to 'H', so the "File A"
 /// is the leftmost column, whereas the "File H" is the rightmost one.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, FromPrimitive, PartialEq, Eq)]
 pub enum File {
     FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH,
 }
@@ -38,7 +38,7 @@ pub const FILES_BBS: [u64; 8] = [
 /// Traditionally, in suqare board games the horizontal files are represented
 /// from bottom to top using the numbers from '1' to '8', so the "Rank 1"
 /// is the bottom row, whereas the "Rank 8" is the top one.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, FromPrimitive, PartialEq, Eq)]
 pub enum Rank {
     Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8,
 }
@@ -97,6 +97,49 @@ pub fn to_cell(f: File, r: Rank) -> Cell {
     // and the result of the from_u32 is a valid Cell for sure
     num::FromPrimitive::from_u32((r as u32) * 8 + (f as u32)).unwrap()
 }
+
+/// Given a Cell, returns its File
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(file(Cell::C5), File::FileC);
+/// assert_eq!(file(Cell::A7), File::FileA);
+/// assert_eq!(file(Cell::H1), File::FileH);
+/// ```
+///
+pub fn file(c: Cell) -> File {
+    // It is not necessary to check for validity because c is safe
+    // and the result of the from_u32 is a valid File for sure
+    num::FromPrimitive::from_u32(c as u32 % 8).unwrap()
+}
+
+/// Given a Cell, returns its Rank
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(rank(Cell::B2), Rank::Rank2);
+/// assert_eq!(rank(Cell::F5), Rank::Rank5);
+/// assert_eq!(rank(Cell::G8), Rank::Rank8);
+/// ```
+///
+pub fn rank(c: Cell) -> Rank {
+    // It is not necessary to check for validity because c is safe
+    // and the result of the from_u32 is a valid Rank for sure
+    num::FromPrimitive::from_u32(c as u32 >> 3).unwrap()
+}
+
+// Given a cell, returns File, Rank, Diagonal, AntiDiagonal (and combinations)
+/// File file(const Cell &c);
+/// Rank rank(const Cell &c);
+/// Diagonal diag(const Cell &c);
+/// AntiDiagonal antiDiag(const Cell &c);
+/// std::pair<File, Rank> coords(const Cell &c);
+/// std::pair<Diagonal, AntiDiagonal> diagonals(const Cell &c);
+
+
+
 
 // ****************************************************************************
 // TESTS
