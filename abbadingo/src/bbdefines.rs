@@ -1,5 +1,3 @@
-use crate::error::AbbaDingoError;
-
 // ********************************************************************************
 // ********************************************************************************
 // ENUMs, STRUCTs, DEFINEs
@@ -315,25 +313,19 @@ pub fn diags(c: Cell) -> (Diagonal, AntiDiagonal) {
 }
 
 /// Given a cell, returns its west file. The west file is not defined
-/// for cells in A file, so this function returns a Result with - possibly -
-/// an AbbaDingoError.
+/// for cells in A file, so this function returns an Option<File>,
+/// returning a valid File if the Cell is on File B to H, or None
+/// if the Cell is in the A file.
 ///
 /// # Example
 /// ```
 /// # use abbadingo::bbdefines::*;
 /// # use abbadingo::error::AbbaDingoError;
-/// assert_eq!(west(Cell::C5).ok(), Some(File::FileB));
-/// assert_eq!(west(Cell::A7).unwrap_err(), AbbaDingoError::InvalidOperationOnFile);
+/// assert_eq!(west(Cell::C5), Some(File::FileB));
+/// assert_eq!(west(Cell::A7), None);
 /// ```
-pub fn west(c: Cell) -> Result<File, AbbaDingoError> {
-    let f = file(c);
-    if f > File::FileA {
-        let f_w = num::FromPrimitive::from_u32(f as u32 - 1).unwrap();
-        Ok(f_w)
-    }
-    else {
-        Err(AbbaDingoError::InvalidOperationOnFile)
-    }
+pub fn west(c: Cell) -> Option<File> {
+    num::FromPrimitive::from_i32(file(c) as i32 - 1)
 }
 
 
