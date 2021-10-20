@@ -1,3 +1,5 @@
+use crate::error::AbbaDingoError;
+
 // ********************************************************************************
 // ********************************************************************************
 // ENUMs, STRUCTs, DEFINEs
@@ -10,7 +12,7 @@
 /// Traditionally, in square board games the vertical files are represented
 /// from left to right using the letters from 'A' to 'H', so the "File A"
 /// is the leftmost column, whereas the "File H" is the rightmost one.
-#[derive(Debug, Clone, Copy, FromPrimitive, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, FromPrimitive, PartialOrd, PartialEq, Eq)]
 pub enum File {
     FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH,
 }
@@ -311,6 +313,33 @@ pub fn anti_diagonal(c: Cell) -> AntiDiagonal {
 pub fn diags(c: Cell) -> (Diagonal, AntiDiagonal) {
     (diagonal(c), anti_diagonal(c))
 }
+
+/// Given a cell, returns its west file. The west file is not defined
+/// for cells in A file, so this function returns a Result with - possibly -
+/// an AbbaDingoError.
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// # use abbadingo::error::AbbaDingoError;
+/// assert_eq!(west(Cell::C5).ok(), Some(File::FileB));
+/// assert_eq!(west(Cell::A7).unwrap_err(), AbbaDingoError::InvalidOperationOnFile);
+/// ```
+pub fn west(c: Cell) -> Result<File, AbbaDingoError> {
+    let f = file(c);
+    if f > File::FileA {
+        let f_w = num::FromPrimitive::from_u32(f as u32 - 1).unwrap();
+        Ok(f_w)
+    }
+    else {
+        Err(AbbaDingoError::InvalidOperationOnFile)
+    }
+}
+
+
+//    File east(const Cell &c);
+//    Rank south(const Cell &c);
+//    Rank north(const Cell &c);
 
 // ****************************************************************************
 // TESTS
