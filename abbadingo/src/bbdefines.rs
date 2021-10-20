@@ -312,10 +312,11 @@ pub fn diags(c: Cell) -> (Diagonal, AntiDiagonal) {
     (diagonal(c), anti_diagonal(c))
 }
 
-/// Given a cell, returns its west file. The west file is not defined
-/// for cells in A file, so this function returns an Option<File>,
-/// returning a valid File if the Cell is on File B to H, or None
-/// if the Cell is in the A file.
+/// Given a cell, returns its west file.
+///
+/// The west file is not defined for cells in A file, so this function
+/// returns an Option<File>, returning a valid File if the Cell is on
+/// File B to H, or None if the Cell is in the A file.
 ///
 /// # Example
 /// ```
@@ -328,10 +329,11 @@ pub fn west(c: Cell) -> Option<File> {
     num::FromPrimitive::from_i32(file(c) as i32 - 1)
 }
 
-/// Given a cell, returns its east file. The east file is not defined
-/// for cells in H file, so this function returns an Option<File>,
-/// returning a valid File if the Cell is on File A to G, or None
-/// if the Cell is in the H file.
+/// Given a cell, returns its east file.
+///
+/// The east file is not defined for cells in H file, so this function
+/// returns an Option<File>, returning a valid File if the Cell is on
+/// File A to G, or None if the Cell is in the H file.
 ///
 /// # Example
 /// ```
@@ -344,10 +346,11 @@ pub fn east(c: Cell) -> Option<File> {
     num::FromPrimitive::from_i32(file(c) as i32 + 1)
 }
 
-/// Given a cell, returns its south rank. The south rank is not defined
-/// for cells in rank 1, so this function returns an Option<Rank>,
-/// returning a valid Rank if the Cell is on Rank 2 to 8, or None
-/// if the Cell is in the Rank 1.
+/// Given a cell, returns its south rank.
+///
+/// The south rank is not defined for cells in rank 1, so this
+/// function returns an Option<Rank>, returning a valid Rank if
+/// the Cell is on Rank 2 to 8, or None if the Cell is in the Rank 1.
 ///
 /// # Example
 /// ```
@@ -360,10 +363,11 @@ pub fn south(c: Cell) -> Option<Rank> {
     num::FromPrimitive::from_i32(rank(c) as i32 - 1)
 }
 
-/// Given a cell, returns its north rank. The north rank is not defined
-/// for cells in rank 8, so this function returns an Option<Rank>,
-/// returning a valid Rank if the Cell is on Rank 1 to 7, or None
-/// if the Cell is in the Rank 8.
+/// Given a cell, returns its north rank.
+///
+/// The north rank is not defined for cells in rank 8, so this
+/// function returns an Option<Rank>, returning a valid Rank if
+/// the Cell is on Rank 1 to 7, or None if the Cell is in the Rank 8.
 ///
 /// # Example
 /// ```
@@ -374,6 +378,180 @@ pub fn south(c: Cell) -> Option<Rank> {
 /// ```
 pub fn north(c: Cell) -> Option<Rank> {
     num::FromPrimitive::from_i32(rank(c) as i32 + 1)
+}
+
+/// Given a cell, returns the cell at its "west" position.
+///
+/// The west position is not defined for cells in the A file, so
+/// this function returns an Option<Cell>, returning None if the
+/// cell is in a position without a valid west neighbour cell.
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(w(Cell::C4), Some(Cell::B4));
+/// assert_eq!(w(Cell::G7), Some(Cell::F7));
+/// assert_eq!(w(Cell::A3), None);
+/// ```
+pub fn w(c: Cell) -> Option<Cell> {
+    match file(c) {
+        File::FileA => None,
+        _ => num::FromPrimitive::from_i32(c as i32 - 1)
+    }
+}
+
+/// Given a cell, returns the cell at its "north-west" position.
+///
+/// The north-west position is not defined for cells in the A file,
+/// or in the Rank 8, so this function return an Option<Cell>,
+/// returning None if the cell is in a position without a valid
+/// north-west neighbour cell.
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(nw(Cell::B1), Some(Cell::A2));
+/// assert_eq!(nw(Cell::D5), Some(Cell::C6));
+/// assert_eq!(nw(Cell::H7), Some(Cell::G8));
+/// assert_eq!(nw(Cell::A3), None);
+/// assert_eq!(nw(Cell::C8), None);
+/// ```
+pub fn nw(c: Cell) -> Option<Cell> {
+    match file(c) {
+        File::FileA => None,
+        _ => num::FromPrimitive::from_i32(c as i32 + 7)
+    }
+}
+
+/// Given a cell, returns the cell at its "north" position.
+///
+/// The north position is not defined for cells in the Rank 8,
+/// so this function return an Option<Cell>, returning None if
+/// the cell is in a position without a valid north neighbour cell.
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(n(Cell::A1), Some(Cell::A2));
+/// assert_eq!(n(Cell::C2), Some(Cell::C3));
+/// assert_eq!(n(Cell::G7), Some(Cell::G8));
+/// assert_eq!(n(Cell::F8), None);
+/// ```
+pub fn n(c: Cell) -> Option<Cell> {
+    match rank(c) {
+        Rank::Rank8 => None,
+        _ => num::FromPrimitive::from_i32(c as i32 + 8)
+    }
+}
+
+/// Given a cell, returns the cell at its "north-east" position.
+///
+/// The north-east position is not defined for cells in the H file,
+/// or in the Rank 8, so this function return an Option<Cell>,
+/// returning None if the cell is in a position without a valid
+/// north-east neighbour cell.
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(ne(Cell::A7), Some(Cell::B8));
+/// assert_eq!(ne(Cell::E3), Some(Cell::F4));
+/// assert_eq!(ne(Cell::G1), Some(Cell::H2));
+/// assert_eq!(ne(Cell::D8), None);
+/// assert_eq!(ne(Cell::H2), None);
+/// ```
+pub fn ne(c: Cell) -> Option<Cell> {
+    match file(c) {
+        File::FileH => None,
+        _ => num::FromPrimitive::from_i32(c as i32 + 9)
+    }
+}
+
+/// Given a cell, returns the cell at its "east" position.
+///
+/// The east position is not defined for cells in the H file, so
+/// this function returns an Option<Cell>, returning None if the
+/// cell is in a position without a valid east neighbour cell.
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(e(Cell::A8), Some(Cell::B8));
+/// assert_eq!(e(Cell::C6), Some(Cell::D6));
+/// assert_eq!(e(Cell::H3), None);
+/// ```
+pub fn e(c: Cell) -> Option<Cell> {
+    match file(c) {
+        File::FileH => None,
+        _ => num::FromPrimitive::from_i32(c as i32 + 1)
+    }
+}
+
+/// Given a cell, returns the cell at its "south-east" position.
+///
+/// The south-east position is not defined for cells in the H file,
+/// or in the Rank 1, so this function return an Option<Cell>,
+/// returning None if the cell is in a position without a valid
+/// south-east neighbour cell.
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(se(Cell::E2), Some(Cell::F1));
+/// assert_eq!(se(Cell::G5), Some(Cell::H4));
+/// assert_eq!(se(Cell::B8), Some(Cell::C7));
+/// assert_eq!(se(Cell::H5), None);
+/// assert_eq!(se(Cell::G1), None);
+/// ```
+pub fn se(c: Cell) -> Option<Cell> {
+    match file(c) {
+        File::FileH => None,
+        _ => num::FromPrimitive::from_i32(c as i32 - 7)
+    }
+}
+
+/// Given a cell, returns the cell at its "south" position.
+///
+/// The south position is not defined for cells in the Rank 1,
+/// so this function return an Option<Cell>, returning None if
+/// the cell is in a position without a valid south neighbour cell.
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(s(Cell::B2), Some(Cell::B1));
+/// assert_eq!(s(Cell::F3), Some(Cell::F2));
+/// assert_eq!(s(Cell::H7), Some(Cell::H6));
+/// assert_eq!(s(Cell::F1), None);
+/// ```
+pub fn s(c: Cell) -> Option<Cell> {
+    match rank(c) {
+        Rank::Rank1 => None,
+        _ => num::FromPrimitive::from_i32(c as i32 - 8)
+    }
+}
+
+/// Given a cell, returns the cell at its "south-west" position.
+///
+/// The south-west position is not defined for cells in the A file,
+/// or in the Rank 1, so this function return an Option<Cell>,
+/// returning None if the cell is in a position without a valid
+/// north-west neighbour cell.
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(sw(Cell::B6), Some(Cell::A5));
+/// assert_eq!(sw(Cell::E2), Some(Cell::D1));
+/// assert_eq!(sw(Cell::G4), Some(Cell::F3));
+/// assert_eq!(sw(Cell::A8), None);
+/// assert_eq!(sw(Cell::H1), None);
+/// ```
+pub fn sw(c: Cell) -> Option<Cell> {
+    match file(c) {
+        File::FileA => None,
+        _ => num::FromPrimitive::from_i32(c as i32 - 9)
+    }
 }
 
 // ****************************************************************************
