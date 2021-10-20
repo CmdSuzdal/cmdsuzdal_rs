@@ -328,10 +328,53 @@ pub fn west(c: Cell) -> Option<File> {
     num::FromPrimitive::from_i32(file(c) as i32 - 1)
 }
 
+/// Given a cell, returns its east file. The east file is not defined
+/// for cells in H file, so this function returns an Option<File>,
+/// returning a valid File if the Cell is on File A to G, or None
+/// if the Cell is in the H file.
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(east(Cell::A1), Some(File::FileB));
+/// assert_eq!(east(Cell::E3), Some(File::FileF));
+/// assert_eq!(east(Cell::H2), None);
+/// ```
+pub fn east(c: Cell) -> Option<File> {
+    num::FromPrimitive::from_i32(file(c) as i32 + 1)
+}
 
-//    File east(const Cell &c);
-//    Rank south(const Cell &c);
-//    Rank north(const Cell &c);
+/// Given a cell, returns its south rank. The south rank is not defined
+/// for cells in rank 1, so this function returns an Option<Rank>,
+/// returning a valid Rank if the Cell is on Rank 2 to 8, or None
+/// if the Cell is in the Rank 1.
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(south(Cell::A4), Some(Rank::Rank3));
+/// assert_eq!(south(Cell::E8), Some(Rank::Rank7));
+/// assert_eq!(south(Cell::G1), None);
+/// ```
+pub fn south(c: Cell) -> Option<Rank> {
+    num::FromPrimitive::from_i32(rank(c) as i32 - 1)
+}
+
+/// Given a cell, returns its north rank. The north rank is not defined
+/// for cells in rank 8, so this function returns an Option<Rank>,
+/// returning a valid Rank if the Cell is on Rank 1 to 7, or None
+/// if the Cell is in the Rank 8.
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(north(Cell::C1), Some(Rank::Rank2));
+/// assert_eq!(north(Cell::B4), Some(Rank::Rank5));
+/// assert_eq!(north(Cell::H8), None);
+/// ```
+pub fn north(c: Cell) -> Option<Rank> {
+    num::FromPrimitive::from_i32(rank(c) as i32 + 1)
+}
 
 // ****************************************************************************
 // TESTS
