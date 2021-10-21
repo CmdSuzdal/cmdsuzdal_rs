@@ -45,11 +45,11 @@
 /// The position of the cell inside the board is defined using the three coordinates
 /// (q,r,s) as defined in the [Red Blob Games](https://www.redblobgames.com/grids/hexagons/implementation.html)
 /// article.
-#[derive(Default, Debug)]
+#[derive(Default, Debug, PartialEq, Eq)]
 pub struct HexCell {
-    q: i32,
-    r: i32,
-    s: i32,
+    pub q: i32,
+    pub r: i32,
+    pub s: i32,
 }
 
 impl HexCell {
@@ -57,6 +57,26 @@ impl HexCell {
     /// at origin of field (coordinates 0,0,0).
     pub fn new() -> HexCell {
         HexCell { q: 0, r: 0, s: 0 }
+    }
+
+    /// Set an [HexCell] to position (q,r, -q-r)
+    ///
+    /// The [HexCell] position is defined by a trio of coordinates
+    /// (q,r,s) of which only the first two (q,r) are free, since the
+    /// third (s) can be computed with the formula: s = -q-r
+    ///
+    /// # Example
+    /// ```
+    /// # use abbadingo::hexboard::HexCell;
+    /// let mut xc = HexCell::new();
+    /// xc.set(3, -1);
+    /// assert_eq!(xc, HexCell {q: 3, r: -1, s: -2});
+    /// ```
+    pub fn set(&mut self, q: i32, r: i32)
+    {
+        self.q = q;
+        self.r = r;
+        self.s = -q -r;
     }
 }
 
