@@ -72,11 +72,10 @@ impl HexCell {
     /// xc.set(3, -1);
     /// assert_eq!(xc, HexCell {q: 3, r: -1, s: -2});
     /// ```
-    pub fn set(&mut self, q: i32, r: i32)
-    {
+    pub fn set(&mut self, q: i32, r: i32) {
         self.q = q;
         self.r = r;
-        self.s = -q -r;
+        self.s = -q - r;
     }
 }
 
@@ -93,5 +92,4 @@ mod tests {
         let xc = HexCell::new();
         assert_eq!((xc.q, xc.r, xc.s), (0, 0, 0));
     }
-
 }

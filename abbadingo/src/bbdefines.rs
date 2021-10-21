@@ -401,7 +401,7 @@ pub fn north(c: Cell) -> Option<Rank> {
 pub fn w(c: Cell) -> Option<Cell> {
     match file(c) {
         File::FileA => None,
-        _ => num::FromPrimitive::from_i32(c as i32 - 1)
+        _ => num::FromPrimitive::from_i32(c as i32 - 1),
     }
 }
 
@@ -424,7 +424,7 @@ pub fn w(c: Cell) -> Option<Cell> {
 pub fn nw(c: Cell) -> Option<Cell> {
     match file(c) {
         File::FileA => None,
-        _ => num::FromPrimitive::from_i32(c as i32 + 7)
+        _ => num::FromPrimitive::from_i32(c as i32 + 7),
     }
 }
 
@@ -445,7 +445,7 @@ pub fn nw(c: Cell) -> Option<Cell> {
 pub fn n(c: Cell) -> Option<Cell> {
     match rank(c) {
         Rank::Rank8 => None,
-        _ => num::FromPrimitive::from_i32(c as i32 + 8)
+        _ => num::FromPrimitive::from_i32(c as i32 + 8),
     }
 }
 
@@ -468,7 +468,7 @@ pub fn n(c: Cell) -> Option<Cell> {
 pub fn ne(c: Cell) -> Option<Cell> {
     match file(c) {
         File::FileH => None,
-        _ => num::FromPrimitive::from_i32(c as i32 + 9)
+        _ => num::FromPrimitive::from_i32(c as i32 + 9),
     }
 }
 
@@ -488,7 +488,7 @@ pub fn ne(c: Cell) -> Option<Cell> {
 pub fn e(c: Cell) -> Option<Cell> {
     match file(c) {
         File::FileH => None,
-        _ => num::FromPrimitive::from_i32(c as i32 + 1)
+        _ => num::FromPrimitive::from_i32(c as i32 + 1),
     }
 }
 
@@ -511,7 +511,7 @@ pub fn e(c: Cell) -> Option<Cell> {
 pub fn se(c: Cell) -> Option<Cell> {
     match file(c) {
         File::FileH => None,
-        _ => num::FromPrimitive::from_i32(c as i32 - 7)
+        _ => num::FromPrimitive::from_i32(c as i32 - 7),
     }
 }
 
@@ -532,7 +532,7 @@ pub fn se(c: Cell) -> Option<Cell> {
 pub fn s(c: Cell) -> Option<Cell> {
     match rank(c) {
         Rank::Rank1 => None,
-        _ => num::FromPrimitive::from_i32(c as i32 - 8)
+        _ => num::FromPrimitive::from_i32(c as i32 - 8),
     }
 }
 
