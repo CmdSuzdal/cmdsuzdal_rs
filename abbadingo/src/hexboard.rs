@@ -1,5 +1,5 @@
 //! Structures used to represent and "infinite" hex board in the style of the
-//! ones used in the [hive game](https://en.wikipedia.org/wiki/Hive_(game)).
+//! ones used for example in the [hive game](https://en.wikipedia.org/wiki/Hive_(game)).
 //!
 //! Based upon the work on Red Blog Games, especially the
 //! [base article](https://www.redblobgames.com/grids/hexagons/) and the
@@ -35,7 +35,7 @@
 //
 //     For this reason two coordinates are sufficient to identify a cell.
 //     Normally q and r are used and s is computed:
-//           s = -q -r
+//           s = -q-r
 //
 //     So a position in the hexboard is defined by the following trio:
 //        (q, r, -q-r)
@@ -53,8 +53,25 @@ pub struct HexCell {
 }
 
 impl HexCell {
+    /// Default constructor for the [HexCell] struct: instantiate an [HexCell]
+    /// at origin of field (coordinates 0,0,0).
     pub fn new() -> HexCell {
         HexCell { q: 0, r: 0, s: 0 }
     }
 }
 
+// ****************************************************************************
+// TESTS
+// ****************************************************************************
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn by_default_a_new_hexcell_is_at_zero_coordinates() {
+        let xc = HexCell::new();
+        assert_eq!((xc.q, xc.r, xc.s), (0, 0, 0));
+    }
+
+}
