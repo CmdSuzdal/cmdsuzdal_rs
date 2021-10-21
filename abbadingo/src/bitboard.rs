@@ -1,3 +1,5 @@
+//! Definition of the [BitBoard] structure and related methods implementation.
+
 use crate::bbdefines::{File, Rank, Cell, RANKS_BBS, FILES_BBS};
 
 const EMPTY_STATE: u64 = 0;

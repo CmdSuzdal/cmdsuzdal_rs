@@ -1,3 +1,8 @@
+//! Base definitions of items used in square 8x8 bitboard representation
+//!
+//! In this module there are definition for Cells, Files, Ranks and other
+//! concepts used in definition and manipulation of [BitBoard](crate::bitboard::BitBoard).)s.
+
 // ********************************************************************************
 // ********************************************************************************
 // ENUMs, STRUCTs, DEFINEs
