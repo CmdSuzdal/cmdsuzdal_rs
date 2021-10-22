@@ -1,8 +1,6 @@
 //! Definition of the [BitBoard] structure and related methods implementation.
 
-use crate::bbdefines::{BitBoardState, Cell, File, Rank, FILES_BBS, RANKS_BBS};
-
-const EMPTY_STATE: BitBoardState = 0;
+use crate::bbdefines::{BitBoardState, Cell, File, Rank, EMPTY_STATE, FILES_BBS, RANKS_BBS};
 
 /// Structure used to represent an 8x8 square board in a piece centric manner.
 ///

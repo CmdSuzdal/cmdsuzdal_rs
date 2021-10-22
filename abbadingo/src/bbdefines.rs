@@ -9,8 +9,9 @@
 // ********************************************************************************
 // ********************************************************************************
 
-
 pub type BitBoardState = u64;
+
+pub const EMPTY_STATE: BitBoardState = 0;
 
 #[rustfmt::skip]
 /// A vertical file (or column) inside an 8x8 board.
@@ -588,6 +589,52 @@ pub fn calc_cell_after_steps(c: Cell, step_north: i32, step_east: i32) -> Option
         (Some(valid_rank), Some(valid_file)) => Some(to_cell(valid_file, valid_rank)),
         (_, _) => None,
     }
+}
+
+/// Computes the bitboard state with a single cell active
+pub fn single_cell(c: Cell) -> BitBoardState {
+    EMPTY_STATE
+}
+
+/// Computes the bitboard state with the neighbour cells of a given cell active
+pub fn neighbour(c: Cell) -> BitBoardState {
+    EMPTY_STATE
+}
+
+/// Computes the bitboard state with the cells of the file of a given cell active
+pub fn file_mask(c: Cell) -> BitBoardState {
+    EMPTY_STATE
+}
+
+/// Computes the bitboard state with the cells of the rank a given cell active
+pub fn rank_mask(c: Cell) -> BitBoardState {
+    EMPTY_STATE
+}
+
+/// Computes the bitboard state with the cells of the file and rank a given cell active
+pub fn file_rank_mask(c: Cell) -> BitBoardState {
+    EMPTY_STATE
+}
+
+/// Computes the bitboard state with the cells of the diagonal a given cell active
+pub fn diag_mask(c: Cell) -> BitBoardState {
+    EMPTY_STATE
+}
+
+/// Computes the bitboard state with the cells of the antidiagonal of a given cell active
+pub fn antidiag_mask(c: Cell) -> BitBoardState {
+    EMPTY_STATE
+}
+
+/// Computes the bitboard state with the cells of both diagonals of a given cell active
+pub fn diagonals_mask(c: Cell) -> BitBoardState {
+    EMPTY_STATE
+}
+
+/// Computes the bitboard state with the cells of file, rank and
+/// diagonals of a given cell active (the "Queen" moves in the chess game)
+pub fn queen_mask(c: Cell) -> BitBoardState {
+    EMPTY_STATE
 }
 
 // ****************************************************************************
