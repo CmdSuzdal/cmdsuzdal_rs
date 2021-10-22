@@ -664,4 +664,27 @@ mod tests {
         assert_eq!(to_cell(File::FileH, Rank::Rank7), Cell::H7);
         assert_eq!(to_cell(File::FileH, Rank::Rank8), Cell::H8);
     }
+
+    // Tests for calc_cell_after_steps methods
+    #[test]
+    fn calc_cell_after_steps_test() {
+        assert_eq!(calc_cell_after_steps(Cell::A1, 5, 0), Some(Cell::A6));
+        assert_eq!(calc_cell_after_steps(Cell::A1, 0, 5), Some(Cell::F1));
+        assert_eq!(calc_cell_after_steps(Cell::D4, 2, 1), Some(Cell::E6));
+        assert_eq!(calc_cell_after_steps(Cell::D4, 1, 2), Some(Cell::F5));
+        assert_eq!(calc_cell_after_steps(Cell::D4, -1, 2), Some(Cell::F3));
+        assert_eq!(calc_cell_after_steps(Cell::D4, -2, 1), Some(Cell::E2));
+        assert_eq!(calc_cell_after_steps(Cell::D4, -2, -1), Some(Cell::C2));
+        assert_eq!(calc_cell_after_steps(Cell::D4, -1, -2), Some(Cell::B3));
+        assert_eq!(calc_cell_after_steps(Cell::D4, 1, -2), Some(Cell::B5));
+        assert_eq!(calc_cell_after_steps(Cell::D4, 2, -1), Some(Cell::C6));
+        assert_eq!(calc_cell_after_steps(Cell::C2, 6, -2), Some(Cell::A8));
+        assert_eq!(calc_cell_after_steps(Cell::B7, 1, 3), Some(Cell::E8));
+        assert_eq!(calc_cell_after_steps(Cell::F5, 3, 2), Some(Cell::H8));
+        assert_eq!(calc_cell_after_steps(Cell::D2, -1, -3), Some(Cell::A1));
+        assert_eq!(calc_cell_after_steps(Cell::C2, 1, -3), None);
+        assert_eq!(calc_cell_after_steps(Cell::B7, 2, -1), None);
+        assert_eq!(calc_cell_after_steps(Cell::F5, 1, 3), None);
+        assert_eq!(calc_cell_after_steps(Cell::D2, -2, -1), None);
+    }
 }
