@@ -559,26 +559,24 @@ pub fn sw(c: Cell) -> Option<Cell> {
     }
 }
 
-/**
-Computes the position of the [Cell] reached starting from `c`
-and performing `step_north` steps towards north and `step_east` steps
-towards east.
-
-If `step_north` is negative the steps are done towards south,
-if `step_east` is negative, the steps are done towards west.
-
-# Example
-```
-# use abbadingo::bbdefines::*;
-assert_eq!(calc_cell_after_steps(Cell::A1, 7, 0), Some(Cell::A8));
-assert_eq!(calc_cell_after_steps(Cell::H6, 0, -7), Some(Cell::A6));
-assert_eq!(calc_cell_after_steps(Cell::F2, 0, 0), Some(Cell::F2));
-assert_eq!(calc_cell_after_steps(Cell::D4, 2, -1), Some(Cell::C6));
-assert_eq!(calc_cell_after_steps(Cell::A4, -2, -1), None);
-assert_eq!(calc_cell_after_steps(Cell::G7, 1, 2), None);
-
-```
-*/
+/// Computes the position of the [Cell] reached starting from `c`
+/// and performing `step_north` steps towards north and `step_east` steps
+/// towards east.
+///
+/// If `step_north` is negative the steps are done towards south,
+/// if `step_east` is negative, the steps are done towards west.
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(calc_cell_after_steps(Cell::A1, 7, 0), Some(Cell::A8));
+/// assert_eq!(calc_cell_after_steps(Cell::H6, 0, -7), Some(Cell::A6));
+/// assert_eq!(calc_cell_after_steps(Cell::F2, 0, 0), Some(Cell::F2));
+/// assert_eq!(calc_cell_after_steps(Cell::D4, 2, -1), Some(Cell::C6));
+/// assert_eq!(calc_cell_after_steps(Cell::A4, -2, -1), None);
+/// assert_eq!(calc_cell_after_steps(Cell::G7, 1, 2), None);
+///
+/// ```
 pub fn calc_cell_after_steps(c: Cell, step_north: i32, step_east: i32) -> Option<Cell> {
     match (
         num::FromPrimitive::from_i32(rank(c) as i32 + step_north),
