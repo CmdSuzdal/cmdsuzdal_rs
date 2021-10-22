@@ -9,6 +9,9 @@
 // ********************************************************************************
 // ********************************************************************************
 
+
+pub type BitBoardState = u64;
+
 #[rustfmt::skip]
 /// A vertical file (or column) inside an 8x8 board.
 ///
@@ -32,7 +35,7 @@ pub enum File {
 // r1|  0  1  2  3  4  5  6  7 |
 //    -------------------------
 //     fa fb fc fd fe ff fg fh
-pub const FILES_BBS: [u64; 8] = [
+pub const FILES_BBS: [BitBoardState; 8] = [
     0x0101010101010101,
     0x0101010101010101 << 1,
     0x0101010101010101 << 2,
@@ -66,7 +69,7 @@ pub enum Rank {
 // r1|  0  0  0  0  0  0  0  0 |
 //     -------------------------
 //     fa fb fc fd fe ff fg fh
-pub const RANKS_BBS: [u64; 8] = [
+pub const RANKS_BBS: [BitBoardState; 8] = [
     0x00000000000000FF,
     0x00000000000000FF << 8,
     0x00000000000000FF << 16,

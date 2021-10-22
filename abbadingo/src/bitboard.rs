@@ -1,8 +1,8 @@
 //! Definition of the [BitBoard] structure and related methods implementation.
 
-use crate::bbdefines::{Cell, File, Rank, FILES_BBS, RANKS_BBS};
+use crate::bbdefines::{BitBoardState, Cell, File, Rank, FILES_BBS, RANKS_BBS};
 
-const EMPTY_STATE: u64 = 0;
+const EMPTY_STATE: BitBoardState = 0;
 
 /// Structure used to represent an 8x8 square board in a piece centric manner.
 ///
@@ -33,7 +33,7 @@ const EMPTY_STATE: u64 = 0;
 ///
 #[derive(Default, Debug, PartialEq, Eq)]
 pub struct BitBoard {
-    state: u64,
+    state: BitBoardState,
 }
 impl BitBoard {
     /// Default constructor for the [BitBoard] struct: instantiate an empty [BitBoard]
@@ -279,7 +279,7 @@ mod tests {
     }
     #[test]
     fn init_bitboard_using_a_cells_vector_with_active_cell_in_diagonal() {
-        const BBS_DIAGONAL: u64 = 0x80_40_20_10_08_04_02_01;
+        const BBS_DIAGONAL: BitBoardState = 0x80_40_20_10_08_04_02_01;
         let bb = BitBoard::from([
             Cell::A1,
             Cell::B2,
@@ -297,7 +297,7 @@ mod tests {
 
     #[test]
     fn init_bitboard_using_a_cells_vector_with_active_cell_in_antidiagonal() {
-        const BBS_ANTIDIAGONAL: u64 = 0x01_02_04_08_10_20_40_80;
+        const BBS_ANTIDIAGONAL: BitBoardState = 0x01_02_04_08_10_20_40_80;
         let bb = BitBoard::from([
             Cell::A8,
             Cell::B7,
