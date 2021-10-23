@@ -201,6 +201,28 @@ impl BitBoard {
         }
         cnt
     }
+
+    /// Clear the [BitBoard].
+    ///
+    /// After the call to this method all the Cell are set to free status.
+    /// (i.e. the board is empty).
+    ///
+    /// # Example
+    /// ```
+    /// # use abbadingo::bitboard::*;
+    /// # use abbadingo::bbdefines::*;
+    ///
+    /// let mut bb = BitBoard::from([Cell::B2, Cell::G7]);
+    /// // BitBoard is not empty:
+    /// assert!(!bb.is_empty());
+    /// // Clears the BitBoard:
+    /// bb.clear();
+    /// // Now the BitBoard is empty:
+    /// assert!(bb.is_empty());
+    /// ```
+    pub fn clear(&mut self) {
+        self.state = EMPTY_STATE;
+    }
 }
 
 /// From trait for the BitBoard struct starting from a slice of [Cell]s.
