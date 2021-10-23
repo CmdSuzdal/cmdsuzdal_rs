@@ -693,6 +693,16 @@ pub fn queen_mask(c: Cell) -> BitBoardState {
 
 // ----------------------------------------------------------------------------
 // Functions implementation for File enum
+impl Into<char> for File {
+    fn into(self) -> char {
+        (self as u8 + 97) as char
+    }
+}
+impl Into<u8> for File {
+    fn into(self) -> u8 {
+        self as u8 + 97
+    }
+}
 impl TryFrom<char> for File {
     type Error = AbbaDingoError;
     fn try_from(value: char) -> Result<Self, Self::Error> {
@@ -721,6 +731,16 @@ impl TryFrom<u8> for File {
 
 // ----------------------------------------------------------------------------
 // Functions implementation for Rank enum
+impl Into<char> for Rank {
+    fn into(self) -> char {
+        (self as u8 + 49) as char
+    }
+}
+impl Into<u8> for Rank {
+    fn into(self) -> u8 {
+        self as u8 + 49
+    }
+}
 impl TryFrom<char> for Rank {
     type Error = AbbaDingoError;
     fn try_from(value: char) -> Result<Self, Self::Error> {
@@ -907,7 +927,7 @@ mod tests {
         assert_eq!(queen_mask(Cell::A8), 0xFF_03_05_09_11_21_41_81_u64);
     }
 
-    // Conversion tests from character to File
+    // Conversion tests from character to File and from File to character
     #[test]
     fn from_character_to_file_tests() {
         assert_eq!(File::try_from('a'), Ok(File::FileA));
@@ -924,7 +944,13 @@ mod tests {
         assert_eq!(File::try_from('是'), Err(AbbaDingoError::IllegalConversionToFile));
         assert_eq!(File::try_from('1'), Err(AbbaDingoError::IllegalConversionToFile));
     }
-    // Conversion tests from u8 to File
+    #[test]
+    fn from_file_to_char_tests() {
+        let f: char = File::FileC.into();
+        assert_eq!(f, 'c');
+    }
+
+    // Conversion tests from u8 to File and from File to u8
     #[test]
     fn from_u8_to_file_tests() {
         assert_eq!(File::try_from(99), Ok(File::FileC));
@@ -932,7 +958,13 @@ mod tests {
         assert_eq!(File::try_from(45), Err(AbbaDingoError::IllegalConversionToFile));
 
     }
-    // Conversion tests from character to Rank
+    #[test]
+    fn from_file_to_u8_tests() {
+        let f: u8 = File::FileH.into();
+        assert_eq!(f, 104);
+    }
+
+    // Conversion tests from character to Rank and from Rank to character
     #[test]
     fn from_character_to_rank_tests() {
         assert_eq!(Rank::try_from('1'), Ok(Rank::Rank1));
@@ -949,14 +981,23 @@ mod tests {
         assert_eq!(Rank::try_from('是'), Err(AbbaDingoError::IllegalConversionToRank));
         assert_eq!(Rank::try_from('a'), Err(AbbaDingoError::IllegalConversionToRank));
     }
-    // Conversion tests from u8 to Rank
+    #[test]
+    fn from_rank_to_char_tests() {
+        let r: char = Rank::Rank7.into();
+        assert_eq!(r, '7');
+    }
+    // Conversion tests from u8 to Rank and from Rank to u8
     #[test]
     fn from_u8_to_rank_tests() {
         assert_eq!(Rank::try_from(53), Ok(Rank::Rank5));
         assert_eq!(Rank::try_from(58), Err(AbbaDingoError::IllegalConversionToRank));
         assert_eq!(Rank::try_from(33), Err(AbbaDingoError::IllegalConversionToRank));
         assert_eq!(Rank::try_from(0), Err(AbbaDingoError::IllegalConversionToRank));
-
+    }
+    #[test]
+    fn from_rank_to_u8_tests() {
+        let r: u8 = Rank::Rank2.into();
+        assert_eq!(r, 50);
     }
 
 }
