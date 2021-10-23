@@ -694,87 +694,59 @@ pub fn queen_mask(c: Cell) -> BitBoardState {
 
 // ----------------------------------------------------------------------------
 // Functions and Traits implementation for File enum
-impl Into<char> for File {
-    fn into(self) -> char {
-        (self as u8 + 97) as char
+impl Into<String> for File {
+    fn into(self) -> String {
+        format!("{}", (self as u8 + 97) as char)
     }
 }
-impl Into<u8> for File {
-    fn into(self) -> u8 {
-        self as u8 + 97
-    }
-}
-impl TryFrom<char> for File {
+impl TryFrom<&str> for File {
     type Error = AbbaDingoError;
-    fn try_from(value: char) -> Result<Self, Self::Error> {
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
-            'a' => Ok(File::FileA),
-            'b' => Ok(File::FileB),
-            'c' => Ok(File::FileC),
-            'd' => Ok(File::FileD),
-            'e' => Ok(File::FileE),
-            'f' => Ok(File::FileF),
-            'g' => Ok(File::FileG),
-            'h' => Ok(File::FileH),
+            "a" => Ok(File::FileA),
+            "b" => Ok(File::FileB),
+            "c" => Ok(File::FileC),
+            "d" => Ok(File::FileD),
+            "e" => Ok(File::FileE),
+            "f" => Ok(File::FileF),
+            "g" => Ok(File::FileG),
+            "h" => Ok(File::FileH),
             _ => Err(AbbaDingoError::IllegalConversionToFile)
-        }
-    }
-}
-impl TryFrom<u8> for File {
-    type Error = AbbaDingoError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match num::FromPrimitive::from_i32(value as i32 - 97) {
-            Some(f) => Ok(f),
-            None => Err(AbbaDingoError::IllegalConversionToFile),
         }
     }
 }
 impl fmt::Display for File {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", Into::<char>::into(*self))
+        write!(f, "{}", Into::<String>::into(*self))
     }
 }
 
 // ----------------------------------------------------------------------------
 // Functions and Traits implementation for Rank enum
-impl Into<char> for Rank {
-    fn into(self) -> char {
-        (self as u8 + 49) as char
+impl Into<String> for Rank {
+    fn into(self) -> String {
+        format!("{}", (self as u8 + 49) as char)
     }
 }
-impl Into<u8> for Rank {
-    fn into(self) -> u8 {
-        self as u8 + 49
-    }
-}
-impl TryFrom<char> for Rank {
+impl TryFrom<&str> for Rank {
     type Error = AbbaDingoError;
-    fn try_from(value: char) -> Result<Self, Self::Error> {
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
-            '1' => Ok(Rank::Rank1),
-            '2' => Ok(Rank::Rank2),
-            '3' => Ok(Rank::Rank3),
-            '4' => Ok(Rank::Rank4),
-            '5' => Ok(Rank::Rank5),
-            '6' => Ok(Rank::Rank6),
-            '7' => Ok(Rank::Rank7),
-            '8' => Ok(Rank::Rank8),
+            "1" => Ok(Rank::Rank1),
+            "2" => Ok(Rank::Rank2),
+            "3" => Ok(Rank::Rank3),
+            "4" => Ok(Rank::Rank4),
+            "5" => Ok(Rank::Rank5),
+            "6" => Ok(Rank::Rank6),
+            "7" => Ok(Rank::Rank7),
+            "8" => Ok(Rank::Rank8),
             _ => Err(AbbaDingoError::IllegalConversionToRank)
-        }
-    }
-}
-impl TryFrom<u8> for Rank {
-    type Error = AbbaDingoError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match num::FromPrimitive::from_i32(value as i32 - 49) {
-            Some(f) => Ok(f),
-            None => Err(AbbaDingoError::IllegalConversionToRank),
         }
     }
 }
 impl fmt::Display for Rank {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", Into::<char>::into(*self))
+        write!(f, "{}", Into::<String>::into(*self))
     }
 }
 
@@ -952,78 +924,51 @@ mod tests {
         assert_eq!(queen_mask(Cell::A8), 0xFF_03_05_09_11_21_41_81_u64);
     }
 
-    // Conversion tests from character to File and from File to character
+    // Conversion tests from String to File and from File to String
     #[test]
-    fn try_from_character_to_file_tests() {
-        assert_eq!(File::try_from('a'), Ok(File::FileA));
-        assert_eq!(File::try_from('b'), Ok(File::FileB));
-        assert_eq!(File::try_from('c'), Ok(File::FileC));
-        assert_eq!(File::try_from('d'), Ok(File::FileD));
-        assert_eq!(File::try_from('e'), Ok(File::FileE));
-        assert_eq!(File::try_from('f'), Ok(File::FileF));
-        assert_eq!(File::try_from('g'), Ok(File::FileG));
-        assert_eq!(File::try_from('h'), Ok(File::FileH));
-        assert_eq!(File::try_from('i'), Err(AbbaDingoError::IllegalConversionToFile));
-        assert_eq!(File::try_from('B'), Err(AbbaDingoError::IllegalConversionToFile));
-        assert_eq!(File::try_from('à'), Err(AbbaDingoError::IllegalConversionToFile));
-        assert_eq!(File::try_from('是'), Err(AbbaDingoError::IllegalConversionToFile));
-        assert_eq!(File::try_from('1'), Err(AbbaDingoError::IllegalConversionToFile));
+    fn try_from_string_to_file_tests() {
+        assert_eq!(File::try_from("a"), Ok(File::FileA));
+        assert_eq!(File::try_from("b"), Ok(File::FileB));
+        assert_eq!(File::try_from("c"), Ok(File::FileC));
+        assert_eq!(File::try_from("d"), Ok(File::FileD));
+        assert_eq!(File::try_from("e"), Ok(File::FileE));
+        assert_eq!(File::try_from("f"), Ok(File::FileF));
+        assert_eq!(File::try_from("g"), Ok(File::FileG));
+        assert_eq!(File::try_from("h"), Ok(File::FileH));
+        assert_eq!(File::try_from("ah"), Err(AbbaDingoError::IllegalConversionToFile));
+        assert_eq!(File::try_from("i"), Err(AbbaDingoError::IllegalConversionToFile));
+        assert_eq!(File::try_from("B"), Err(AbbaDingoError::IllegalConversionToFile));
+        assert_eq!(File::try_from("à"), Err(AbbaDingoError::IllegalConversionToFile));
+        assert_eq!(File::try_from("是"), Err(AbbaDingoError::IllegalConversionToFile));
+        assert_eq!(File::try_from("1"), Err(AbbaDingoError::IllegalConversionToFile));
     }
     #[test]
-    fn file_into_character_tests() {
-        let f: char = File::FileC.into();
-        assert_eq!(f, 'c');
-    }
-
-    // Conversion tests from u8 to File and from File to u8
-    #[test]
-    fn try_from_u8_to_file_tests() {
-        assert_eq!(File::try_from(99), Ok(File::FileC));
-        assert_eq!(File::try_from(106), Err(AbbaDingoError::IllegalConversionToFile));
-        assert_eq!(File::try_from(45), Err(AbbaDingoError::IllegalConversionToFile));
-
-    }
-    #[test]
-    fn file_into_u8_tests() {
-        let f: u8 = File::FileH.into();
-        assert_eq!(f, 104);
+    fn file_into_string_tests() {
+        let f: String = File::FileC.into();
+        assert_eq!(f, "c");
     }
 
-    // Conversion tests from character to Rank and from Rank to character
+    // Conversion tests from String to Rank and from Rank to String
     #[test]
-    fn try_from_character_to_rank_tests() {
-        assert_eq!(Rank::try_from('1'), Ok(Rank::Rank1));
-        assert_eq!(Rank::try_from('2'), Ok(Rank::Rank2));
-        assert_eq!(Rank::try_from('3'), Ok(Rank::Rank3));
-        assert_eq!(Rank::try_from('4'), Ok(Rank::Rank4));
-        assert_eq!(Rank::try_from('5'), Ok(Rank::Rank5));
-        assert_eq!(Rank::try_from('6'), Ok(Rank::Rank6));
-        assert_eq!(Rank::try_from('7'), Ok(Rank::Rank7));
-        assert_eq!(Rank::try_from('8'), Ok(Rank::Rank8));
-        assert_eq!(Rank::try_from('9'), Err(AbbaDingoError::IllegalConversionToRank));
-        assert_eq!(Rank::try_from('B'), Err(AbbaDingoError::IllegalConversionToRank));
-        assert_eq!(Rank::try_from('à'), Err(AbbaDingoError::IllegalConversionToRank));
-        assert_eq!(Rank::try_from('是'), Err(AbbaDingoError::IllegalConversionToRank));
-        assert_eq!(Rank::try_from('a'), Err(AbbaDingoError::IllegalConversionToRank));
+    fn try_from_string_to_rank_tests() {
+        assert_eq!(Rank::try_from("1"), Ok(Rank::Rank1));
+        assert_eq!(Rank::try_from("2"), Ok(Rank::Rank2));
+        assert_eq!(Rank::try_from("3"), Ok(Rank::Rank3));
+        assert_eq!(Rank::try_from("4"), Ok(Rank::Rank4));
+        assert_eq!(Rank::try_from("5"), Ok(Rank::Rank5));
+        assert_eq!(Rank::try_from("6"), Ok(Rank::Rank6));
+        assert_eq!(Rank::try_from("7"), Ok(Rank::Rank7));
+        assert_eq!(Rank::try_from("8"), Ok(Rank::Rank8));
+        assert_eq!(Rank::try_from("9"), Err(AbbaDingoError::IllegalConversionToRank));
+        assert_eq!(Rank::try_from("B"), Err(AbbaDingoError::IllegalConversionToRank));
+        assert_eq!(Rank::try_from("à"), Err(AbbaDingoError::IllegalConversionToRank));
+        assert_eq!(Rank::try_from("是"), Err(AbbaDingoError::IllegalConversionToRank));
+        assert_eq!(Rank::try_from("a"), Err(AbbaDingoError::IllegalConversionToRank));
     }
     #[test]
-    fn rank_into_character_tests() {
-        let r: char = Rank::Rank7.into();
-        assert_eq!(r, '7');
-    }
-    // Conversion tests from u8 to Rank and from Rank to u8
-    #[test]
-    fn try_from_u8_to_rank_tests() {
-        assert_eq!(Rank::try_from(53), Ok(Rank::Rank5));
-        assert_eq!(Rank::try_from(58), Err(AbbaDingoError::IllegalConversionToRank));
-        assert_eq!(Rank::try_from(33), Err(AbbaDingoError::IllegalConversionToRank));
-        assert_eq!(Rank::try_from(0), Err(AbbaDingoError::IllegalConversionToRank));
-    }
-    #[test]
-    fn rank_into_u8_tests() {
-        let r = Rank::Rank2;
-        let r_u: u8 = r.into();
-        assert_eq!(r_u, 50);
+    fn rank_into_string_tests() {
+        let r: String = Rank::Rank7.into();
+        assert_eq!(r, "7");
     }
 
     // Display trait tests for File, Rank and Cells
