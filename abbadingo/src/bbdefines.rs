@@ -140,6 +140,25 @@ pub enum Diagonal {
     Diag14,
 }
 
+// Diagonal masks
+pub const DIAGS_BBS: [BitBoardState; 15] = [
+    0x0100000000000000_u64, //  0
+    0x0201000000000000_u64, //  1
+    0x0402010000000000_u64, //  2
+    0x0804020100000000_u64, //  3
+    0x1008040201000000_u64, //  4
+    0x2010080402010000_u64, //  5
+    0x4020100804020100_u64, //  6
+    0x8040201008040201_u64, //  7
+    0x0080402010080402_u64, //  8
+    0x0000804020100804_u64, //  9
+    0x0000008040201008_u64, // 10
+    0x0000000080402010_u64, // 11
+    0x0000000000804020_u64, // 12
+    0x0000000000008040_u64, // 13
+    0x0000000000000080_u64, // 14
+];
+
 /// As Anti Diagonal inside an 8x8 board.
 ///
 /// Traditionally, in square board games the first anti diagonal (#0) is the
@@ -180,6 +199,25 @@ pub enum AntiDiagonal {
     AntiDiag13,
     AntiDiag14,
 }
+
+// Diagonal masks
+pub const ANTIDIAGS_BBS: [BitBoardState; 15] = [
+    0x0000000000000001_u64, //  0
+    0x0000000000000102_u64, //  1
+    0x0000000000010204_u64, //  2
+    0x0000000001020408_u64, //  3
+    0x0000000102040810_u64, //  4
+    0x0000010204081020_u64, //  5
+    0x0001020408102040_u64, //  6
+    0x0102040810204080_u64, //  7
+    0x0204081020408000_u64, //  8
+    0x0408102040800000_u64, //  9
+    0x0810204080000000_u64, // 10
+    0x1020408000000000_u64, // 11
+    0x2040800000000000_u64, // 12
+    0x4080000000000000_u64, // 13
+    0x8000000000000000_u64, // 14
+];
 
 // ********************************************************************************
 // ********************************************************************************
@@ -593,48 +631,60 @@ pub fn calc_cell_after_steps(c: Cell, step_north: i32, step_east: i32) -> Option
 
 /// Computes the bitboard state with a single cell active
 pub fn single_cell(c: Cell) -> BitBoardState {
-    EMPTY_STATE
+    1_u64 << c as u64
 }
 
 /// Computes the bitboard state with the neighbour cells of a given cell active
 pub fn neighbour(c: Cell) -> BitBoardState {
-    EMPTY_STATE
+    let mut file_mask: BitBoardState = 0;
+    let mut rank_mask: BitBoardState = 0;
+    file_mask |= FILES_BBS[file(c) as usize];
+    file_mask |= match west(c) { Some(w) => FILES_BBS[w as usize], _ => 0};
+    file_mask |= match east(c) { Some(e) => FILES_BBS[e as usize], _ => 0};
+    rank_mask |= RANKS_BBS[rank(c) as usize];
+    rank_mask |= match north(c) { Some(n) => RANKS_BBS[n as usize], _ => 0};
+    rank_mask |= match south(c) { Some(s) => RANKS_BBS[s as usize], _ => 0};
+    file_mask & rank_mask ^ single_cell(c)
 }
 
 /// Computes the bitboard state with the cells of the file of a given cell active
 pub fn file_mask(c: Cell) -> BitBoardState {
-    EMPTY_STATE
+    FILES_BBS[file(c) as usize]
 }
 
 /// Computes the bitboard state with the cells of the rank a given cell active
 pub fn rank_mask(c: Cell) -> BitBoardState {
-    EMPTY_STATE
+    RANKS_BBS[rank(c) as usize]
+
 }
 
 /// Computes the bitboard state with the cells of the file and rank a given cell active
 pub fn file_rank_mask(c: Cell) -> BitBoardState {
-    EMPTY_STATE
+    FILES_BBS[file(c) as usize] | RANKS_BBS[rank(c) as usize]
 }
 
-/// Computes the bitboard state with the cells of the diagonal a given cell active
+
+    /// Computes the bitboard state with the cells of the diagonal a given cell active
 pub fn diag_mask(c: Cell) -> BitBoardState {
-    EMPTY_STATE
+        DIAGS_BBS[diagonal(c) as usize]
 }
 
 /// Computes the bitboard state with the cells of the antidiagonal of a given cell active
 pub fn antidiag_mask(c: Cell) -> BitBoardState {
-    EMPTY_STATE
+    ANTIDIAGS_BBS[anti_diagonal(c) as usize]
+
 }
 
 /// Computes the bitboard state with the cells of both diagonals of a given cell active
 pub fn diagonals_mask(c: Cell) -> BitBoardState {
-    EMPTY_STATE
+    DIAGS_BBS[diagonal(c) as usize] | ANTIDIAGS_BBS[anti_diagonal(c) as usize]
 }
 
 /// Computes the bitboard state with the cells of file, rank and
 /// diagonals of a given cell active (the "Queen" moves in the chess game)
 pub fn queen_mask(c: Cell) -> BitBoardState {
-    EMPTY_STATE
+    FILES_BBS[file(c) as usize] | RANKS_BBS[rank(c) as usize] |
+        DIAGS_BBS[diagonal(c) as usize] | ANTIDIAGS_BBS[anti_diagonal(c) as usize]
 }
 
 // ****************************************************************************
@@ -735,4 +785,66 @@ mod tests {
         assert_eq!(calc_cell_after_steps(Cell::F5, 1, 3), None);
         assert_eq!(calc_cell_after_steps(Cell::D2, -2, -1), None);
     }
+
+    // Test for the single_cell() method
+    #[test]
+    fn single_cell_mask_test() {
+        assert_eq!(single_cell(Cell::A1), 1_u64);
+        assert_eq!(single_cell(Cell::H8), 0x80_00_00_00_00_00_00_00_u64);
+        assert_eq!(single_cell(Cell::E5), 0x00_00_00_10_00_00_00_00_u64);
+    }
+
+    // Test for the neighbour() method
+    #[test]
+    fn neighbour_mask_test() {
+        assert_eq!(neighbour(Cell::D4), 0x00_00_00_1C_14_1C_00_00_u64);
+        assert_eq!(neighbour(Cell::G1), 0x00_00_00_00_00_00_E0_A0_u64);
+    }
+
+    // Test for the file_mask() method
+    #[test]
+    fn file_mask_test() {
+        assert_eq!(file_mask(Cell::A2), 0x01_01_01_01_01_01_01_01_u64);
+        assert_eq!(file_mask(Cell::F5), 0x20_20_20_20_20_20_20_20_u64);
+    }
+
+    // Test for the rank_mask() method
+    #[test]
+    fn rank_mask_test() {
+        assert_eq!(rank_mask(Cell::B2), 0x00_00_00_00_00_00_FF_00_u64);
+        assert_eq!(rank_mask(Cell::H7), 0x00_FF_00_00_00_00_00_00_u64);
+    }
+
+    // Test for the file_rank_mask() method
+    #[test]
+    fn file_rank_mask_test() {
+        assert_eq!(file_rank_mask(Cell::C6), 0x04_04_FF_04_04_04_04_04_u64);
+        assert_eq!(file_rank_mask(Cell::G2), 0x40_40_40_40_40_40_FF_40_u64);
+    }
+
+    // Test for the diag_mask() method
+    #[test]
+    fn diag_mask_test() {
+        assert_eq!(diag_mask(Cell::H8), 0x80_40_20_10_08_04_02_01_u64);
+    }
+
+    // Test for the antidiag_mask() method
+    #[test]
+    fn anti_diag_mask_test() {
+        assert_eq!(antidiag_mask(Cell::B6), 0x00_01_02_04_08_10_20_40_u64);
+    }
+
+    // Test for the diagonals_mask() method
+    #[test]
+    fn diagonals_mask_test() {
+        assert_eq!(diagonals_mask(Cell::C3), 0x80_40_20_11_0A_04_0A_11_u64);
+    }
+
+    // Test for the queen_mask() method
+    #[test]
+    fn queen_mask_test() {
+        assert_eq!(queen_mask(Cell::D4), 0x88_49_2A_1C_FF_1C_2A_49_u64);
+        assert_eq!(queen_mask(Cell::A8), 0xFF_03_05_09_11_21_41_81_u64);
+    }
+
 }
