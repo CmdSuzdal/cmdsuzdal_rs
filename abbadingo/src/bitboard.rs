@@ -1,6 +1,6 @@
 //! Definition of the [BitBoard] structure and related methods implementation.
 
-use crate::bbdefines::{BitBoardState, Cell, File, Rank, EMPTY_STATE, FILES_BBS, RANKS_BBS};
+use crate::bbdefines::*;
 
 /// Structure used to represent an 8x8 square board in a piece centric manner.
 ///
@@ -159,6 +159,33 @@ impl BitBoard {
         for c in cells {
             self.set_cell(*c);
         }
+    }
+
+    /// Set the Cell at the crossing of the given File and Cell to the active state
+    ///
+    /// # Example
+    /// ```
+    /// # use abbadingo::bitboard::*;
+    /// # use abbadingo::bbdefines::*;
+    ///
+    /// let mut bb = BitBoard::new();
+    /// bb.set_cell_from_file_and_rank(File::FileD, Rank::Rank3);
+    /// bb.set_cell_from_file_and_rank(File::FileG, Rank::Rank8);
+    /// //    _________________________
+    /// // r8|  .  .  .  .  .  .  o  . |
+    /// // r7|  .  .  .  .  .  .  .  . |
+    /// // r6|  .  .  .  .  .  .  .  . |
+    /// // r5|  .  .  .  .  .  .  .  . |
+    /// // r4|  .  .  .  .  .  .  .  . |
+    /// // r3|  .  .  .  o  .  .  .  . |
+    /// // r2|  .  .  .  .  .  .  .  . |
+    /// // r1|  .  .  .  .  .  .  .  . |
+    /// //     -------------------------
+    /// //     fa fb fc fd fe ff fg fh
+    /// assert_eq!(bb.pop_count(), 2);
+    /// ```
+    pub fn set_cell_from_file_and_rank(&mut self, f: File, r: Rank) {
+        self.state |= single_cell(to_cell(f, r));
     }
 
     /// Resets all the cells specified in a slice to free state.
