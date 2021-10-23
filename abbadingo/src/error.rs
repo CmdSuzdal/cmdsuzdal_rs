@@ -18,5 +18,4 @@ pub enum AbbaDingoError {
     /// Illegal conversion to Rank.
     #[error("Illegal conversion to Rank")]
     IllegalConversionToRank,
-
 }

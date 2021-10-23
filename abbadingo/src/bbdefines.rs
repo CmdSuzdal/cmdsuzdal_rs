@@ -6,7 +6,7 @@
 use std::convert::TryFrom;
 use std::fmt;
 
-use crate::error::{AbbaDingoError};
+use crate::error::AbbaDingoError;
 
 // ********************************************************************************
 // ********************************************************************************
@@ -644,11 +644,23 @@ pub fn neighbour(c: Cell) -> BitBoardState {
     let mut file_mask: BitBoardState = 0;
     let mut rank_mask: BitBoardState = 0;
     file_mask |= FILES_BBS[file(c) as usize];
-    file_mask |= match west(c) { Some(w) => FILES_BBS[w as usize], _ => 0};
-    file_mask |= match east(c) { Some(e) => FILES_BBS[e as usize], _ => 0};
+    file_mask |= match west(c) {
+        Some(w) => FILES_BBS[w as usize],
+        _ => 0,
+    };
+    file_mask |= match east(c) {
+        Some(e) => FILES_BBS[e as usize],
+        _ => 0,
+    };
     rank_mask |= RANKS_BBS[rank(c) as usize];
-    rank_mask |= match north(c) { Some(n) => RANKS_BBS[n as usize], _ => 0};
-    rank_mask |= match south(c) { Some(s) => RANKS_BBS[s as usize], _ => 0};
+    rank_mask |= match north(c) {
+        Some(n) => RANKS_BBS[n as usize],
+        _ => 0,
+    };
+    rank_mask |= match south(c) {
+        Some(s) => RANKS_BBS[s as usize],
+        _ => 0,
+    };
     file_mask & rank_mask ^ single_cell(c)
 }
 
@@ -660,7 +672,6 @@ pub fn file_mask(c: Cell) -> BitBoardState {
 /// Computes the bitboard state with the cells of the rank a given cell active
 pub fn rank_mask(c: Cell) -> BitBoardState {
     RANKS_BBS[rank(c) as usize]
-
 }
 
 /// Computes the bitboard state with the cells of the file and rank a given cell active
@@ -668,16 +679,14 @@ pub fn file_rank_mask(c: Cell) -> BitBoardState {
     FILES_BBS[file(c) as usize] | RANKS_BBS[rank(c) as usize]
 }
 
-
-    /// Computes the bitboard state with the cells of the diagonal a given cell active
+/// Computes the bitboard state with the cells of the diagonal a given cell active
 pub fn diag_mask(c: Cell) -> BitBoardState {
-        DIAGS_BBS[diagonal(c) as usize]
+    DIAGS_BBS[diagonal(c) as usize]
 }
 
 /// Computes the bitboard state with the cells of the antidiagonal of a given cell active
 pub fn antidiag_mask(c: Cell) -> BitBoardState {
     ANTIDIAGS_BBS[anti_diagonal(c) as usize]
-
 }
 
 /// Computes the bitboard state with the cells of both diagonals of a given cell active
@@ -688,8 +697,10 @@ pub fn diagonals_mask(c: Cell) -> BitBoardState {
 /// Computes the bitboard state with the cells of file, rank and
 /// diagonals of a given cell active (the "Queen" moves in the chess game)
 pub fn queen_mask(c: Cell) -> BitBoardState {
-    FILES_BBS[file(c) as usize] | RANKS_BBS[rank(c) as usize] |
-        DIAGS_BBS[diagonal(c) as usize] | ANTIDIAGS_BBS[anti_diagonal(c) as usize]
+    FILES_BBS[file(c) as usize]
+        | RANKS_BBS[rank(c) as usize]
+        | DIAGS_BBS[diagonal(c) as usize]
+        | ANTIDIAGS_BBS[anti_diagonal(c) as usize]
 }
 
 // ----------------------------------------------------------------------------
@@ -711,7 +722,7 @@ impl TryFrom<&str> for File {
             "f" => Ok(File::FileF),
             "g" => Ok(File::FileG),
             "h" => Ok(File::FileH),
-            _ => Err(AbbaDingoError::IllegalConversionToFile)
+            _ => Err(AbbaDingoError::IllegalConversionToFile),
         }
     }
 }
@@ -740,7 +751,7 @@ impl TryFrom<&str> for Rank {
             "6" => Ok(Rank::Rank6),
             "7" => Ok(Rank::Rank7),
             "8" => Ok(Rank::Rank8),
-            _ => Err(AbbaDingoError::IllegalConversionToRank)
+            _ => Err(AbbaDingoError::IllegalConversionToRank),
         }
     }
 }
@@ -762,7 +773,6 @@ impl fmt::Display for Cell {
         write!(f, "{}", Into::<String>::into(*self))
     }
 }
-
 
 // ****************************************************************************
 // TESTS
@@ -935,12 +945,30 @@ mod tests {
         assert_eq!(File::try_from("f"), Ok(File::FileF));
         assert_eq!(File::try_from("g"), Ok(File::FileG));
         assert_eq!(File::try_from("h"), Ok(File::FileH));
-        assert_eq!(File::try_from("ah"), Err(AbbaDingoError::IllegalConversionToFile));
-        assert_eq!(File::try_from("i"), Err(AbbaDingoError::IllegalConversionToFile));
-        assert_eq!(File::try_from("B"), Err(AbbaDingoError::IllegalConversionToFile));
-        assert_eq!(File::try_from("à"), Err(AbbaDingoError::IllegalConversionToFile));
-        assert_eq!(File::try_from("是"), Err(AbbaDingoError::IllegalConversionToFile));
-        assert_eq!(File::try_from("1"), Err(AbbaDingoError::IllegalConversionToFile));
+        assert_eq!(
+            File::try_from("ah"),
+            Err(AbbaDingoError::IllegalConversionToFile)
+        );
+        assert_eq!(
+            File::try_from("i"),
+            Err(AbbaDingoError::IllegalConversionToFile)
+        );
+        assert_eq!(
+            File::try_from("B"),
+            Err(AbbaDingoError::IllegalConversionToFile)
+        );
+        assert_eq!(
+            File::try_from("à"),
+            Err(AbbaDingoError::IllegalConversionToFile)
+        );
+        assert_eq!(
+            File::try_from("是"),
+            Err(AbbaDingoError::IllegalConversionToFile)
+        );
+        assert_eq!(
+            File::try_from("1"),
+            Err(AbbaDingoError::IllegalConversionToFile)
+        );
     }
     #[test]
     fn file_into_string_tests() {
@@ -959,11 +987,26 @@ mod tests {
         assert_eq!(Rank::try_from("6"), Ok(Rank::Rank6));
         assert_eq!(Rank::try_from("7"), Ok(Rank::Rank7));
         assert_eq!(Rank::try_from("8"), Ok(Rank::Rank8));
-        assert_eq!(Rank::try_from("9"), Err(AbbaDingoError::IllegalConversionToRank));
-        assert_eq!(Rank::try_from("B"), Err(AbbaDingoError::IllegalConversionToRank));
-        assert_eq!(Rank::try_from("à"), Err(AbbaDingoError::IllegalConversionToRank));
-        assert_eq!(Rank::try_from("是"), Err(AbbaDingoError::IllegalConversionToRank));
-        assert_eq!(Rank::try_from("a"), Err(AbbaDingoError::IllegalConversionToRank));
+        assert_eq!(
+            Rank::try_from("9"),
+            Err(AbbaDingoError::IllegalConversionToRank)
+        );
+        assert_eq!(
+            Rank::try_from("B"),
+            Err(AbbaDingoError::IllegalConversionToRank)
+        );
+        assert_eq!(
+            Rank::try_from("à"),
+            Err(AbbaDingoError::IllegalConversionToRank)
+        );
+        assert_eq!(
+            Rank::try_from("是"),
+            Err(AbbaDingoError::IllegalConversionToRank)
+        );
+        assert_eq!(
+            Rank::try_from("a"),
+            Err(AbbaDingoError::IllegalConversionToRank)
+        );
     }
     #[test]
     fn rank_into_string_tests() {
@@ -979,7 +1022,10 @@ mod tests {
         assert_eq!(format!("{}", File::FileC), "c");
         assert_eq!(format!("{}", File::FileD), "d");
         assert_eq!(format!("{}", File::FileE), "e");
-        assert_eq!(format!("{} {} {}", File::FileF, File::FileG, File::FileH), "f g h");
+        assert_eq!(
+            format!("{} {} {}", File::FileF, File::FileG, File::FileH),
+            "f g h"
+        );
     }
     #[test]
     fn display_rank_test() {
@@ -988,7 +1034,10 @@ mod tests {
         assert_eq!(format!("{}", Rank::Rank3), "3");
         assert_eq!(format!("{}", Rank::Rank4), "4");
         assert_eq!(format!("{}", Rank::Rank5), "5");
-        assert_eq!(format!("{} {} {}", Rank::Rank6, Rank::Rank7, Rank::Rank8), "6 7 8");
+        assert_eq!(
+            format!("{} {} {}", Rank::Rank6, Rank::Rank7, Rank::Rank8),
+            "6 7 8"
+        );
     }
     #[test]
     fn display_cell_test() {
@@ -1000,7 +1049,19 @@ mod tests {
         assert_eq!(format!("{}", Cell::F6), "f6");
         assert_eq!(format!("{}", Cell::G7), "g7");
         assert_eq!(format!("{}", Cell::H8), "h8");
-        assert_eq!(format!("{}, {}, {}, {}, {}, {}, {}, {}", Cell::A8, Cell::B7, Cell::C6, Cell::D5,
-            Cell::E4, Cell::F3, Cell::G2, Cell::H1), "a8, b7, c6, d5, e4, f3, g2, h1");
+        assert_eq!(
+            format!(
+                "{}, {}, {}, {}, {}, {}, {}, {}",
+                Cell::A8,
+                Cell::B7,
+                Cell::C6,
+                Cell::D5,
+                Cell::E4,
+                Cell::F3,
+                Cell::G2,
+                Cell::H1
+            ),
+            "a8, b7, c6, d5, e4, f3, g2, h1"
+        );
     }
 }
