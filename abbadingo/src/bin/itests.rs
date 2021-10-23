@@ -1,4 +1,4 @@
-use abbadingo::bbdefines::{to_cell, File, Rank};
+use abbadingo::bbdefines::{to_cell, File, Rank, Cell};
 use abbadingo::bitboard::BitBoard;
 use abbadingo::hexboard::HexCell;
 
@@ -8,6 +8,7 @@ fn main() {
     let f = File::FileA;
     println!("Hello File: {:?} = '{}'", f, f);
     println!("Hello Rank: {:?} = '{}'", Rank::Rank3, Rank::Rank3);
+    println!("Hello Cell: {:?} = '{}'", Cell::D4, Cell::D4);
 
     println!("--------------------------------------------------");
     let bb = BitBoard::new();

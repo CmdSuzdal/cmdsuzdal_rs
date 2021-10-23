@@ -778,6 +778,20 @@ impl fmt::Display for Rank {
     }
 }
 
+// ----------------------------------------------------------------------------
+// Functions and Traits implementation for Cell enum
+impl Into<String> for Cell {
+    fn into(self) -> String {
+        format!("{}{}", file(self), rank(self))
+    }
+}
+impl fmt::Display for Cell {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", Into::<String>::into(*self))
+    }
+}
+
+
 // ****************************************************************************
 // TESTS
 // ****************************************************************************
@@ -1012,7 +1026,7 @@ mod tests {
         assert_eq!(r_u, 50);
     }
 
-    // Display trait tests for File and Rank
+    // Display trait tests for File, Rank and Cells
     #[test]
     fn display_file_test() {
         assert_eq!(format!("{}", File::FileA), "a");
@@ -1031,5 +1045,17 @@ mod tests {
         assert_eq!(format!("{}", Rank::Rank5), "5");
         assert_eq!(format!("{} {} {}", Rank::Rank6, Rank::Rank7, Rank::Rank8), "6 7 8");
     }
-
+    #[test]
+    fn display_cell_test() {
+        assert_eq!(format!("{}", Cell::A1), "a1");
+        assert_eq!(format!("{}", Cell::B2), "b2");
+        assert_eq!(format!("{}", Cell::C3), "c3");
+        assert_eq!(format!("{}", Cell::D4), "d4");
+        assert_eq!(format!("{}", Cell::E5), "e5");
+        assert_eq!(format!("{}", Cell::F6), "f6");
+        assert_eq!(format!("{}", Cell::G7), "g7");
+        assert_eq!(format!("{}", Cell::H8), "h8");
+        assert_eq!(format!("{}, {}, {}, {}, {}, {}, {}, {}", Cell::A8, Cell::B7, Cell::C6, Cell::D5,
+            Cell::E4, Cell::F3, Cell::G2, Cell::H1), "a8, b7, c6, d5, e4, f3, g2, h1");
+    }
 }
