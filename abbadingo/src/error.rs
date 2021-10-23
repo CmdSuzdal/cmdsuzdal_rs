@@ -12,4 +12,11 @@ pub enum AbbaDingoError {
     /// Invalid operation on Rank requested.
     #[error("Invalid operation on Rank")]
     InvalidOperationOnRank,
+    /// Illegal conversion to File.
+    #[error("Illegal conversion to File")]
+    IllegalConversionToFile,
+    /// Illegal conversion to Rank.
+    #[error("Illegal conversion to Rank")]
+    IllegalConversionToRank,
+
 }
