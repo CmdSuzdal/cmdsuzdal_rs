@@ -18,4 +18,7 @@ pub enum AbbaDingoError {
     /// Illegal conversion to Rank.
     #[error("Illegal conversion to Rank")]
     IllegalConversionToRank,
+    /// Illegal conversion to Cell.
+    #[error("Illegal conversion to Cell")]
+    IllegalConversionToCell,
 }

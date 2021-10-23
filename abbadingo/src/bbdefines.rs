@@ -768,6 +768,24 @@ impl Into<String> for Cell {
         format!("{}{}", file(self), rank(self))
     }
 }
+impl TryFrom<&str> for Cell {
+    type Error = AbbaDingoError;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        if value.chars().count() != 2 {
+            return Err(AbbaDingoError::IllegalConversionToCell);
+        }
+        let f = File::try_from(&value[0..1]);
+        let r = Rank::try_from(&value[1..2]);
+        match f {
+            Ok(f) => match r {
+                Ok(r) => Ok(to_cell(f, r)),
+                _ => Err(AbbaDingoError::IllegalConversionToCell),
+            },
+            _ => Err(AbbaDingoError::IllegalConversionToCell),
+        }
+    }
+}
+
 impl fmt::Display for Cell {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", Into::<String>::into(*self))
@@ -1013,6 +1031,33 @@ mod tests {
         let r: String = Rank::Rank7.into();
         assert_eq!(r, "7");
     }
+
+    // Conversion tests from String to Cell and from Cell to String
+    #[test]
+    fn try_from_string_to_cell_tests() {
+        assert_eq!(Cell::try_from("g1"), Ok(Cell::G1));
+        assert_eq!(Cell::try_from("a7"), Ok(Cell::A7));
+        assert_eq!(Cell::try_from("b4"), Ok(Cell::B4));
+        assert_eq!(Cell::try_from("c3"), Ok(Cell::C3));
+
+        assert_eq!(Cell::try_from(""), Err(AbbaDingoError::IllegalConversionToCell));
+        assert_eq!(Cell::try_from("a"), Err(AbbaDingoError::IllegalConversionToCell));
+        assert_eq!(Cell::try_from("7"), Err(AbbaDingoError::IllegalConversionToCell));
+        assert_eq!(Cell::try_from("é"), Err(AbbaDingoError::IllegalConversionToCell));
+        assert_eq!(Cell::try_from("h22"), Err(AbbaDingoError::IllegalConversionToCell));
+    }
+    #[test]
+    fn cell_into_string_tests() {
+        assert_eq!(Into::<String>::into(Cell::A2), "a2");
+        assert_eq!(Into::<String>::into(Cell::B8), "b8");
+        assert_eq!(Into::<String>::into(Cell::C1), "c1");
+        assert_eq!(Into::<String>::into(Cell::D4), "d4");
+        assert_eq!(Into::<String>::into(Cell::E3), "e3");
+        assert_eq!(Into::<String>::into(Cell::F7), "f7");
+        assert_eq!(Into::<String>::into(Cell::G5), "g5");
+        assert_eq!(Into::<String>::into(Cell::H6), "h6");
+    }
+
 
     // Display trait tests for File, Rank and Cells
     #[test]
