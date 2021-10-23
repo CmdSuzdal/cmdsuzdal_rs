@@ -4,6 +4,7 @@
 //! concepts used in definition and manipulation of [BitBoard](crate::bitboard::BitBoard).)s.
 
 use std::convert::TryFrom;
+use std::fmt;
 
 use crate::error::{AbbaDingoError};
 
@@ -692,7 +693,7 @@ pub fn queen_mask(c: Cell) -> BitBoardState {
 }
 
 // ----------------------------------------------------------------------------
-// Functions implementation for File enum
+// Functions and Traits implementation for File enum
 impl Into<char> for File {
     fn into(self) -> char {
         (self as u8 + 97) as char
@@ -728,9 +729,14 @@ impl TryFrom<u8> for File {
         }
     }
 }
+impl fmt::Display for File {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", Into::<char>::into(*self))
+    }
+}
 
 // ----------------------------------------------------------------------------
-// Functions implementation for Rank enum
+// Functions and Traits implementation for Rank enum
 impl Into<char> for Rank {
     fn into(self) -> char {
         (self as u8 + 49) as char
@@ -764,6 +770,11 @@ impl TryFrom<u8> for Rank {
             Some(f) => Ok(f),
             None => Err(AbbaDingoError::IllegalConversionToRank),
         }
+    }
+}
+impl fmt::Display for Rank {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", Into::<char>::into(*self))
     }
 }
 
@@ -929,7 +940,7 @@ mod tests {
 
     // Conversion tests from character to File and from File to character
     #[test]
-    fn from_character_to_file_tests() {
+    fn try_from_character_to_file_tests() {
         assert_eq!(File::try_from('a'), Ok(File::FileA));
         assert_eq!(File::try_from('b'), Ok(File::FileB));
         assert_eq!(File::try_from('c'), Ok(File::FileC));
@@ -945,28 +956,28 @@ mod tests {
         assert_eq!(File::try_from('1'), Err(AbbaDingoError::IllegalConversionToFile));
     }
     #[test]
-    fn from_file_to_char_tests() {
+    fn file_into_character_tests() {
         let f: char = File::FileC.into();
         assert_eq!(f, 'c');
     }
 
     // Conversion tests from u8 to File and from File to u8
     #[test]
-    fn from_u8_to_file_tests() {
+    fn try_from_u8_to_file_tests() {
         assert_eq!(File::try_from(99), Ok(File::FileC));
         assert_eq!(File::try_from(106), Err(AbbaDingoError::IllegalConversionToFile));
         assert_eq!(File::try_from(45), Err(AbbaDingoError::IllegalConversionToFile));
 
     }
     #[test]
-    fn from_file_to_u8_tests() {
+    fn file_into_u8_tests() {
         let f: u8 = File::FileH.into();
         assert_eq!(f, 104);
     }
 
     // Conversion tests from character to Rank and from Rank to character
     #[test]
-    fn from_character_to_rank_tests() {
+    fn try_from_character_to_rank_tests() {
         assert_eq!(Rank::try_from('1'), Ok(Rank::Rank1));
         assert_eq!(Rank::try_from('2'), Ok(Rank::Rank2));
         assert_eq!(Rank::try_from('3'), Ok(Rank::Rank3));
@@ -982,22 +993,43 @@ mod tests {
         assert_eq!(Rank::try_from('a'), Err(AbbaDingoError::IllegalConversionToRank));
     }
     #[test]
-    fn from_rank_to_char_tests() {
+    fn rank_into_character_tests() {
         let r: char = Rank::Rank7.into();
         assert_eq!(r, '7');
     }
     // Conversion tests from u8 to Rank and from Rank to u8
     #[test]
-    fn from_u8_to_rank_tests() {
+    fn try_from_u8_to_rank_tests() {
         assert_eq!(Rank::try_from(53), Ok(Rank::Rank5));
         assert_eq!(Rank::try_from(58), Err(AbbaDingoError::IllegalConversionToRank));
         assert_eq!(Rank::try_from(33), Err(AbbaDingoError::IllegalConversionToRank));
         assert_eq!(Rank::try_from(0), Err(AbbaDingoError::IllegalConversionToRank));
     }
     #[test]
-    fn from_rank_to_u8_tests() {
-        let r: u8 = Rank::Rank2.into();
-        assert_eq!(r, 50);
+    fn rank_into_u8_tests() {
+        let r = Rank::Rank2;
+        let r_u: u8 = r.into();
+        assert_eq!(r_u, 50);
+    }
+
+    // Display trait tests for File and Rank
+    #[test]
+    fn display_file_test() {
+        assert_eq!(format!("{}", File::FileA), "a");
+        assert_eq!(format!("{}", File::FileB), "b");
+        assert_eq!(format!("{}", File::FileC), "c");
+        assert_eq!(format!("{}", File::FileD), "d");
+        assert_eq!(format!("{}", File::FileE), "e");
+        assert_eq!(format!("{} {} {}", File::FileF, File::FileG, File::FileH), "f g h");
+    }
+    #[test]
+    fn display_rank_test() {
+        assert_eq!(format!("{}", Rank::Rank1), "1");
+        assert_eq!(format!("{}", Rank::Rank2), "2");
+        assert_eq!(format!("{}", Rank::Rank3), "3");
+        assert_eq!(format!("{}", Rank::Rank4), "4");
+        assert_eq!(format!("{}", Rank::Rank5), "5");
+        assert_eq!(format!("{} {} {}", Rank::Rank6, Rank::Rank7, Rank::Rank8), "6 7 8");
     }
 
 }

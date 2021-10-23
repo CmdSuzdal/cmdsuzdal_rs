@@ -3,6 +3,12 @@ use abbadingo::bitboard::BitBoard;
 use abbadingo::hexboard::HexCell;
 
 fn main() {
+
+    println!("--------------------------------------------------");
+    let f = File::FileA;
+    println!("Hello File: {:?} = '{}'", f, f);
+    println!("Hello Rank: {:?} = '{}'", Rank::Rank3, Rank::Rank3);
+
     println!("--------------------------------------------------");
     let bb = BitBoard::new();
     println!("Hello BitBoard: {:?}", bb);
