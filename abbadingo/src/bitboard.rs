@@ -188,6 +188,34 @@ impl BitBoard {
         self.state |= single_cell(to_cell(f, r));
     }
 
+    /// Reset the Cell at the crossing of the given File and Cell to the inactive state
+    ///
+    /// # Example
+    /// ```
+    /// # use abbadingo::bitboard::*;
+    /// # use abbadingo::bbdefines::*;
+    ///
+    /// let mut bb = BitBoard::new();
+    /// bb.set_file(File::FileC);
+    /// bb.set_rank(Rank::Rank4);
+    /// bb.reset_cell_from_file_and_rank(File::FileC, Rank::Rank4);
+    /// //    _________________________
+    /// // r8|  .  .  o  .  .  .  .  . |
+    /// // r7|  .  .  o  .  .  .  .  . |
+    /// // r6|  .  .  o  .  .  .  .  . |
+    /// // r5|  .  .  o  .  .  .  .  . |
+    /// // r4|  o  o  .  o  o  o  o  o |
+    /// // r3|  .  .  o  .  .  .  .  . |
+    /// // r2|  .  .  o  .  .  .  .  . |
+    /// // r1|  .  .  o  .  .  .  .  . |
+    /// //     -------------------------
+    /// //     fa fb fc fd fe ff fg fh
+    /// assert_eq!(bb.pop_count(), 14);
+    /// ```
+    pub fn reset_cell_from_file_and_rank(&mut self, f: File, r: Rank) {
+        self.state &= !single_cell(to_cell(f, r));
+    }
+
     /// Resets all the cells specified in a slice to free state.
     ///
     pub fn reset_cells(&mut self, cells: &[Cell]) {
