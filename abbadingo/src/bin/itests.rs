@@ -18,6 +18,8 @@ fn main() {
     let c = to_cell(f, r);
     println!("File is {:?}, Rank is {:?}, Cell is {:?}", f, r, c);
 
+    println!("Bitboard: {}", bb);
+
     println!("--------------------------------------------------");
     let xb = HexCell::new();
     println!("Hello HexCell: {:?}", xb);

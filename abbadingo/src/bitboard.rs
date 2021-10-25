@@ -1,5 +1,7 @@
 //! Definition of the [BitBoard] structure and related methods implementation.
 
+use std::fmt;
+
 use crate::bbdefines::*;
 
 /// Structure used to represent an 8x8 square board in a piece centric manner.
@@ -310,6 +312,10 @@ impl BitBoard {
     }
 }
 
+
+// ----------------------------------------------------------------------------
+// Traits implementation for BitBoard structure
+
 /// From trait for the BitBoard struct starting from a slice of [Cell]s.
 ///
 /// Converts a slice of cells to a [BitBoard] with all the cells of the slice set to busy (1) status.
@@ -339,6 +345,28 @@ impl<'a, T: AsRef<[Cell]>> From<T> for BitBoard {
         bb
     }
 }
+
+/// Display trait for [BitBoard] structure.
+///
+/// Represent a bitboard in "ascii" form.
+///
+impl fmt::Display for BitBoard {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut bb_str: String = "\n  _ _ _ _ _ _ _ _".to_owned();
+        let _fillchar = ' ';
+        for r in (0..8).rev() {
+            bb_str.push_str(match r {
+                0 => "\n |_|_|_|_|_|_|_|_|",
+                _ => "\n | | | | | | | | |",
+            });
+        }
+        bb_str.push_str("\n  a b c d e f g h\n");
+        write!(f, "{}", bb_str)
+    }
+}
+// ----------------------------------------------------------------------------
+
+
 // ------------------------------------------------------------
 // FIXME --- Seems impossible to add the From trait for a single
 // Cell because conflicts with the From trait for Cell slices.
@@ -621,5 +649,4 @@ mod tests {
         assert!(!bb.cell_is_active(Cell::G2));
         assert!(!bb.cell_is_active(Cell::B6));
     }
-
 }
