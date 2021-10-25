@@ -161,6 +161,24 @@ impl BitBoard {
         }
     }
 
+    /// Returns true if the given [Cell] in the [BitBoard] is in active state
+    ///
+    /// # Example
+    /// ```
+    /// # use abbadingo::bitboard::*;
+    /// # use abbadingo::bbdefines::*;
+    ///
+    /// let mut bb = BitBoard::new();
+    /// bb.set_file(File::FileG);
+    /// bb.set_rank(Rank::Rank3);
+    /// assert!(bb.cell_is_active(Cell::G3));
+    /// assert!(!bb.cell_is_active(Cell::A1));
+    ///
+    /// ```
+    pub fn cell_is_active(&self, c: Cell) -> bool {
+        self.state & (1 << c as usize) != 0
+    }
+
     /// Set the Cell at the crossing of the given File and Cell to the active state
     ///
     /// # Example
@@ -529,5 +547,39 @@ mod tests {
         //     fa fb fc fd fe ff fg fh
         assert_eq!(bb.state, 0x08_80_41_22_14_89_14_2A);
         assert_eq!(bb.pop_count(), 16);
+    }
+
+    // Test on cell_is_active() function
+    #[test]
+    fn check_active_cells_when_the_whole_rank_2_is_active()
+    {
+        let mut bb = BitBoard::new();
+        bb.set_rank(Rank::Rank2);
+        assert!(bb.cell_is_active(Cell::A2));
+        assert!(bb.cell_is_active(Cell::B2));
+        assert!(bb.cell_is_active(Cell::C2));
+        assert!(bb.cell_is_active(Cell::D2));
+        assert!(bb.cell_is_active(Cell::E2));
+        assert!(bb.cell_is_active(Cell::F2));
+        assert!(bb.cell_is_active(Cell::G2));
+        assert!(bb.cell_is_active(Cell::H2));
+        assert!(!bb.cell_is_active(Cell::A1));
+        assert!(!bb.cell_is_active(Cell::G3));
+    }
+    #[test]
+    fn check_active_cells_when_the_whole_file_d_is_active()
+    {
+        let mut bb = BitBoard::new();
+        bb.set_file(File::FileC);
+        assert!(bb.cell_is_active(Cell::C1));
+        assert!(bb.cell_is_active(Cell::C2));
+        assert!(bb.cell_is_active(Cell::C3));
+        assert!(bb.cell_is_active(Cell::C4));
+        assert!(bb.cell_is_active(Cell::C5));
+        assert!(bb.cell_is_active(Cell::C6));
+        assert!(bb.cell_is_active(Cell::C7));
+        assert!(bb.cell_is_active(Cell::C8));
+        assert!(!bb.cell_is_active(Cell::B3));
+        assert!(!bb.cell_is_active(Cell::D5));
     }
 }
