@@ -153,6 +153,18 @@ impl BitBoard {
         self.state &= !(FILES_BBS[f as usize]);
     }
 
+    /// Sets all the cells of a [Diagonal] to busy state.
+    ///
+    pub fn set_diagonal(&mut self, d: Diagonal) {
+        self.state |= DIAGS_BBS[d as usize];
+    }
+
+    /// Sets all the cells of an [AntiDiagonal] to busy state.
+    ///
+    pub fn set_antidiagonal(&mut self, d: AntiDiagonal) {
+        self.state |= ANTIDIAGS_BBS[d as usize];
+    }
+
     /// Sets all the cells specified in a slice to busy state.
     ///
     pub fn set_cells(&mut self, cells: &[Cell]) {
@@ -582,4 +594,32 @@ mod tests {
         assert!(!bb.cell_is_active(Cell::B3));
         assert!(!bb.cell_is_active(Cell::D5));
     }
+    #[test]
+    fn check_active_cells_when_the_whole_diagonal_10_is_active()
+    {
+        let mut bb = BitBoard::new();
+        bb.set_diagonal(Diagonal::Diag10);
+        assert!(bb.cell_is_active(Cell::D1));
+        assert!(bb.cell_is_active(Cell::E2));
+        assert!(bb.cell_is_active(Cell::F3));
+        assert!(bb.cell_is_active(Cell::G4));
+        assert!(bb.cell_is_active(Cell::H5));
+        assert!(!bb.cell_is_active(Cell::E1));
+        assert!(!bb.cell_is_active(Cell::G6));
+    }
+    #[test]
+    fn check_active_cells_when_the_whole_antidiagonal_5_is_active()
+    {
+        let mut bb = BitBoard::new();
+        bb.set_antidiagonal(AntiDiagonal::AntiDiag5);
+        assert!(bb.cell_is_active(Cell::F1));
+        assert!(bb.cell_is_active(Cell::E2));
+        assert!(bb.cell_is_active(Cell::D3));
+        assert!(bb.cell_is_active(Cell::C4));
+        assert!(bb.cell_is_active(Cell::B5));
+        assert!(bb.cell_is_active(Cell::A6));
+        assert!(!bb.cell_is_active(Cell::G2));
+        assert!(!bb.cell_is_active(Cell::B6));
+    }
+
 }
