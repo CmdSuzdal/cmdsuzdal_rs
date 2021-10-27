@@ -9,5 +9,6 @@ extern crate num_derive;
 
 pub mod bbdefines;
 pub mod bitboard;
+pub mod chessdefines;
 pub mod error;
 pub mod hexboard;
