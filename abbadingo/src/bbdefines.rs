@@ -1040,11 +1040,26 @@ mod tests {
         assert_eq!(Cell::try_from("b4"), Ok(Cell::B4));
         assert_eq!(Cell::try_from("c3"), Ok(Cell::C3));
 
-        assert_eq!(Cell::try_from(""), Err(AbbaDingoError::IllegalConversionToCell));
-        assert_eq!(Cell::try_from("a"), Err(AbbaDingoError::IllegalConversionToCell));
-        assert_eq!(Cell::try_from("7"), Err(AbbaDingoError::IllegalConversionToCell));
-        assert_eq!(Cell::try_from("é"), Err(AbbaDingoError::IllegalConversionToCell));
-        assert_eq!(Cell::try_from("h22"), Err(AbbaDingoError::IllegalConversionToCell));
+        assert_eq!(
+            Cell::try_from(""),
+            Err(AbbaDingoError::IllegalConversionToCell)
+        );
+        assert_eq!(
+            Cell::try_from("a"),
+            Err(AbbaDingoError::IllegalConversionToCell)
+        );
+        assert_eq!(
+            Cell::try_from("7"),
+            Err(AbbaDingoError::IllegalConversionToCell)
+        );
+        assert_eq!(
+            Cell::try_from("é"),
+            Err(AbbaDingoError::IllegalConversionToCell)
+        );
+        assert_eq!(
+            Cell::try_from("h22"),
+            Err(AbbaDingoError::IllegalConversionToCell)
+        );
     }
     #[test]
     fn cell_into_string_tests() {
@@ -1057,7 +1072,6 @@ mod tests {
         assert_eq!(Into::<String>::into(Cell::G5), "g5");
         assert_eq!(Into::<String>::into(Cell::H6), "h6");
     }
-
 
     // Display trait tests for File, Rank and Cells
     #[test]

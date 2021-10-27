@@ -312,7 +312,6 @@ impl BitBoard {
     }
 }
 
-
 // ----------------------------------------------------------------------------
 // Traits implementation for BitBoard structure
 
@@ -355,17 +354,17 @@ impl fmt::Display for BitBoard {
         let mut bb_str: String = "\n  _ _ _ _ _ _ _ _".to_owned();
         let mut fillchar = ' ';
         for r in (0..8).rev() {
-            bb_str.push_str(&format!("\n{}|", r+1));
+            bb_str.push_str(&format!("\n{}|", r + 1));
             if r == 0 {
                 fillchar = '_';
             }
             for c in 0..8 {
                 if self.cell_is_active(to_cell(
                     num::FromPrimitive::from_i32(c).unwrap(),
-                    num::FromPrimitive::from_i32(r).unwrap())) {
+                    num::FromPrimitive::from_i32(r).unwrap(),
+                )) {
                     bb_str.push('x');
-                }
-                else {
+                } else {
                     bb_str.push(fillchar);
                 }
                 bb_str.push('|');
@@ -376,7 +375,6 @@ impl fmt::Display for BitBoard {
     }
 }
 // ----------------------------------------------------------------------------
-
 
 // ------------------------------------------------------------
 // FIXME --- Seems impossible to add the From trait for a single
@@ -602,8 +600,7 @@ mod tests {
 
     // Test on cell_is_active() function
     #[test]
-    fn check_active_cells_when_the_whole_rank_2_is_active()
-    {
+    fn check_active_cells_when_the_whole_rank_2_is_active() {
         let mut bb = BitBoard::new();
         bb.set_rank(Rank::Rank2);
         assert!(bb.cell_is_active(Cell::A2));
@@ -618,8 +615,7 @@ mod tests {
         assert!(!bb.cell_is_active(Cell::G3));
     }
     #[test]
-    fn check_active_cells_when_the_whole_file_d_is_active()
-    {
+    fn check_active_cells_when_the_whole_file_d_is_active() {
         let mut bb = BitBoard::new();
         bb.set_file(File::FileC);
         assert!(bb.cell_is_active(Cell::C1));
@@ -634,8 +630,7 @@ mod tests {
         assert!(!bb.cell_is_active(Cell::D5));
     }
     #[test]
-    fn check_active_cells_when_the_whole_diagonal_10_is_active()
-    {
+    fn check_active_cells_when_the_whole_diagonal_10_is_active() {
         let mut bb = BitBoard::new();
         bb.set_diagonal(Diagonal::Diag10);
         assert!(bb.cell_is_active(Cell::D1));
@@ -647,8 +642,7 @@ mod tests {
         assert!(!bb.cell_is_active(Cell::G6));
     }
     #[test]
-    fn check_active_cells_when_the_whole_antidiagonal_5_is_active()
-    {
+    fn check_active_cells_when_the_whole_antidiagonal_5_is_active() {
         let mut bb = BitBoard::new();
         bb.set_antidiagonal(AntiDiagonal::AntiDiag5);
         assert!(bb.cell_is_active(Cell::F1));
