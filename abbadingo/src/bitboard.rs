@@ -353,12 +353,23 @@ impl<'a, T: AsRef<[Cell]>> From<T> for BitBoard {
 impl fmt::Display for BitBoard {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut bb_str: String = "\n  _ _ _ _ _ _ _ _".to_owned();
-        let _fillchar = ' ';
+        let mut fillchar = ' ';
         for r in (0..8).rev() {
-            bb_str.push_str(match r {
-                0 => "\n |_|_|_|_|_|_|_|_|",
-                _ => "\n | | | | | | | | |",
-            });
+            bb_str.push_str(&format!("\n{}|", r+1));
+            if r == 0 {
+                fillchar = '_';
+            }
+            for c in 0..8 {
+                if self.cell_is_active(to_cell(
+                    num::FromPrimitive::from_i32(c).unwrap(),
+                    num::FromPrimitive::from_i32(r).unwrap())) {
+                    bb_str.push('x');
+                }
+                else {
+                    bb_str.push(fillchar);
+                }
+                bb_str.push('|');
+            }
         }
         bb_str.push_str("\n  a b c d e f g h\n");
         write!(f, "{}", bb_str)
