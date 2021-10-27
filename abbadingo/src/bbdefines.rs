@@ -705,11 +705,35 @@ pub fn queen_mask(c: Cell) -> BitBoardState {
 
 // ----------------------------------------------------------------------------
 // Functions and Traits implementation for File enum
+
+/// Converts a File into its String representation ("a", ..., "h").
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(Into::<String>::into(File::FileA), "a");
+/// ```
 impl Into<String> for File {
     fn into(self) -> String {
         format!("{}", (self as u8 + 97) as char)
     }
 }
+
+/// Tentatively convert a &str to a File.
+///
+/// For valid values ("a", "b", ..., "h") this function returns the
+/// corresponding Ok(File), otherwise Err(AbbaDingoError::IllegalConversionToFile)
+/// is returned.
+///
+/// # Example
+/// ```
+/// # use std::convert::TryFrom;
+/// # use abbadingo::bbdefines::*;
+/// # use abbadingo::error::AbbaDingoError;
+/// assert_eq!(File::try_from("a"), Ok(File::FileA));
+/// assert_eq!(File::try_from("x!"), Err(AbbaDingoError::IllegalConversionToFile));
+/// ```
+///
 impl TryFrom<&str> for File {
     type Error = AbbaDingoError;
     fn try_from(value: &str) -> Result<Self, Self::Error> {
@@ -726,6 +750,9 @@ impl TryFrom<&str> for File {
         }
     }
 }
+
+/// Display trait for the File enum.
+///
 impl fmt::Display for File {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", Into::<String>::into(*self))
@@ -734,11 +761,35 @@ impl fmt::Display for File {
 
 // ----------------------------------------------------------------------------
 // Functions and Traits implementation for Rank enum
+
+/// Converts a Rank into its String representation ("1", ..., "8").
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(Into::<String>::into(Rank::Rank2), "2");
+/// ```
 impl Into<String> for Rank {
     fn into(self) -> String {
         format!("{}", (self as u8 + 49) as char)
     }
 }
+
+/// Tentatively convert a &str to a Rank.
+///
+/// For valid values ("1", "2", ..., "8") this function returns the
+/// corresponding Ok(Rank), otherwise Err(AbbaDingoError::IllegalConversionToRank)
+/// is returned.
+///
+/// # Example
+/// ```
+/// # use std::convert::TryFrom;
+/// # use abbadingo::bbdefines::*;
+/// # use abbadingo::error::AbbaDingoError;
+/// assert_eq!(Rank::try_from("3"), Ok(Rank::Rank3));
+/// assert_eq!(Rank::try_from("0"), Err(AbbaDingoError::IllegalConversionToRank));
+/// ```
+///
 impl TryFrom<&str> for Rank {
     type Error = AbbaDingoError;
     fn try_from(value: &str) -> Result<Self, Self::Error> {
@@ -755,6 +806,9 @@ impl TryFrom<&str> for Rank {
         }
     }
 }
+
+/// Display trait for the Rank enum.
+///
 impl fmt::Display for Rank {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", Into::<String>::into(*self))
@@ -763,11 +817,35 @@ impl fmt::Display for Rank {
 
 // ----------------------------------------------------------------------------
 // Functions and Traits implementation for Cell enum
+
+/// Converts a Cell into its String representation ("a1", ..., "h8").
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::*;
+/// assert_eq!(Into::<String>::into(Cell::E4), "e4");
+/// ```
 impl Into<String> for Cell {
     fn into(self) -> String {
         format!("{}{}", file(self), rank(self))
     }
 }
+
+/// Tentatively convert a &str to a Cell.
+///
+/// For valid values ("a1", "a2", ..., "h8") this function returns the
+/// corresponding Ok(Cell), otherwise Err(AbbaDingoError::IllegalConversionToCell)
+/// is returned.
+///
+/// # Example
+/// ```
+/// # use std::convert::TryFrom;
+/// # use abbadingo::bbdefines::*;
+/// # use abbadingo::error::AbbaDingoError;
+/// assert_eq!(Cell::try_from("g3"), Ok(Cell::G3));
+/// assert_eq!(Cell::try_from("x0"), Err(AbbaDingoError::IllegalConversionToCell));
+/// ```
+///
 impl TryFrom<&str> for Cell {
     type Error = AbbaDingoError;
     fn try_from(value: &str) -> Result<Self, Self::Error> {
@@ -786,6 +864,8 @@ impl TryFrom<&str> for Cell {
     }
 }
 
+/// Display trait for the Cell enum.
+///
 impl fmt::Display for Cell {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", Into::<String>::into(*self))
