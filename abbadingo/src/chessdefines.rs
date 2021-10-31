@@ -50,20 +50,18 @@ pub const NUM_PIECES_TYPES: usize = 6;
 /// assert_eq!(Into::<String>::into(ChessPiece::Queen), "Queen");
 /// assert_eq!(Into::<String>::into(ChessPiece::Pawn), "pawn");
 /// ```
+#[allow(clippy::from_over_into)]
 impl Into<String> for ChessPiece {
     fn into(self) -> String {
-        format!(
-            "{}",
-            match self {
-                ChessPiece::King => "King",
-                ChessPiece::Queen => "Queen",
-                ChessPiece::Bishop => "Bishop",
-                ChessPiece::Knight => "Knight",
-                ChessPiece::Rook => "Rook",
-                ChessPiece::Pawn => "pawn",
-            }
-        )
-        //format!("{}", (self as u8 + 97) as char)
+        (match self {
+            ChessPiece::King => "King",
+            ChessPiece::Queen => "Queen",
+            ChessPiece::Bishop => "Bishop",
+            ChessPiece::Knight => "Knight",
+            ChessPiece::Rook => "Rook",
+            ChessPiece::Pawn => "pawn",
+        })
+        .to_string()
     }
 }
 

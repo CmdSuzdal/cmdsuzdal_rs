@@ -713,6 +713,7 @@ pub fn queen_mask(c: Cell) -> BitBoardState {
 /// # use abbadingo::bbdefines::*;
 /// assert_eq!(Into::<String>::into(File::FileA), "a");
 /// ```
+#[allow(clippy::from_over_into)]
 impl Into<String> for File {
     fn into(self) -> String {
         format!("{}", (self as u8 + 97) as char)
@@ -769,6 +770,7 @@ impl fmt::Display for File {
 /// # use abbadingo::bbdefines::*;
 /// assert_eq!(Into::<String>::into(Rank::Rank2), "2");
 /// ```
+#[allow(clippy::from_over_into)]
 impl Into<String> for Rank {
     fn into(self) -> String {
         format!("{}", (self as u8 + 49) as char)
@@ -825,6 +827,7 @@ impl fmt::Display for Rank {
 /// # use abbadingo::bbdefines::*;
 /// assert_eq!(Into::<String>::into(Cell::E4), "e4");
 /// ```
+#[allow(clippy::from_over_into)]
 impl Into<String> for Cell {
     fn into(self) -> String {
         format!("{}{}", file(self), rank(self))
