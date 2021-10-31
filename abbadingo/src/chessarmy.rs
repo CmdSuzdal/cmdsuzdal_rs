@@ -128,6 +128,42 @@ impl ChessArmy {
             }
         }
     }
+
+    /// Returns the number of Pieces (including pawn) of an [Army].
+    ///
+    /// # Example
+    /// ```
+    /// # use abbadingo::chessdefines::ArmyColour;
+    /// # use abbadingo::chessarmy::ChessArmy;
+    /// let mut army = ChessArmy::new(ArmyColour::White);
+    /// assert_eq!(army.num_pieces(), 16);
+    /// ```
+    pub fn num_pieces(&self) -> usize {
+        self.pieces[ChessPiece::King as usize].pop_count()
+            + self.pieces[ChessPiece::Queen as usize].pop_count()
+            + self.pieces[ChessPiece::Bishop as usize].pop_count()
+            + self.pieces[ChessPiece::Knight as usize].pop_count()
+            + self.pieces[ChessPiece::Rook as usize].pop_count()
+            + self.pieces[ChessPiece::Pawn as usize].pop_count()
+    }
+
+    /// Returns the [BitBoardState] mask of the cell occupied by army pieces (including pawn).
+    ///
+    /// # Example
+    /// ```
+    /// # use abbadingo::chessdefines::ArmyColour;
+    /// # use abbadingo::chessarmy::ChessArmy;
+    /// let mut army = ChessArmy::new(ArmyColour::Black);
+    /// assert_eq!(army.occupied_cells(), 0xFF_FF_00_00_00_00_00_00);
+    /// ```
+    pub fn occupied_cells(&self) -> BitBoardState {
+        self.pieces[ChessPiece::King as usize].state
+            | self.pieces[ChessPiece::Queen as usize].state
+            | self.pieces[ChessPiece::Pawn as usize].state
+            | self.pieces[ChessPiece::Bishop as usize].state
+            | self.pieces[ChessPiece::Knight as usize].state
+            | self.pieces[ChessPiece::Rook as usize].state
+    }
 }
 // ****************************************************************************
 // TESTS

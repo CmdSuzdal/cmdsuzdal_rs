@@ -33,7 +33,7 @@ use crate::bbdefines::*;
 ///
 #[derive(Default, Debug, Copy, Clone, PartialEq, Eq)]
 pub struct BitBoard {
-    state: BitBoardState,
+    pub state: BitBoardState,
 }
 impl BitBoard {
     /// Default constructor for the [BitBoard] struct: instantiate an empty [BitBoard]
