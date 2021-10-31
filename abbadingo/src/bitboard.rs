@@ -31,7 +31,7 @@ use crate::bbdefines::*;
 /// | **Rank 2** | A2 = 8 | B2     | C2     | D2     | E2     | F2     | G2     | H2 = 15|
 /// | **Rank 1** | A1 = 0 | B1 = 1 | C1 = 2 | D1 = ..| E1     | F1     | G1     | H1 = 7 |
 ///
-#[derive(Default, Debug, PartialEq, Eq)]
+#[derive(Default, Debug, Copy, Clone, PartialEq, Eq)]
 pub struct BitBoard {
     state: BitBoardState,
 }
@@ -39,6 +39,32 @@ impl BitBoard {
     /// Default constructor for the [BitBoard] struct: instantiate an empty [BitBoard]
     pub fn new() -> BitBoard {
         BitBoard { state: EMPTY_STATE }
+    }
+
+    /// [BitBoard] constructor starting from an array of cells.
+    ///
+    /// The cells in the slice, will be set to active state.
+    ///
+    /// # Arguments
+    ///
+    /// * `cells` - A [Cell] slice with the cells to be set on the [BitBoard]
+    ///
+    /// # Example
+    /// ```
+    /// # use abbadingo::bitboard::*;
+    /// # use abbadingo::bbdefines::*;
+    /// let mut bb = BitBoard::new();
+    /// bb.set_cell(Cell::A1);
+    /// bb.set_cell(Cell::A2);
+    /// bb.set_cell(Cell::H8);
+    /// assert_eq!(bb, BitBoard::from_cells(&[Cell::A1, Cell::A2, Cell::H8]));
+    /// ```
+    pub fn from_cells(cells: &[Cell]) -> BitBoard {
+        let mut bb = BitBoard::new();
+        for c in cells {
+            bb.set_cell(*c);
+        }
+        bb
     }
 
     /// Returns `true` if the [BitBoard] is empty.
@@ -66,7 +92,7 @@ impl BitBoard {
     /// assert_eq!(BitBoard::new().is_empty(), true);
     ///
     /// // Builds a BitBoard with the E1 cell busy
-    /// let bb = BitBoard::from([Cell::E1]);
+    /// let bb = BitBoard::from_cells(&[Cell::E1]);
     /// //    _________________________
     /// // r8|  .  .  .  .  .  .  .  . |
     /// // r7|  .  .  .  .  .  .  .  . |
@@ -107,7 +133,7 @@ impl BitBoard {
     /// # use abbadingo::bitboard::*;
     /// # use abbadingo::bbdefines::*;
     ///
-    /// let mut bb = BitBoard::from([Cell::A1, Cell::H8]);
+    /// let mut bb = BitBoard::from_cells(&[Cell::A1, Cell::H8]);
     /// //    _________________________
     /// // r8|  .  .  .  .  .  .  .  o |
     /// // r7|  .  .  .  .  .  .  .  . |
@@ -263,7 +289,7 @@ impl BitBoard {
     /// # use abbadingo::bitboard::*;
     /// # use abbadingo::bbdefines::*;
     ///
-    /// let mut bb = BitBoard::from([Cell::B2, Cell::G7]);
+    /// let mut bb = BitBoard::from_cells(&[Cell::B2, Cell::G7]);
     /// bb.set_file(File::FileD);
     /// //    _________________________
     /// // r8|  .  .  .  o  .  .  .  . |
@@ -299,7 +325,7 @@ impl BitBoard {
     /// # use abbadingo::bitboard::*;
     /// # use abbadingo::bbdefines::*;
     ///
-    /// let mut bb = BitBoard::from([Cell::B2, Cell::G7]);
+    /// let mut bb = BitBoard::from_cells(&[Cell::B2, Cell::G7]);
     /// // BitBoard is not empty:
     /// assert!(!bb.is_empty());
     /// // Clears the BitBoard:
@@ -315,32 +341,29 @@ impl BitBoard {
 // ----------------------------------------------------------------------------
 // Traits implementation for BitBoard structure
 
-/// From trait for the BitBoard struct starting from a slice of [Cell]s.
+/// From trait for the BitBoard struct starting from a BitBoardState.
 ///
-/// Converts a slice of cells to a [BitBoard] with all the cells of the slice set to busy (1) status.
+/// Set the internal state of the BitBoard to the specified u64 value interpretated as a bitmask.
+/// Each bit set to 1 in the u64 value is set to active in the bitboard
 ///
 /// # Arguments
 ///
-/// * `cells` - A [Cell] slice with the cells to be set on the [BitBoard]
+/// * `mask` - The bitmask to use to set the cells in the [BitBoard].
+///
 /// # Example
-///```
+/// ```
 /// # use abbadingo::bitboard::*;
 /// # use abbadingo::bbdefines::*;
-/// let mut bb = BitBoard::new();
-/// bb.set_file(File::FileD);
-/// assert_eq!(bb, BitBoard::from([Cell::D1, Cell::D2, Cell::D3, Cell::D4,
-///                                Cell::D5, Cell::D6, Cell::D7, Cell::D8]));
-///```
-// The following implementation is the only way I found to work with
-// arrays, vectors and slices, but onestly I still do not understand
-// it. See:
-// https://www.reddit.com/r/rust/comments/70xqpw/using_the_from_trait_not_as_easy_as_i_thought/
-impl<'a, T: AsRef<[Cell]>> From<T> for BitBoard {
-    fn from(cells: T) -> Self {
+/// let mut bb = BitBoard::from(0xFF_00_00_00_00_00_00_FF);
+/// assert_eq!(bb, BitBoard::from_cells(&[Cell::A8, Cell::B8, Cell::C8, Cell::D8,
+///                                       Cell::E8, Cell::F8, Cell::G8, Cell::H8,
+///                                       Cell::A1, Cell::B1, Cell::C1, Cell::D1,
+///                                       Cell::E1, Cell::F1, Cell::G1, Cell::H1]));
+/// ```
+impl From<BitBoardState> for BitBoard {
+    fn from(mask: BitBoardState) -> Self {
         let mut bb = BitBoard::new();
-        for c in cells.as_ref().to_vec() {
-            bb.set_cell(c);
-        }
+        bb.state = mask;
         bb
     }
 }
@@ -374,28 +397,6 @@ impl fmt::Display for BitBoard {
         write!(f, "{}", bb_str)
     }
 }
-// ----------------------------------------------------------------------------
-
-// ------------------------------------------------------------
-// FIXME --- Seems impossible to add the From trait for a single
-// Cell because conflicts with the From trait for Cell slices.
-// i.e. adding the following code cause compilation failure:
-//
-// impl From<Cell> for BitBoard {
-//     fn from(c: Cell) -> Self {
-//         let mut bb = BitBoard::new();
-//         bb.set_cell(c);
-//         bb
-//     }
-// }
-// Because of this, I was not able to add a method to create a
-// BitBoard using a single cell. To do this using the From slice
-// trait we have to do this (see tests):
-//    let bb = BitBoard::from([Cell::H8]);
-//
-// but these does not work:
-//    let bb = BitBoard::from(Cell::H8);
-//    let bb = BitBoard::from(&Cell::H8);
 
 // ****************************************************************************
 // TESTS
@@ -413,16 +414,16 @@ mod tests {
         assert_eq!(bb.pop_count(), 0);
     }
     #[test]
-    fn init_bitboard_using_a_vector_with_a_cell_in_h8() {
-        let bb = BitBoard::from([Cell::H8]);
+    fn create_bitboard_using_a_vector_with_a_cell_in_h8() {
+        let bb = BitBoard::from_cells(&[Cell::H8]);
         assert_eq!(bb.is_empty(), false);
         assert_eq!(bb.state, 0x80_00_00_00_00_00_00_00);
         assert_eq!(bb.pop_count(), 1);
     }
     #[test]
-    fn init_bitboard_using_a_cells_vector_with_active_cell_in_diagonal() {
+    fn create_bitboard_using_a_cells_vector_with_active_cell_in_diagonal() {
         const BBS_DIAGONAL: BitBoardState = 0x80_40_20_10_08_04_02_01;
-        let bb = BitBoard::from([
+        let bb = BitBoard::from_cells(&[
             Cell::A1,
             Cell::B2,
             Cell::C3,
@@ -438,9 +439,9 @@ mod tests {
     }
 
     #[test]
-    fn init_bitboard_using_a_cells_vector_with_active_cell_in_antidiagonal() {
+    fn create_bitboard_using_a_cells_vector_with_active_cell_in_antidiagonal() {
         const BBS_ANTIDIAGONAL: BitBoardState = 0x01_02_04_08_10_20_40_80;
-        let bb = BitBoard::from([
+        let bb = BitBoard::from_cells(&[
             Cell::A8,
             Cell::B7,
             Cell::C6,
@@ -456,8 +457,8 @@ mod tests {
     }
 
     #[test]
-    fn init_bitboard_using_a_cells_vector_with_active_cell_in_diagonal_and_reset_e5() {
-        let mut bb = BitBoard::from([
+    fn create_bitboard_using_a_cells_vector_with_active_cell_in_diagonal_and_reset_e5() {
+        let mut bb = BitBoard::from_cells(&[
             Cell::A1,
             Cell::B2,
             Cell::C3,
