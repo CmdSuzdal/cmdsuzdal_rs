@@ -2,8 +2,8 @@
 //!
 
 use crate::bbdefines::*;
+use crate::bitboard::BitBoard;
 use crate::chessdefines::*;
-use crate::bitboard::{BitBoard};
 
 /// Structure used to represent a Chess Army.
 ///
@@ -53,7 +53,10 @@ impl ChessArmy {
     /// //     -------------------------
     /// //     fa fb fc fd fe ff fg fh
     pub fn new(c: ArmyColour) -> ChessArmy {
-        let mut a = ChessArmy { pieces: [BitBoard::new(); NUM_PIECES_TYPES], colour: c };
+        let mut a = ChessArmy {
+            pieces: [BitBoard::new(); NUM_PIECES_TYPES],
+            colour: c,
+        };
         a.reset(c);
         a
     }
@@ -102,21 +105,27 @@ impl ChessArmy {
             ArmyColour::White => {
                 self.pieces[ChessPiece::King as usize] = BitBoard::from_cells(&[Cell::E1]);
                 self.pieces[ChessPiece::Queen as usize] = BitBoard::from_cells(&[Cell::D1]);
-                self.pieces[ChessPiece::Bishop as usize] = BitBoard::from_cells(&[Cell::C1, Cell::F1]);
-                self.pieces[ChessPiece::Knight as usize] = BitBoard::from_cells(&[Cell::B1, Cell::G1]);
-                self.pieces[ChessPiece::Rook as usize] = BitBoard::from_cells(&[Cell::A1, Cell::H1]);
+                self.pieces[ChessPiece::Bishop as usize] =
+                    BitBoard::from_cells(&[Cell::C1, Cell::F1]);
+                self.pieces[ChessPiece::Knight as usize] =
+                    BitBoard::from_cells(&[Cell::B1, Cell::G1]);
+                self.pieces[ChessPiece::Rook as usize] =
+                    BitBoard::from_cells(&[Cell::A1, Cell::H1]);
                 self.pieces[ChessPiece::Pawn as usize] = BitBoard::new();
                 self.pieces[ChessPiece::Pawn as usize].set_rank(Rank::Rank2);
-            },
+            }
             ArmyColour::Black => {
                 self.pieces[ChessPiece::King as usize] = BitBoard::from_cells(&[Cell::E8]);
                 self.pieces[ChessPiece::Queen as usize] = BitBoard::from_cells(&[Cell::D8]);
-                self.pieces[ChessPiece::Bishop as usize] = BitBoard::from_cells(&[Cell::C8, Cell::F8]);
-                self.pieces[ChessPiece::Knight as usize] = BitBoard::from_cells(&[Cell::B8, Cell::G8]);
-                self.pieces[ChessPiece::Rook as usize] = BitBoard::from_cells(&[Cell::A8, Cell::H8]);
+                self.pieces[ChessPiece::Bishop as usize] =
+                    BitBoard::from_cells(&[Cell::C8, Cell::F8]);
+                self.pieces[ChessPiece::Knight as usize] =
+                    BitBoard::from_cells(&[Cell::B8, Cell::G8]);
+                self.pieces[ChessPiece::Rook as usize] =
+                    BitBoard::from_cells(&[Cell::A8, Cell::H8]);
                 self.pieces[ChessPiece::Pawn as usize] = BitBoard::new();
                 self.pieces[ChessPiece::Pawn as usize].set_rank(Rank::Rank7);
-            },
+            }
         }
     }
 }
@@ -152,25 +161,75 @@ mod tests {
 
     fn check_white_initial_placement(a: &ChessArmy) {
         assert_eq!(a.colour, ArmyColour::White);
-        assert_eq!(a.pieces[ChessPiece::King as usize], BitBoard::from_cells(&[Cell::E1]));
-        assert_eq!(a.pieces[ChessPiece::Queen as usize], BitBoard::from_cells(&[Cell::D1]));
-        assert_eq!(a.pieces[ChessPiece::Bishop as usize], BitBoard::from_cells(&[Cell::C1, Cell::F1]));
-        assert_eq!(a.pieces[ChessPiece::Knight as usize], BitBoard::from_cells(&[Cell::B1, Cell::G1]));
-        assert_eq!(a.pieces[ChessPiece::Rook as usize], BitBoard::from_cells(&[Cell::A1, Cell::H1]));
-        assert_eq!(a.pieces[ChessPiece::Pawn as usize], BitBoard::from_cells(&[Cell::A2, Cell::B2, Cell::C2, Cell::D2,
-            Cell::E2, Cell::F2, Cell::G2, Cell::H2]));
+        assert_eq!(
+            a.pieces[ChessPiece::King as usize],
+            BitBoard::from_cells(&[Cell::E1])
+        );
+        assert_eq!(
+            a.pieces[ChessPiece::Queen as usize],
+            BitBoard::from_cells(&[Cell::D1])
+        );
+        assert_eq!(
+            a.pieces[ChessPiece::Bishop as usize],
+            BitBoard::from_cells(&[Cell::C1, Cell::F1])
+        );
+        assert_eq!(
+            a.pieces[ChessPiece::Knight as usize],
+            BitBoard::from_cells(&[Cell::B1, Cell::G1])
+        );
+        assert_eq!(
+            a.pieces[ChessPiece::Rook as usize],
+            BitBoard::from_cells(&[Cell::A1, Cell::H1])
+        );
+        assert_eq!(
+            a.pieces[ChessPiece::Pawn as usize],
+            BitBoard::from_cells(&[
+                Cell::A2,
+                Cell::B2,
+                Cell::C2,
+                Cell::D2,
+                Cell::E2,
+                Cell::F2,
+                Cell::G2,
+                Cell::H2
+            ])
+        );
     }
 
     fn check_black_initial_placement(a: &ChessArmy) {
         assert_eq!(a.colour, ArmyColour::Black);
-        assert_eq!(a.pieces[ChessPiece::King as usize], BitBoard::from_cells(&[Cell::E8]));
-        assert_eq!(a.pieces[ChessPiece::Queen as usize], BitBoard::from_cells(&[Cell::D8]));
-        assert_eq!(a.pieces[ChessPiece::Bishop as usize], BitBoard::from_cells(&[Cell::C8, Cell::F8]));
-        assert_eq!(a.pieces[ChessPiece::Knight as usize], BitBoard::from_cells(&[Cell::B8, Cell::G8]));
-        assert_eq!(a.pieces[ChessPiece::Rook as usize], BitBoard::from_cells(&[Cell::A8, Cell::H8]));
-        assert_eq!(a.pieces[ChessPiece::Pawn as usize], BitBoard::from_cells(&[Cell::A7, Cell::B7, Cell::C7, Cell::D7,
-            Cell::E7, Cell::F7, Cell::G7, Cell::H7]));
+        assert_eq!(
+            a.pieces[ChessPiece::King as usize],
+            BitBoard::from_cells(&[Cell::E8])
+        );
+        assert_eq!(
+            a.pieces[ChessPiece::Queen as usize],
+            BitBoard::from_cells(&[Cell::D8])
+        );
+        assert_eq!(
+            a.pieces[ChessPiece::Bishop as usize],
+            BitBoard::from_cells(&[Cell::C8, Cell::F8])
+        );
+        assert_eq!(
+            a.pieces[ChessPiece::Knight as usize],
+            BitBoard::from_cells(&[Cell::B8, Cell::G8])
+        );
+        assert_eq!(
+            a.pieces[ChessPiece::Rook as usize],
+            BitBoard::from_cells(&[Cell::A8, Cell::H8])
+        );
+        assert_eq!(
+            a.pieces[ChessPiece::Pawn as usize],
+            BitBoard::from_cells(&[
+                Cell::A7,
+                Cell::B7,
+                Cell::C7,
+                Cell::D7,
+                Cell::E7,
+                Cell::F7,
+                Cell::G7,
+                Cell::H7
+            ])
+        );
     }
-
 }
-
