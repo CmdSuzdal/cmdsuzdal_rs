@@ -129,7 +129,7 @@ impl ChessArmy {
         }
     }
 
-    /// Returns the number of Pieces (including pawn) of an [Army].
+    /// Returns the number of Pieces (including pawn) of a [ChessArmy].
     ///
     /// # Example
     /// ```
@@ -222,7 +222,6 @@ impl ChessArmy {
     fn king_controlled_cells(&self) -> BitBoard {
         BitBoard::from(crate::bbdefines::neighbour(self.get_king_position()))
     }
-
 
 }
 // ****************************************************************************

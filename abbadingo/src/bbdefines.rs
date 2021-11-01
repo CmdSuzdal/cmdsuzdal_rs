@@ -104,7 +104,7 @@ pub enum Cell {
     A8, B8, C8, D8, E8, F8, G8, H8,
 }
 
-/// The number of [Cell]s in a 8x8 [BitBoard]
+/// The number of [Cell]s in a 8x8 board
 pub const NUM_CELLS: usize = 64;
 
 /// A Diagonal inside an 8x8 board.
