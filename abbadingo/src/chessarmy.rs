@@ -416,6 +416,89 @@ impl ChessArmy {
         bb
     }
 
+    /// Returns the [BitBoard] with the [Cell]s controlled by the [ChessArmy] rooks.
+    ///
+    /// The "interference board" is provided to add a set of cell occupied by some
+    /// other pieces. This, together with the cell occupied by the [ChessArmy] itself,
+    /// can limit the view of the current army pieces.
+    ///
+    /// The normal use of the interference board is to pass the position of the
+    /// pieces of the enemy army (see the ChessBoard class)
+    ///
+    /// # Arguments
+    ///
+    /// `intf_board`: A [BitBoard] with pieces limiting the "view" of the [ChessArmy]
+    ///
+    fn rooks_controlled_cells(&self, intf_board: BitBoard) -> BitBoard {
+        let mut bb = BitBoard::new();
+        let mut remaining = self.pieces[ChessPiece::Rook as usize].pop_count();
+        let busy_cells_bitboard = self.occupied_cells() | intf_board;
+        let mut cell_ndx = Cell::A1 as usize;
+
+        while cell_ndx <= Cell::H8 as usize && remaining > 0 {
+            // We can unwrap safely here... cell_ndx is always valid
+            if let Some(ChessPiece::Rook) =
+                self.get_piece_in_cell(num::FromPrimitive::from_usize(cell_ndx).unwrap())
+            {
+                let f = file(num::FromPrimitive::from_usize(cell_ndx).unwrap());
+                let r = rank(num::FromPrimitive::from_usize(cell_ndx).unwrap());
+
+                // Rook found in position cell_ndx, (file f, rank r)
+                // Eplore rank and file for controlled cells.
+                // The cells are controlled until a busy cell
+                // is found: the busy cell is the last controlled one.
+
+                // Explore the left side of the rank
+                let mut file_ndx = f as i32 - 1;
+                while file_ndx >= 0 {
+                    bb.set_cell_from_file_and_rank(
+                        num::FromPrimitive::from_i32(file_ndx).unwrap(), r);
+                    if busy_cells_bitboard.cell_is_active(to_cell(
+                        num::FromPrimitive::from_i32(file_ndx).unwrap(), r)) {
+                        break;
+                    }
+                    file_ndx -= 1;
+                }
+                // Explore the right side of the rank
+                let mut file_ndx = f as usize + 1;
+                while file_ndx < NUM_FILES {
+                    bb.set_cell_from_file_and_rank(
+                        num::FromPrimitive::from_usize(file_ndx).unwrap(), r);
+                    if busy_cells_bitboard.cell_is_active(to_cell(
+                        num::FromPrimitive::from_usize(file_ndx).unwrap(), r)) {
+                        break;
+                    }
+                    file_ndx += 1;
+                }
+                // Explore the lower side of the file
+                let mut rank_ndx = r as i32 - 1;
+                while rank_ndx >= 0 {
+                    bb.set_cell_from_file_and_rank(
+                        f, num::FromPrimitive::from_i32(rank_ndx).unwrap());
+                    if busy_cells_bitboard.cell_is_active(to_cell(
+                        f, num::FromPrimitive::from_i32(rank_ndx).unwrap())) {
+                        break;
+                    }
+                    rank_ndx -= 1;
+                }
+                // Explore the upper side of the file
+                let mut rank_ndx = r as usize + 1;
+                while rank_ndx < NUM_RANKS {
+                    bb.set_cell_from_file_and_rank(
+                        f, num::FromPrimitive::from_usize(rank_ndx).unwrap());
+                    if busy_cells_bitboard.cell_is_active(to_cell(
+                        f, num::FromPrimitive::from_usize(rank_ndx).unwrap())) {
+                        break;
+                    }
+                    rank_ndx += 1;
+                }
+                remaining -= 1;
+            }
+            cell_ndx += 1;
+        }
+        bb
+    }
+
     /// Returns the [BitBoard] with the [Cell]s controlled by a pawn
     /// in the given position.
     ///
@@ -616,6 +699,19 @@ mod tests {
         assert_eq!(
             a_black.bishops_controlled_cells(a_white.occupied_cells()),
             BitBoard::from_cells(&[Cell::B7, Cell::D7, Cell::E7, Cell::G7])
+        );
+    }
+    #[test]
+    fn test_cell_controlled_by_all_rooks_of_initial_white_and_black_army() {
+        let a_white = ChessArmy::new(ArmyColour::White);
+        let a_black = ChessArmy::new(ArmyColour::Black);
+        assert_eq!(
+            a_white.rooks_controlled_cells(a_black.occupied_cells()),
+            BitBoard::from_cells(&[Cell::A2, Cell::B1, Cell::G1, Cell::H2])
+        );
+        assert_eq!(
+            a_black.rooks_controlled_cells(a_white.occupied_cells()),
+            BitBoard::from_cells(&[Cell::A7, Cell::B8, Cell::G8, Cell::H7])
         );
     }
 
