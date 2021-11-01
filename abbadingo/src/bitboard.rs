@@ -1,5 +1,7 @@
 //! Definition of the [BitBoard] structure and related methods implementation.
 
+use std::ops::{BitOr, BitOrAssign, BitAnd, BitAndAssign};
+
 use std::fmt;
 use crate::num::FromPrimitive;
 
@@ -153,45 +155,45 @@ impl BitBoard {
     ///```
     ///
     pub fn reset_cell(&mut self, c: Cell) {
-        self.state &= !(1 << c as usize);
+        *self &= BitBoard::from(!(1 << c as usize));
     }
 
     /// Sets all the cells of a [Rank] to busy state, i.e. set all the bits
     /// for the cells of the [Rank] to the value 1.
     ///
     pub fn set_rank(&mut self, r: Rank) {
-        self.state |= RANKS_BBS[r as usize];
+        *self |= BitBoard::from(RANKS_BBS[r as usize]);
     }
 
     /// Resets all the cells of a [Rank] to free state, i.e. reset all the bits
     /// for the cells of the [Rank] to the value 0.
     ///
     pub fn reset_rank(&mut self, r: Rank) {
-        self.state &= !(RANKS_BBS[r as usize]);
+        *self &= BitBoard::from(!(RANKS_BBS[r as usize]));
     }
 
     /// Sets all the cells of a [File] to busy state.
     ///
     pub fn set_file(&mut self, f: File) {
-        self.state |= FILES_BBS[f as usize];
+        *self |= BitBoard::from(FILES_BBS[f as usize]);
     }
 
     /// Resets all the cells of a [File] to free state.
     ///
     pub fn reset_file(&mut self, f: File) {
-        self.state &= !(FILES_BBS[f as usize]);
+        *self &= BitBoard::from(!(FILES_BBS[f as usize]));
     }
 
     /// Sets all the cells of a [Diagonal] to busy state.
     ///
     pub fn set_diagonal(&mut self, d: Diagonal) {
-        self.state |= DIAGS_BBS[d as usize];
+        *self |= BitBoard::from(DIAGS_BBS[d as usize]);
     }
 
     /// Sets all the cells of an [AntiDiagonal] to busy state.
     ///
     pub fn set_antidiagonal(&mut self, d: AntiDiagonal) {
-        self.state |= ANTIDIAGS_BBS[d as usize];
+        *self |= BitBoard::from(ANTIDIAGS_BBS[d as usize]);
     }
 
     /// Sets all the cells specified in a slice to busy state.
@@ -244,7 +246,7 @@ impl BitBoard {
     /// assert_eq!(bb.pop_count(), 2);
     /// ```
     pub fn set_cell_from_file_and_rank(&mut self, f: File, r: Rank) {
-        self.state |= single_cell(to_cell(f, r));
+        *self |= BitBoard::from(single_cell(to_cell(f, r)));
     }
 
     /// Reset the Cell at the crossing of the given File and Cell to the inactive state
@@ -272,7 +274,7 @@ impl BitBoard {
     /// assert_eq!(bb.pop_count(), 14);
     /// ```
     pub fn reset_cell_from_file_and_rank(&mut self, f: File, r: Rank) {
-        self.state &= !single_cell(to_cell(f, r));
+        *self &= BitBoard::from(!single_cell(to_cell(f, r)));
     }
 
     /// Resets all the cells specified in a slice to free state.
@@ -433,6 +435,31 @@ impl fmt::Display for BitBoard {
         }
         bb_str.push_str("\n  a b c d e f g h\n");
         write!(f, "{}", bb_str)
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Operators overloading
+impl BitOr for BitBoard {
+    type Output = BitBoard;
+    fn bitor(self, rhs: Self) -> Self {
+        BitBoard { state: self.state | rhs.state }
+    }
+}
+impl BitOrAssign for BitBoard {
+    fn bitor_assign(&mut self, rhs: Self) {
+        self.state |= rhs.state;
+    }
+}
+impl BitAnd for BitBoard {
+    type Output = BitBoard;
+    fn bitand(self, rhs: Self) -> Self {
+        BitBoard { state: self.state & rhs.state }
+    }
+}
+impl BitAndAssign for BitBoard {
+    fn bitand_assign(&mut self, rhs: Self) {
+        self.state &= rhs.state;
     }
 }
 
@@ -605,7 +632,7 @@ mod tests {
         // r3|  o  o  o  o  o  o  o  o |
         // r2|  .  .  x  o  x  .  .  . |
         // r1|  .  x  .  o  .  x  .  . |
-        //     -------------------------
+        //    -------------------------
         //     fa fb fc fd fe ff fg fh
         assert_eq!(bb.state, 0x08_88_49_2A_1C_FF_1C_2A);
         assert_eq!(bb.pop_count(), 26);
@@ -631,7 +658,7 @@ mod tests {
         // r3|  o  .  .  o  .  .  .  o |
         // r2|  .  .  x  .  x  .  .  . |
         // r1|  .  x  .  o  .  x  .  . |
-        //     -------------------------
+        //    -------------------------
         //     fa fb fc fd fe ff fg fh
         assert_eq!(bb.state, 0x08_80_41_22_14_89_14_2A);
         assert_eq!(bb.pop_count(), 16);
@@ -692,5 +719,26 @@ mod tests {
         assert!(bb.cell_is_active(Cell::A6));
         assert!(!bb.cell_is_active(Cell::G2));
         assert!(!bb.cell_is_active(Cell::B6));
+    }
+
+    #[test]
+    fn test_bitor_operators() {
+        let mut bb1 = BitBoard::from_cells(&[Cell::A1, Cell::H8]);
+        let bb2 = BitBoard::from_cells(&[Cell::A8, Cell::H1]);
+        let bb3 = BitBoard::from_cells(&[Cell::D4, Cell::E5]);
+        bb1 = bb1 | bb2;
+        assert_eq!(bb1, BitBoard::from_cells(&[Cell::A1, Cell::A8, Cell::H1, Cell::H8]));
+        bb1 |= bb3;
+        assert_eq!(bb1, BitBoard::from_cells(&[Cell::A1, Cell::A8, Cell::D4, Cell::E5, Cell::H1, Cell::H8]));
+    }
+    #[test]
+    fn test_bitand_operators() {
+        let mut bb1 = BitBoard::from(0xFF_FF_FF_FF_FF_FF_FF_FF);
+        let bb2 = BitBoard::from(0xFF_FF_FF_FF_00_00_00_00);
+        let bb3 = BitBoard::from(0x33_33_33_33_33_33_33_33);
+        bb1 = bb1 & bb2;
+        assert_eq!(bb1, BitBoard::from(0xFF_FF_FF_FF_00_00_00_00));
+        bb1 &= bb3;
+        assert_eq!(bb1, BitBoard::from(0x33_33_33_33_00_00_00_00));
     }
 }
