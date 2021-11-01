@@ -1,9 +1,9 @@
 //! Definition of the [BitBoard] structure and related methods implementation.
 
-use std::ops::{BitOr, BitOrAssign, BitAnd, BitAndAssign};
+use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign};
 
-use std::fmt;
 use crate::num::FromPrimitive;
+use std::fmt;
 
 use crate::bbdefines::*;
 
@@ -443,7 +443,9 @@ impl fmt::Display for BitBoard {
 impl BitOr for BitBoard {
     type Output = BitBoard;
     fn bitor(self, rhs: Self) -> Self {
-        BitBoard { state: self.state | rhs.state }
+        BitBoard {
+            state: self.state | rhs.state,
+        }
     }
 }
 impl BitOrAssign for BitBoard {
@@ -454,7 +456,9 @@ impl BitOrAssign for BitBoard {
 impl BitAnd for BitBoard {
     type Output = BitBoard;
     fn bitand(self, rhs: Self) -> Self {
-        BitBoard { state: self.state & rhs.state }
+        BitBoard {
+            state: self.state & rhs.state,
+        }
     }
 }
 impl BitAndAssign for BitBoard {
@@ -727,9 +731,15 @@ mod tests {
         let bb2 = BitBoard::from_cells(&[Cell::A8, Cell::H1]);
         let bb3 = BitBoard::from_cells(&[Cell::D4, Cell::E5]);
         bb1 = bb1 | bb2;
-        assert_eq!(bb1, BitBoard::from_cells(&[Cell::A1, Cell::A8, Cell::H1, Cell::H8]));
+        assert_eq!(
+            bb1,
+            BitBoard::from_cells(&[Cell::A1, Cell::A8, Cell::H1, Cell::H8])
+        );
         bb1 |= bb3;
-        assert_eq!(bb1, BitBoard::from_cells(&[Cell::A1, Cell::A8, Cell::D4, Cell::E5, Cell::H1, Cell::H8]));
+        assert_eq!(
+            bb1,
+            BitBoard::from_cells(&[Cell::A1, Cell::A8, Cell::D4, Cell::E5, Cell::H1, Cell::H8])
+        );
     }
     #[test]
     fn test_bitand_operators() {

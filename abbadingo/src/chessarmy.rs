@@ -200,7 +200,6 @@ impl ChessArmy {
         }
     }
 
-
     // ---------------------------------------------------------------------------
     // PRIVATE METHODS
     // ---------------------------------------------------------------------------
@@ -214,7 +213,9 @@ impl ChessArmy {
     ///
     fn get_king_position(&self) -> Cell {
         //self.pieces[ChessPiece::King as usize]
-        self.pieces[ChessPiece::King as usize].active_cell().unwrap()
+        self.pieces[ChessPiece::King as usize]
+            .active_cell()
+            .unwrap()
     }
 
     /// Returns the [BitBoard] with the [Cell]s controlled by the [ChessArmy] King.
@@ -223,6 +224,63 @@ impl ChessArmy {
         BitBoard::from(crate::bbdefines::neighbour(self.get_king_position()))
     }
 
+    /// Returns the [BitBoard] with the [Cell]s controlled by the [ChessArmy] Pawns.
+    ///
+    fn pawns_controlled_cells(&self) -> BitBoard {
+        let mut bb = BitBoard::new();
+        let mut remaining_pawns = self.pieces[ChessPiece::Pawn as usize].pop_count();
+        let mut cell_ndx = Cell::A2 as usize; // needless to check first and last rank
+
+        while cell_ndx < Cell::A8 as usize && remaining_pawns > 0 {
+            // We can unwrap safely here... cell_ndx is always valid
+            if let Some(ChessPiece::Pawn) =
+                self.get_piece_in_cell(num::FromPrimitive::from_usize(cell_ndx).unwrap())
+            {
+                bb |= ChessArmy::pawn_controlled_cells(
+                    num::FromPrimitive::from_usize(cell_ndx).unwrap(),
+                    self.colour,
+                );
+                remaining_pawns -= 1;
+            }
+            cell_ndx += 1;
+        }
+        bb
+    }
+
+    /// Returns the [BitBoard] with the [Cell]s controlled by a pawn
+    /// in the given position.
+    ///
+    /// [ChessArmy] type-associated function that, given a [Cell]
+    /// and a [ChessArmy] colour (black or white), returns the BitBoard with
+    /// the cell controlled by a pawn of the given colour placed in that cells
+    ///
+    /// # Arguments:
+    ///
+    /// * `c`: the [Cell] where the pawn is placed
+    /// * `ac`: The [ArmyColour] of the pawn
+    ///
+    fn pawn_controlled_cells(c: Cell, ac: ArmyColour) -> BitBoard {
+        let mut bb = BitBoard::new();
+        match ac {
+            ArmyColour::White => {
+                if let Some(cell) = nw(c) {
+                    bb.set_cell(cell);
+                }
+                if let Some(cell) = ne(c) {
+                    bb.set_cell(cell);
+                }
+            }
+            ArmyColour::Black => {
+                if let Some(cell) = sw(c) {
+                    bb.set_cell(cell);
+                }
+                if let Some(cell) = se(c) {
+                    bb.set_cell(cell);
+                }
+            }
+        }
+        bb
+    }
 }
 // ****************************************************************************
 // TESTS
@@ -299,14 +357,72 @@ mod tests {
     #[test]
     fn test_king_controlled_cells_in_initial_white_army() {
         let a = ChessArmy::new(ArmyColour::White);
-        assert_eq!(a.king_controlled_cells(), BitBoard::from_cells(&[Cell::D1, Cell::F1, Cell::D2, Cell::E2, Cell::F2]));
+        assert_eq!(
+            a.king_controlled_cells(),
+            BitBoard::from_cells(&[Cell::D1, Cell::F1, Cell::D2, Cell::E2, Cell::F2])
+        );
     }
     #[test]
     fn test_king_controlled_cells_in_initial_black_army() {
         let a = ChessArmy::new(ArmyColour::Black);
-        assert_eq!(a.king_controlled_cells(), BitBoard::from_cells(&[Cell::D8, Cell::F8, Cell::D7, Cell::E7, Cell::F7]));
+        assert_eq!(
+            a.king_controlled_cells(),
+            BitBoard::from_cells(&[Cell::D8, Cell::F8, Cell::D7, Cell::E7, Cell::F7])
+        );
     }
 
+    #[test]
+    fn test_cell_controlled_by_single_pawn() {
+        assert_eq!(
+            ChessArmy::pawn_controlled_cells(Cell::E2, ArmyColour::White),
+            BitBoard::from_cells(&[Cell::D3, Cell::F3])
+        );
+        assert_eq!(
+            ChessArmy::pawn_controlled_cells(Cell::H6, ArmyColour::Black),
+            BitBoard::from_cells(&[Cell::G5])
+        );
+        assert_eq!(
+            ChessArmy::pawn_controlled_cells(Cell::E8, ArmyColour::White),
+            BitBoard::new()
+        );
+    }
+    #[test]
+    fn test_cell_controlled_by_all_pawns_of_initial_white_army() {
+        let a = ChessArmy::new(ArmyColour::White);
+        assert_eq!(
+            a.pawns_controlled_cells(),
+            BitBoard::from_cells(&[
+                Cell::A3,
+                Cell::B3,
+                Cell::C3,
+                Cell::D3,
+                Cell::E3,
+                Cell::F3,
+                Cell::G3,
+                Cell::H3
+            ])
+        );
+    }
+    #[test]
+    fn test_cell_controlled_by_all_pawns_of_initial_black_army() {
+        let a = ChessArmy::new(ArmyColour::Black);
+        assert_eq!(
+            a.pawns_controlled_cells(),
+            BitBoard::from_cells(&[
+                Cell::A6,
+                Cell::B6,
+                Cell::C6,
+                Cell::D6,
+                Cell::E6,
+                Cell::F6,
+                Cell::G6,
+                Cell::H6
+            ])
+        );
+    }
+
+    // ------------------------------------------------------------------------------
+    // utility (non-test) functions
     fn check_white_initial_placement(a: &ChessArmy) {
         assert_eq!(a.colour, ArmyColour::White);
         assert_eq!(
