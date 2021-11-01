@@ -164,6 +164,66 @@ impl ChessArmy {
             | self.pieces[ChessPiece::Knight as usize].state
             | self.pieces[ChessPiece::Rook as usize].state
     }
+
+    /// Returns the [ChessPiece] occupying the given [Cell] if one,
+    /// or `None` if the [Cell] is free.
+    ///
+    /// # Arguments
+    ///
+    /// * `c` - The [Cell] to check.
+    ///
+    /// # Example
+    /// ```
+    /// # use abbadingo::bbdefines::{Cell};
+    /// # use abbadingo::chessdefines::{ArmyColour, ChessPiece};
+    /// # use abbadingo::chessarmy::{ChessArmy};
+    /// let army = ChessArmy::new(ArmyColour::Black);
+    /// assert_eq!(army.get_piece_in_cell(Cell::C8), Some(ChessPiece::Bishop));
+    /// assert_eq!(army.get_piece_in_cell(Cell::C1), None);
+    /// ```
+    ///
+    pub fn get_piece_in_cell(&self, c: Cell) -> Option<ChessPiece> {
+        if self.pieces[ChessPiece::King as usize].cell_is_active(c) {
+            Some(ChessPiece::King)
+        } else if self.pieces[ChessPiece::Queen as usize].cell_is_active(c) {
+            Some(ChessPiece::Queen)
+        } else if self.pieces[ChessPiece::Bishop as usize].cell_is_active(c) {
+            Some(ChessPiece::Bishop)
+        } else if self.pieces[ChessPiece::Knight as usize].cell_is_active(c) {
+            Some(ChessPiece::Knight)
+        } else if self.pieces[ChessPiece::Rook as usize].cell_is_active(c) {
+            Some(ChessPiece::Rook)
+        } else if self.pieces[ChessPiece::Pawn as usize].cell_is_active(c) {
+            Some(ChessPiece::Pawn)
+        } else {
+            None
+        }
+    }
+
+
+    // ---------------------------------------------------------------------------
+    // PRIVATE METHODS
+    // ---------------------------------------------------------------------------
+
+    /// Returns the [Cell] with the position of the King.
+    ///
+    /// This is the only "get_position" function that makes sense because
+    /// one and only one King is always present in an Army arrangement
+    /// (for this reason it is also not necessaty to return an `Option` here,
+    /// because a [ChessArmy] always has the King)
+    ///
+    fn get_king_position(&self) -> Cell {
+        //self.pieces[ChessPiece::King as usize]
+        self.pieces[ChessPiece::King as usize].active_cell().unwrap()
+    }
+
+    /// Returns the [BitBoard] with the [Cell]s controlled by the [ChessArmy] King.
+    ///
+    fn king_controlled_cells(&self) -> BitBoard {
+        BitBoard::from(crate::bbdefines::neighbour(self.get_king_position()))
+    }
+
+
 }
 // ****************************************************************************
 // TESTS
@@ -188,11 +248,64 @@ mod tests {
     }
 
     #[test]
-    fn check_reset_to_white_method() {
+    fn test_reset_to_white_method() {
         let mut a = ChessArmy::new(ArmyColour::Black);
         check_black_initial_placement(&a);
         a.reset(ArmyColour::White);
         check_white_initial_placement(&a);
+    }
+
+    #[test]
+    fn test_get_piece_in_cell_in_initial_white_army() {
+        let a = ChessArmy::new(ArmyColour::White);
+        assert_eq!(a.get_piece_in_cell(Cell::A1), Some(ChessPiece::Rook));
+        assert_eq!(a.get_piece_in_cell(Cell::H1), Some(ChessPiece::Rook));
+        assert_eq!(a.get_piece_in_cell(Cell::B1), Some(ChessPiece::Knight));
+        assert_eq!(a.get_piece_in_cell(Cell::G1), Some(ChessPiece::Knight));
+        assert_eq!(a.get_piece_in_cell(Cell::C1), Some(ChessPiece::Bishop));
+        assert_eq!(a.get_piece_in_cell(Cell::F1), Some(ChessPiece::Bishop));
+        assert_eq!(a.get_piece_in_cell(Cell::D1), Some(ChessPiece::Queen));
+        assert_eq!(a.get_piece_in_cell(Cell::E1), Some(ChessPiece::King));
+        assert_eq!(a.get_piece_in_cell(Cell::A2), Some(ChessPiece::Pawn));
+        assert_eq!(a.get_piece_in_cell(Cell::B2), Some(ChessPiece::Pawn));
+        assert_eq!(a.get_piece_in_cell(Cell::C2), Some(ChessPiece::Pawn));
+        assert_eq!(a.get_piece_in_cell(Cell::D2), Some(ChessPiece::Pawn));
+        assert_eq!(a.get_piece_in_cell(Cell::E2), Some(ChessPiece::Pawn));
+        assert_eq!(a.get_piece_in_cell(Cell::F2), Some(ChessPiece::Pawn));
+        assert_eq!(a.get_piece_in_cell(Cell::G2), Some(ChessPiece::Pawn));
+        assert_eq!(a.get_piece_in_cell(Cell::H2), Some(ChessPiece::Pawn));
+    }
+
+    #[test]
+    fn test_get_piece_in_cell_in_initial_black_army() {
+        let a = ChessArmy::new(ArmyColour::Black);
+        assert_eq!(a.get_piece_in_cell(Cell::A8), Some(ChessPiece::Rook));
+        assert_eq!(a.get_piece_in_cell(Cell::H8), Some(ChessPiece::Rook));
+        assert_eq!(a.get_piece_in_cell(Cell::B8), Some(ChessPiece::Knight));
+        assert_eq!(a.get_piece_in_cell(Cell::G8), Some(ChessPiece::Knight));
+        assert_eq!(a.get_piece_in_cell(Cell::C8), Some(ChessPiece::Bishop));
+        assert_eq!(a.get_piece_in_cell(Cell::F8), Some(ChessPiece::Bishop));
+        assert_eq!(a.get_piece_in_cell(Cell::D8), Some(ChessPiece::Queen));
+        assert_eq!(a.get_piece_in_cell(Cell::E8), Some(ChessPiece::King));
+        assert_eq!(a.get_piece_in_cell(Cell::A7), Some(ChessPiece::Pawn));
+        assert_eq!(a.get_piece_in_cell(Cell::B7), Some(ChessPiece::Pawn));
+        assert_eq!(a.get_piece_in_cell(Cell::C7), Some(ChessPiece::Pawn));
+        assert_eq!(a.get_piece_in_cell(Cell::D7), Some(ChessPiece::Pawn));
+        assert_eq!(a.get_piece_in_cell(Cell::E7), Some(ChessPiece::Pawn));
+        assert_eq!(a.get_piece_in_cell(Cell::F7), Some(ChessPiece::Pawn));
+        assert_eq!(a.get_piece_in_cell(Cell::G7), Some(ChessPiece::Pawn));
+        assert_eq!(a.get_piece_in_cell(Cell::H7), Some(ChessPiece::Pawn));
+    }
+
+    #[test]
+    fn test_king_controlled_cells_in_initial_white_army() {
+        let a = ChessArmy::new(ArmyColour::White);
+        assert_eq!(a.king_controlled_cells(), BitBoard::from_cells(&[Cell::D1, Cell::F1, Cell::D2, Cell::E2, Cell::F2]));
+    }
+    #[test]
+    fn test_king_controlled_cells_in_initial_black_army() {
+        let a = ChessArmy::new(ArmyColour::Black);
+        assert_eq!(a.king_controlled_cells(), BitBoard::from_cells(&[Cell::D8, Cell::F8, Cell::D7, Cell::E7, Cell::F7]));
     }
 
     fn check_white_initial_placement(a: &ChessArmy) {

@@ -341,32 +341,37 @@ impl BitBoard {
     /// Given a [BitBoard] with a single active cell, returns the active [Cell],
     /// otherwise returns `None` if [BitBoard] has no active cells or more than
     /// one active [Cell].
+    ///
+    /// # Example
+    /// ```
     /// # use abbadingo::bitboard::*;
     /// # use abbadingo::bbdefines::*;
     ///
     /// let mut bb = BitBoard::from_cells(&[Cell::H3]);
     /// assert_eq!(bb.active_cell(), Some(Cell::H3));
-    /// bb.set_cell(Cell:C7);
+    /// bb.set_cell(Cell::C7);
     /// // More that one cell active...
     /// assert_eq!(bb.active_cell(), None);
-
-    /// # Example
     /// ```
-    /// ```
+    ///
     pub fn active_cell(&self) -> Option<Cell> {
         match self.pop_count() {
             1 => {
                 // Here we skip a lot of controls, because we are sure
                 // to find a single cell active in the bitboard
-                let ndx: usize = 0;
                 for ndx in 0..NUM_CELLS {
                     if self.cell_is_active(Cell::from_usize(ndx)?) {
-                        break
+                        return Cell::from_usize(ndx);
                     }
                 }
-                Some(Cell::from_usize(ndx)?)
+                // No active cells found in the BitBoard with pop_count() 1...
+                // This should be impossible... Maybe we should panic??
+                None
             }
-            _ => None
+            _ => {
+                // If there is more that one active cell in the BitBoard returns None
+                None
+            }
         }
     }
 }
