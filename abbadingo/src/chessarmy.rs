@@ -247,6 +247,65 @@ impl ChessArmy {
         bb
     }
 
+    /// Returns the [BitBoard] with the [Cell]s controlled by the [ChessArmy] Knights.
+    ///
+    fn knights_controlled_cells(&self) -> BitBoard {
+        let mut bb = BitBoard::new();
+        let mut remaining = self.pieces[ChessPiece::Knight as usize].pop_count();
+        let mut cell_ndx = Cell::A1 as usize;
+
+        while cell_ndx <= Cell::H8 as usize && remaining > 0 {
+            // We can unwrap safely here... cell_ndx is always valid
+            if let Some(ChessPiece::Knight) =
+                self.get_piece_in_cell(num::FromPrimitive::from_usize(cell_ndx).unwrap())
+            {
+                if let Some(cell) =
+                    calc_cell_after_steps(num::FromPrimitive::from_usize(cell_ndx).unwrap(), 2, 1)
+                {
+                    bb.set_cell(cell);
+                }
+                if let Some(cell) =
+                    calc_cell_after_steps(num::FromPrimitive::from_usize(cell_ndx).unwrap(), 1, 2)
+                {
+                    bb.set_cell(cell);
+                }
+                if let Some(cell) =
+                    calc_cell_after_steps(num::FromPrimitive::from_usize(cell_ndx).unwrap(), -1, 2)
+                {
+                    bb.set_cell(cell);
+                }
+                if let Some(cell) =
+                    calc_cell_after_steps(num::FromPrimitive::from_usize(cell_ndx).unwrap(), -2, 1)
+                {
+                    bb.set_cell(cell);
+                }
+                if let Some(cell) =
+                    calc_cell_after_steps(num::FromPrimitive::from_usize(cell_ndx).unwrap(), -2, -1)
+                {
+                    bb.set_cell(cell);
+                }
+                if let Some(cell) =
+                    calc_cell_after_steps(num::FromPrimitive::from_usize(cell_ndx).unwrap(), -1, -2)
+                {
+                    bb.set_cell(cell);
+                }
+                if let Some(cell) =
+                    calc_cell_after_steps(num::FromPrimitive::from_usize(cell_ndx).unwrap(), 1, -2)
+                {
+                    bb.set_cell(cell);
+                }
+                if let Some(cell) =
+                    calc_cell_after_steps(num::FromPrimitive::from_usize(cell_ndx).unwrap(), 2, -1)
+                {
+                    bb.set_cell(cell);
+                }
+                remaining -= 1;
+            }
+            cell_ndx += 1;
+        }
+        bb
+    }
+
     /// Returns the [BitBoard] with the [Cell]s controlled by a pawn
     /// in the given position.
     ///
@@ -420,7 +479,22 @@ mod tests {
             ])
         );
     }
-
+    #[test]
+    fn test_cell_controlled_by_all_knights_of_initial_white_army() {
+        let a = ChessArmy::new(ArmyColour::White);
+        assert_eq!(
+            a.knights_controlled_cells(),
+            BitBoard::from_cells(&[Cell::A3, Cell::C3, Cell::D2, Cell::E2, Cell::F3, Cell::H3])
+        );
+    }
+    #[test]
+    fn test_cell_controlled_by_all_knights_of_initial_black_army() {
+        let a = ChessArmy::new(ArmyColour::Black);
+        assert_eq!(
+            a.knights_controlled_cells(),
+            BitBoard::from_cells(&[Cell::A6, Cell::C6, Cell::D7, Cell::E7, Cell::F6, Cell::H6])
+        );
+    }
     // ------------------------------------------------------------------------------
     // utility (non-test) functions
     fn check_white_initial_placement(a: &ChessArmy) {
