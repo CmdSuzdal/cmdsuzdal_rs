@@ -147,22 +147,25 @@ impl ChessArmy {
             + self.pieces[ChessPiece::Pawn as usize].pop_count()
     }
 
-    /// Returns the [BitBoardState] mask of the cell occupied by army pieces (including pawn).
+    /// Returns a [BitBoard] with the cells occupied by army pieces (including pawn).
     ///
     /// # Example
     /// ```
     /// # use abbadingo::chessdefines::ArmyColour;
+    /// # use abbadingo::bitboard::BitBoard;
     /// # use abbadingo::chessarmy::ChessArmy;
     /// let mut army = ChessArmy::new(ArmyColour::Black);
-    /// assert_eq!(army.occupied_cells(), 0xFF_FF_00_00_00_00_00_00);
+    /// assert_eq!(army.occupied_cells(), BitBoard::from(0xFF_FF_00_00_00_00_00_00));
     /// ```
-    pub fn occupied_cells(&self) -> BitBoardState {
-        self.pieces[ChessPiece::King as usize].state
-            | self.pieces[ChessPiece::Queen as usize].state
-            | self.pieces[ChessPiece::Pawn as usize].state
-            | self.pieces[ChessPiece::Bishop as usize].state
-            | self.pieces[ChessPiece::Knight as usize].state
-            | self.pieces[ChessPiece::Rook as usize].state
+    pub fn occupied_cells(&self) -> BitBoard {
+        BitBoard::from(
+            self.pieces[ChessPiece::King as usize].state
+                | self.pieces[ChessPiece::Queen as usize].state
+                | self.pieces[ChessPiece::Pawn as usize].state
+                | self.pieces[ChessPiece::Bishop as usize].state
+                | self.pieces[ChessPiece::Knight as usize].state
+                | self.pieces[ChessPiece::Rook as usize].state,
+        )
     }
 
     /// Returns the [ChessPiece] occupying the given [Cell] if one,
@@ -298,6 +301,113 @@ impl ChessArmy {
                     calc_cell_after_steps(num::FromPrimitive::from_usize(cell_ndx).unwrap(), 2, -1)
                 {
                     bb.set_cell(cell);
+                }
+                remaining -= 1;
+            }
+            cell_ndx += 1;
+        }
+        bb
+    }
+
+    /// Returns the [BitBoard] with the [Cell]s controlled by the [ChessArmy] Bishops.
+    ///
+    /// The "interference board" is provided to add a set of cell occupied by some
+    /// other pieces. This, together with the cell occupied by the [ChessArmy] itself,
+    /// can limit the view of the current army pieces.
+    ///
+    /// The normal use of the interference board is to pass the position of the
+    /// pieces of the enemy army (see the ChessBoard class)
+    ///
+    /// # Arguments
+    ///
+    /// `intf_board`: A [BitBoard] with pieces limiting the "view" of the [ChessArmy]
+    ///
+    fn bishops_controlled_cells(&self, intf_board: BitBoard) -> BitBoard {
+        let mut bb = BitBoard::new();
+        let mut remaining = self.pieces[ChessPiece::Bishop as usize].pop_count();
+        let busy_cells_bitboard = self.occupied_cells() | intf_board;
+        let mut cell_ndx = Cell::A1 as usize;
+
+        while cell_ndx <= Cell::H8 as usize && remaining > 0 {
+            // We can unwrap safely here... cell_ndx is always valid
+            if let Some(ChessPiece::Bishop) =
+                self.get_piece_in_cell(num::FromPrimitive::from_usize(cell_ndx).unwrap())
+            {
+                let f = file(num::FromPrimitive::from_usize(cell_ndx).unwrap());
+                let r = rank(num::FromPrimitive::from_usize(cell_ndx).unwrap());
+
+                // Bishop found in position cell_ndx, (file f, rank r)
+                // Eplore diagonal and antidiagonals for controlled
+                // cells. The cells are controlled until a busy cell
+                // is found: the busy cell is the last controlled one.
+
+                // Explore the left-lower section of the diagonal
+                let mut file_ndx = f as i32 - 1;
+                let mut rank_ndx = r as i32 - 1;
+                while file_ndx >= 0 && rank_ndx >= 0 {
+                    bb.set_cell_from_file_and_rank(
+                        num::FromPrimitive::from_i32(file_ndx).unwrap(),
+                        num::FromPrimitive::from_i32(rank_ndx).unwrap(),
+                    );
+                    if busy_cells_bitboard.cell_is_active(to_cell(
+                        num::FromPrimitive::from_i32(file_ndx).unwrap(),
+                        num::FromPrimitive::from_i32(rank_ndx).unwrap(),
+                    )) {
+                        break;
+                    }
+                    file_ndx -= 1;
+                    rank_ndx -= 1;
+                }
+                // Explore the right-upper section of the diagonal
+                let mut file_ndx = f as usize + 1;
+                let mut rank_ndx = r as usize + 1;
+                while file_ndx < NUM_FILES && rank_ndx < NUM_RANKS {
+                    bb.set_cell_from_file_and_rank(
+                        num::FromPrimitive::from_usize(file_ndx).unwrap(),
+                        num::FromPrimitive::from_usize(rank_ndx).unwrap(),
+                    );
+                    if busy_cells_bitboard.cell_is_active(to_cell(
+                        num::FromPrimitive::from_usize(file_ndx).unwrap(),
+                        num::FromPrimitive::from_usize(rank_ndx).unwrap(),
+                    )) {
+                        break;
+                    }
+                    file_ndx += 1;
+                    rank_ndx += 1;
+                }
+                // Explore the left-upper section of the antidiagonal
+                let mut file_ndx = f as i32 - 1;
+                let mut rank_ndx = r as usize + 1;
+                while file_ndx >= 0 && rank_ndx < NUM_RANKS {
+                    bb.set_cell_from_file_and_rank(
+                        num::FromPrimitive::from_i32(file_ndx).unwrap(),
+                        num::FromPrimitive::from_usize(rank_ndx).unwrap(),
+                    );
+                    if busy_cells_bitboard.cell_is_active(to_cell(
+                        num::FromPrimitive::from_i32(file_ndx).unwrap(),
+                        num::FromPrimitive::from_usize(rank_ndx).unwrap(),
+                    )) {
+                        break;
+                    }
+                    file_ndx -= 1;
+                    rank_ndx += 1;
+                }
+                // Explore the right-lower section of the antidiagonal
+                let mut file_ndx = f as usize + 1;
+                let mut rank_ndx = r as i32 - 1;
+                while file_ndx < NUM_FILES && rank_ndx >= 0 {
+                    bb.set_cell_from_file_and_rank(
+                        num::FromPrimitive::from_usize(file_ndx).unwrap(),
+                        num::FromPrimitive::from_i32(rank_ndx).unwrap(),
+                    );
+                    if busy_cells_bitboard.cell_is_active(to_cell(
+                        num::FromPrimitive::from_usize(file_ndx).unwrap(),
+                        num::FromPrimitive::from_i32(rank_ndx).unwrap(),
+                    )) {
+                        break;
+                    }
+                    file_ndx += 1;
+                    rank_ndx -= 1;
                 }
                 remaining -= 1;
             }
@@ -495,6 +605,20 @@ mod tests {
             BitBoard::from_cells(&[Cell::A6, Cell::C6, Cell::D7, Cell::E7, Cell::F6, Cell::H6])
         );
     }
+    #[test]
+    fn test_cell_controlled_by_all_bishops_of_initial_white_and_black_army() {
+        let a_white = ChessArmy::new(ArmyColour::White);
+        let a_black = ChessArmy::new(ArmyColour::Black);
+        assert_eq!(
+            a_white.bishops_controlled_cells(a_black.occupied_cells()),
+            BitBoard::from_cells(&[Cell::B2, Cell::D2, Cell::E2, Cell::G2])
+        );
+        assert_eq!(
+            a_black.bishops_controlled_cells(a_white.occupied_cells()),
+            BitBoard::from_cells(&[Cell::B7, Cell::D7, Cell::E7, Cell::G7])
+        );
+    }
+
     // ------------------------------------------------------------------------------
     // utility (non-test) functions
     fn check_white_initial_placement(a: &ChessArmy) {

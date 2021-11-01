@@ -29,6 +29,9 @@ pub enum File {
     FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH,
 }
 
+/// The number of [File]s in a 8x8 board
+pub const NUM_FILES: usize = 8;
+
 // Files Masks --- These are the files indexes of the board:
 //    _________________________
 // r8|  0  1  2  3  4  5  6  7 |
@@ -62,6 +65,9 @@ pub const FILES_BBS: [BitBoardState; 8] = [
 pub enum Rank {
     Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8,
 }
+
+/// The number of [Rank]s in a 8x8 board
+pub const NUM_RANKS: usize = 8;
 
 // Ranks Masks --- These are the rank indexes of the board:
 //    _________________________
