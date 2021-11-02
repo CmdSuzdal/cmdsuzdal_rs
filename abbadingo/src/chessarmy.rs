@@ -10,6 +10,7 @@ use crate::chessdefines::*;
 /// A Chess Army is a group of chess pieces of the same colour placed on a Chess Board.
 /// It is represented by an [ArmyColour] and by a set of [BitBoard]s, one for each Piece type.
 ///
+#[derive(Debug, Copy, Clone)]
 pub struct ChessArmy {
     //pieces: HashMap<ChessPiece, BitBoard>,
     pieces: [BitBoard; NUM_PIECES_TYPES],
@@ -499,6 +500,43 @@ impl ChessArmy {
         bb
     }
 
+    /// Returns the [BitBoard] with the [Cell]s controlled by the [ChessArmy] queens.
+    ///
+    /// The "interference board" is provided to add a set of cell occupied by some
+    /// other pieces. This, together with the cell occupied by the [ChessArmy] itself,
+    /// can limit the view of the current army pieces.
+    ///
+    /// The normal use of the interference board is to pass the position of the
+    /// pieces of the enemy army (see the ChessBoard class)
+    ///
+    /// # Arguments
+    ///
+    /// `intf_board`: A [BitBoard] with pieces limiting the "view" of the [ChessArmy]
+    ///
+    fn queens_controlled_cells(&self, intf_board: BitBoard) -> BitBoard {
+
+        // Cells controlled by Queens is the union of the cells
+        // controlled by rooks and bishops in the same position
+        // of the queens. The code below is quite tricky... we have
+        // to convert bishops and rooks in pawn to mantain interference
+        // and avoid to signal wrong controlled cells and than:
+        //  - place Bishops in the Queens positions and compute the controlled cells
+        //  - place Rooks in the Queens positions and add the controlled cells
+        //
+        let mut fake_army = *self;
+        fake_army.pieces[ChessPiece::Pawn as usize] |= fake_army.pieces[ChessPiece::Bishop as usize];
+        fake_army.pieces[ChessPiece::Pawn as usize] |= fake_army.pieces[ChessPiece::Rook as usize];
+
+        fake_army.pieces[ChessPiece::Bishop as usize] = fake_army.pieces[ChessPiece::Queen as usize];
+        fake_army.pieces[ChessPiece::Queen as usize] = BitBoard::new();
+        let mut bb = fake_army.bishops_controlled_cells(intf_board);
+
+        fake_army.pieces[ChessPiece::Rook as usize] = fake_army.pieces[ChessPiece::Bishop as usize];
+        fake_army.pieces[ChessPiece::Bishop as usize] = BitBoard::new();
+        bb |= fake_army.rooks_controlled_cells(intf_board);
+        bb
+    }
+
     /// Returns the [BitBoard] with the [Cell]s controlled by a pawn
     /// in the given position.
     ///
@@ -712,6 +750,19 @@ mod tests {
         assert_eq!(
             a_black.rooks_controlled_cells(a_white.occupied_cells()),
             BitBoard::from_cells(&[Cell::A7, Cell::B8, Cell::G8, Cell::H7])
+        );
+    }
+    #[test]
+    fn test_cell_controlled_by_all_queens_of_initial_white_and_black_army() {
+        let a_white = ChessArmy::new(ArmyColour::White);
+        let a_black = ChessArmy::new(ArmyColour::Black);
+        assert_eq!(
+            a_white.queens_controlled_cells(a_black.occupied_cells()),
+            BitBoard::from_cells(&[Cell::C1, Cell::C2, Cell::D2, Cell::E2, Cell::E1])
+        );
+        assert_eq!(
+            a_black.queens_controlled_cells(a_white.occupied_cells()),
+            BitBoard::from_cells(&[Cell::C8, Cell::C7, Cell::D7, Cell::E7, Cell::E8])
         );
     }
 
