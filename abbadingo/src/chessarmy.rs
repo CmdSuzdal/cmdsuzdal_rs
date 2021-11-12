@@ -204,6 +204,44 @@ impl ChessArmy {
         }
     }
 
+    /// Returns the [BitBoard] with the [Cell]s controlled by all the [ChessArmy] pieces and pawns.
+    ///
+    /// The "interference board" is provided to add a set of cell occupied by some
+    /// other pieces. This, together with the cell occupied by the [ChessArmy] itself,
+    /// can limit the view of the current army pieces.
+    ///
+    /// The normal use of the interference board is to pass the position of the
+    /// pieces of the enemy army (see the ChessBoard class)
+    ///
+    /// # Arguments
+    ///
+    /// `intf_board`: A [BitBoard] with pieces limiting the "view" of the [ChessArmy]
+    ///
+    /// # Example
+    /// ```
+    /// # use abbadingo::bbdefines::{Cell};
+    /// # use abbadingo::bitboard::{BitBoard};
+    /// # use abbadingo::chessdefines::{ArmyColour};
+    /// # use abbadingo::chessarmy::{ChessArmy};
+    /// let w_army = ChessArmy::new(ArmyColour::White);
+    /// let b_army = ChessArmy::new(ArmyColour::Black);
+    /// assert_eq!(w_army.controlled_cells(b_army.occupied_cells()), BitBoard::from(0x00_00_00_00_00_FF_FF_7E));
+    /// assert_eq!(b_army.controlled_cells(w_army.occupied_cells()), BitBoard::from_cells(&[
+    ///     Cell::B8, Cell::C8, Cell::D8, Cell::E8, Cell::F8, Cell::G8,
+    ///     Cell::A7, Cell::B7, Cell::C7, Cell::D7, Cell::E7, Cell::F7, Cell::G7, Cell::H7,
+    ///     Cell::A6, Cell::B6, Cell::C6, Cell::D6, Cell::E6, Cell::F6, Cell::G6, Cell::H6
+    /// ]));
+    /// ```
+    ///
+    pub fn controlled_cells(&self, intf_board: BitBoard) -> BitBoard {
+        self.king_controlled_cells()
+            | self.queens_controlled_cells(intf_board)
+            | self.bishops_controlled_cells(intf_board)
+            | self.knights_controlled_cells()
+            | self.rooks_controlled_cells(intf_board)
+            | self.pawns_controlled_cells()
+    }
+
     // ---------------------------------------------------------------------------
     // PRIVATE METHODS
     // ---------------------------------------------------------------------------
@@ -453,9 +491,12 @@ impl ChessArmy {
                 let mut file_ndx = f as i32 - 1;
                 while file_ndx >= 0 {
                     bb.set_cell_from_file_and_rank(
-                        num::FromPrimitive::from_i32(file_ndx).unwrap(), r);
-                    if busy_cells_bitboard.cell_is_active(to_cell(
-                        num::FromPrimitive::from_i32(file_ndx).unwrap(), r)) {
+                        num::FromPrimitive::from_i32(file_ndx).unwrap(),
+                        r,
+                    );
+                    if busy_cells_bitboard
+                        .cell_is_active(to_cell(num::FromPrimitive::from_i32(file_ndx).unwrap(), r))
+                    {
                         break;
                     }
                     file_ndx -= 1;
@@ -464,9 +505,13 @@ impl ChessArmy {
                 let mut file_ndx = f as usize + 1;
                 while file_ndx < NUM_FILES {
                     bb.set_cell_from_file_and_rank(
-                        num::FromPrimitive::from_usize(file_ndx).unwrap(), r);
+                        num::FromPrimitive::from_usize(file_ndx).unwrap(),
+                        r,
+                    );
                     if busy_cells_bitboard.cell_is_active(to_cell(
-                        num::FromPrimitive::from_usize(file_ndx).unwrap(), r)) {
+                        num::FromPrimitive::from_usize(file_ndx).unwrap(),
+                        r,
+                    )) {
                         break;
                     }
                     file_ndx += 1;
@@ -475,9 +520,12 @@ impl ChessArmy {
                 let mut rank_ndx = r as i32 - 1;
                 while rank_ndx >= 0 {
                     bb.set_cell_from_file_and_rank(
-                        f, num::FromPrimitive::from_i32(rank_ndx).unwrap());
-                    if busy_cells_bitboard.cell_is_active(to_cell(
-                        f, num::FromPrimitive::from_i32(rank_ndx).unwrap())) {
+                        f,
+                        num::FromPrimitive::from_i32(rank_ndx).unwrap(),
+                    );
+                    if busy_cells_bitboard
+                        .cell_is_active(to_cell(f, num::FromPrimitive::from_i32(rank_ndx).unwrap()))
+                    {
                         break;
                     }
                     rank_ndx -= 1;
@@ -486,9 +534,13 @@ impl ChessArmy {
                 let mut rank_ndx = r as usize + 1;
                 while rank_ndx < NUM_RANKS {
                     bb.set_cell_from_file_and_rank(
-                        f, num::FromPrimitive::from_usize(rank_ndx).unwrap());
+                        f,
+                        num::FromPrimitive::from_usize(rank_ndx).unwrap(),
+                    );
                     if busy_cells_bitboard.cell_is_active(to_cell(
-                        f, num::FromPrimitive::from_usize(rank_ndx).unwrap())) {
+                        f,
+                        num::FromPrimitive::from_usize(rank_ndx).unwrap(),
+                    )) {
                         break;
                     }
                     rank_ndx += 1;
@@ -514,7 +566,6 @@ impl ChessArmy {
     /// `intf_board`: A [BitBoard] with pieces limiting the "view" of the [ChessArmy]
     ///
     fn queens_controlled_cells(&self, intf_board: BitBoard) -> BitBoard {
-
         // Cells controlled by Queens is the union of the cells
         // controlled by rooks and bishops in the same position
         // of the queens. The code below is quite tricky... we have
@@ -524,10 +575,12 @@ impl ChessArmy {
         //  - place Rooks in the Queens positions and add the controlled cells
         //
         let mut fake_army = *self;
-        fake_army.pieces[ChessPiece::Pawn as usize] |= fake_army.pieces[ChessPiece::Bishop as usize];
+        fake_army.pieces[ChessPiece::Pawn as usize] |=
+            fake_army.pieces[ChessPiece::Bishop as usize];
         fake_army.pieces[ChessPiece::Pawn as usize] |= fake_army.pieces[ChessPiece::Rook as usize];
 
-        fake_army.pieces[ChessPiece::Bishop as usize] = fake_army.pieces[ChessPiece::Queen as usize];
+        fake_army.pieces[ChessPiece::Bishop as usize] =
+            fake_army.pieces[ChessPiece::Queen as usize];
         fake_army.pieces[ChessPiece::Queen as usize] = BitBoard::new();
         let mut bb = fake_army.bishops_controlled_cells(intf_board);
 
@@ -572,6 +625,7 @@ impl ChessArmy {
         bb
     }
 }
+
 // ****************************************************************************
 // TESTS
 // ****************************************************************************
@@ -763,6 +817,20 @@ mod tests {
         assert_eq!(
             a_black.queens_controlled_cells(a_white.occupied_cells()),
             BitBoard::from_cells(&[Cell::C8, Cell::C7, Cell::D7, Cell::E7, Cell::E8])
+        );
+    }
+
+    #[test]
+    fn test_cell_controlled_by_initial_white_and_black_army() {
+        let a_white = ChessArmy::new(ArmyColour::White);
+        let a_black = ChessArmy::new(ArmyColour::Black);
+        assert_eq!(
+            a_white.controlled_cells(a_black.occupied_cells()),
+            BitBoard::from(0x00_00_00_00_00_FF_FF_7E)
+        );
+        assert_eq!(
+            a_black.controlled_cells(a_black.occupied_cells()),
+            BitBoard::from(0x7E_FF_FF_00_00_00_00_00)
         );
     }
 
