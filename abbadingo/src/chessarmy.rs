@@ -12,8 +12,7 @@ use crate::chessdefines::*;
 ///
 #[derive(Debug, Copy, Clone)]
 pub struct ChessArmy {
-    //pieces: HashMap<ChessPiece, BitBoard>,
-    pieces: [BitBoard; NUM_PIECES_TYPES],
+    pieces_bmask: [BitBoard; NUM_PIECES_TYPES],  // private: pieces bitmask as accessed using the get_pieces() function
     colour: ArmyColour,
 }
 
@@ -55,7 +54,7 @@ impl ChessArmy {
     /// //     fa fb fc fd fe ff fg fh
     pub fn new(c: ArmyColour) -> ChessArmy {
         let mut a = ChessArmy {
-            pieces: [BitBoard::new(); NUM_PIECES_TYPES],
+            pieces_bmask: [BitBoard::new(); NUM_PIECES_TYPES],
             colour: c,
         };
         a.reset(c);
@@ -64,11 +63,11 @@ impl ChessArmy {
 
     /// Initialize an [ChessArmy] of the specified colour with the initial standard chess deployment.
     ///
-    /// Can be used to reset a [ChessArmy] to initial state
+    /// Can be used to reset a [ChessArmy] to initial state.
     ///
     /// # Arguments
     ///
-    /// * `c` - The colour of the new arrangement of the [ChessArmy].
+    /// * `c` - The [ArmyColour] of the new arrangement of the [ChessArmy].
     ///
     /// # Example:
     /// ```
@@ -104,30 +103,51 @@ impl ChessArmy {
         self.colour = c;
         match c {
             ArmyColour::White => {
-                self.pieces[ChessPiece::King as usize] = BitBoard::from_cells(&[Cell::E1]);
-                self.pieces[ChessPiece::Queen as usize] = BitBoard::from_cells(&[Cell::D1]);
-                self.pieces[ChessPiece::Bishop as usize] =
+                self.pieces_bmask[ChessPiece::King as usize] = BitBoard::from_cells(&[Cell::E1]);
+                self.pieces_bmask[ChessPiece::Queen as usize] = BitBoard::from_cells(&[Cell::D1]);
+                self.pieces_bmask[ChessPiece::Bishop as usize] =
                     BitBoard::from_cells(&[Cell::C1, Cell::F1]);
-                self.pieces[ChessPiece::Knight as usize] =
+                self.pieces_bmask[ChessPiece::Knight as usize] =
                     BitBoard::from_cells(&[Cell::B1, Cell::G1]);
-                self.pieces[ChessPiece::Rook as usize] =
+                self.pieces_bmask[ChessPiece::Rook as usize] =
                     BitBoard::from_cells(&[Cell::A1, Cell::H1]);
-                self.pieces[ChessPiece::Pawn as usize] = BitBoard::new();
-                self.pieces[ChessPiece::Pawn as usize].set_rank(Rank::Rank2);
+                self.pieces_bmask[ChessPiece::Pawn as usize] = BitBoard::new();
+                self.pieces_bmask[ChessPiece::Pawn as usize].set_rank(Rank::Rank2);
             }
             ArmyColour::Black => {
-                self.pieces[ChessPiece::King as usize] = BitBoard::from_cells(&[Cell::E8]);
-                self.pieces[ChessPiece::Queen as usize] = BitBoard::from_cells(&[Cell::D8]);
-                self.pieces[ChessPiece::Bishop as usize] =
+                self.pieces_bmask[ChessPiece::King as usize] = BitBoard::from_cells(&[Cell::E8]);
+                self.pieces_bmask[ChessPiece::Queen as usize] = BitBoard::from_cells(&[Cell::D8]);
+                self.pieces_bmask[ChessPiece::Bishop as usize] =
                     BitBoard::from_cells(&[Cell::C8, Cell::F8]);
-                self.pieces[ChessPiece::Knight as usize] =
+                self.pieces_bmask[ChessPiece::Knight as usize] =
                     BitBoard::from_cells(&[Cell::B8, Cell::G8]);
-                self.pieces[ChessPiece::Rook as usize] =
+                self.pieces_bmask[ChessPiece::Rook as usize] =
                     BitBoard::from_cells(&[Cell::A8, Cell::H8]);
-                self.pieces[ChessPiece::Pawn as usize] = BitBoard::new();
-                self.pieces[ChessPiece::Pawn as usize].set_rank(Rank::Rank7);
+                self.pieces_bmask[ChessPiece::Pawn as usize] = BitBoard::new();
+                self.pieces_bmask[ChessPiece::Pawn as usize].set_rank(Rank::Rank7);
             }
         }
+    }
+
+    /// Gets the BitBoard of the pieces for a [ChessArmy].
+    /// This is a convenience method to avoid to continuously cast the
+    /// [ChessPiece] to usize when directly accessing the `pieces` bitmasks
+    ///
+    /// # Arguments
+    ///
+    /// * `cp` - The [ChessPiece] type to which the [BitBoard] shalle be returned.
+    ///
+    /// # Example:
+    /// ```
+    /// # use abbadingo::bbdefines::{Cell};
+    /// # use abbadingo::bitboard::{BitBoard};
+    /// # use abbadingo::chessdefines::{ArmyColour, ChessPiece };
+    /// # use abbadingo::chessarmy::ChessArmy;
+    /// let mut army = ChessArmy::new(ArmyColour::White);
+    /// assert_eq!(army.get_pieces(ChessPiece::King), BitBoard::from_cells(&[Cell::E1]));
+    ///```
+    pub fn get_pieces(&self, cp: ChessPiece) -> BitBoard {
+        self.pieces_bmask[cp as usize]
     }
 
     /// Returns the number of Pieces (including pawn) of a [ChessArmy].
@@ -140,12 +160,12 @@ impl ChessArmy {
     /// assert_eq!(army.num_pieces(), 16);
     /// ```
     pub fn num_pieces(&self) -> usize {
-        self.pieces[ChessPiece::King as usize].pop_count()
-            + self.pieces[ChessPiece::Queen as usize].pop_count()
-            + self.pieces[ChessPiece::Bishop as usize].pop_count()
-            + self.pieces[ChessPiece::Knight as usize].pop_count()
-            + self.pieces[ChessPiece::Rook as usize].pop_count()
-            + self.pieces[ChessPiece::Pawn as usize].pop_count()
+        self.get_pieces(ChessPiece::King).pop_count()
+            + self.get_pieces(ChessPiece::Queen).pop_count()
+            + self.get_pieces(ChessPiece::Bishop).pop_count()
+            + self.get_pieces(ChessPiece::Knight).pop_count()
+            + self.get_pieces(ChessPiece::Rook).pop_count()
+            + self.get_pieces(ChessPiece::Pawn).pop_count()
     }
 
     /// Returns a [BitBoard] with the cells occupied by army pieces (including pawn).
@@ -160,12 +180,12 @@ impl ChessArmy {
     /// ```
     pub fn occupied_cells(&self) -> BitBoard {
         BitBoard::from(
-            self.pieces[ChessPiece::King as usize].state
-                | self.pieces[ChessPiece::Queen as usize].state
-                | self.pieces[ChessPiece::Pawn as usize].state
-                | self.pieces[ChessPiece::Bishop as usize].state
-                | self.pieces[ChessPiece::Knight as usize].state
-                | self.pieces[ChessPiece::Rook as usize].state,
+            self.get_pieces(ChessPiece::King)
+                | self.get_pieces(ChessPiece::Queen)
+                | self.get_pieces(ChessPiece::Pawn)
+                | self.get_pieces(ChessPiece::Bishop)
+                | self.get_pieces(ChessPiece::Knight)
+                | self.get_pieces(ChessPiece::Rook)
         )
     }
 
@@ -187,17 +207,17 @@ impl ChessArmy {
     /// ```
     ///
     pub fn get_piece_in_cell(&self, c: Cell) -> Option<ChessPiece> {
-        if self.pieces[ChessPiece::King as usize].cell_is_active(c) {
+        if self.get_pieces(ChessPiece::King).cell_is_active(c) {
             Some(ChessPiece::King)
-        } else if self.pieces[ChessPiece::Queen as usize].cell_is_active(c) {
+        } else if self.get_pieces(ChessPiece::Queen).cell_is_active(c) {
             Some(ChessPiece::Queen)
-        } else if self.pieces[ChessPiece::Bishop as usize].cell_is_active(c) {
+        } else if self.get_pieces(ChessPiece::Bishop).cell_is_active(c) {
             Some(ChessPiece::Bishop)
-        } else if self.pieces[ChessPiece::Knight as usize].cell_is_active(c) {
+        } else if self.get_pieces(ChessPiece::Knight).cell_is_active(c) {
             Some(ChessPiece::Knight)
-        } else if self.pieces[ChessPiece::Rook as usize].cell_is_active(c) {
+        } else if self.get_pieces(ChessPiece::Rook).cell_is_active(c) {
             Some(ChessPiece::Rook)
-        } else if self.pieces[ChessPiece::Pawn as usize].cell_is_active(c) {
+        } else if self.get_pieces(ChessPiece::Pawn).cell_is_active(c) {
             Some(ChessPiece::Pawn)
         } else {
             None
@@ -254,8 +274,7 @@ impl ChessArmy {
     /// because a [ChessArmy] always has the King)
     ///
     fn get_king_position(&self) -> Cell {
-        //self.pieces[ChessPiece::King as usize]
-        self.pieces[ChessPiece::King as usize]
+        self.get_pieces(ChessPiece::King)
             .active_cell()
             .unwrap()
     }
@@ -270,7 +289,7 @@ impl ChessArmy {
     ///
     fn pawns_controlled_cells(&self) -> BitBoard {
         let mut bb = BitBoard::new();
-        let mut remaining_pawns = self.pieces[ChessPiece::Pawn as usize].pop_count();
+        let mut remaining_pawns = self.get_pieces(ChessPiece::Pawn).pop_count();
         let mut cell_ndx = Cell::A2 as usize; // needless to check first and last rank
 
         while cell_ndx < Cell::A8 as usize && remaining_pawns > 0 {
@@ -293,7 +312,7 @@ impl ChessArmy {
     ///
     fn knights_controlled_cells(&self) -> BitBoard {
         let mut bb = BitBoard::new();
-        let mut remaining = self.pieces[ChessPiece::Knight as usize].pop_count();
+        let mut remaining = self.get_pieces(ChessPiece::Knight).pop_count();
         let mut cell_ndx = Cell::A1 as usize;
 
         while cell_ndx <= Cell::H8 as usize && remaining > 0 {
@@ -363,7 +382,7 @@ impl ChessArmy {
     ///
     fn bishops_controlled_cells(&self, intf_board: BitBoard) -> BitBoard {
         let mut bb = BitBoard::new();
-        let mut remaining = self.pieces[ChessPiece::Bishop as usize].pop_count();
+        let mut remaining = self.get_pieces(ChessPiece::Bishop).pop_count();
         let busy_cells_bitboard = self.occupied_cells() | intf_board;
         let mut cell_ndx = Cell::A1 as usize;
 
@@ -470,7 +489,7 @@ impl ChessArmy {
     ///
     fn rooks_controlled_cells(&self, intf_board: BitBoard) -> BitBoard {
         let mut bb = BitBoard::new();
-        let mut remaining = self.pieces[ChessPiece::Rook as usize].pop_count();
+        let mut remaining = self.get_pieces(ChessPiece::Rook).pop_count();
         let busy_cells_bitboard = self.occupied_cells() | intf_board;
         let mut cell_ndx = Cell::A1 as usize;
 
@@ -575,17 +594,15 @@ impl ChessArmy {
         //  - place Rooks in the Queens positions and add the controlled cells
         //
         let mut fake_army = *self;
-        fake_army.pieces[ChessPiece::Pawn as usize] |=
-            fake_army.pieces[ChessPiece::Bishop as usize];
-        fake_army.pieces[ChessPiece::Pawn as usize] |= fake_army.pieces[ChessPiece::Rook as usize];
+        fake_army.pieces_bmask[ChessPiece::Pawn as usize] |= fake_army.get_pieces(ChessPiece::Bishop);
+        fake_army.pieces_bmask[ChessPiece::Pawn as usize] |= fake_army.get_pieces(ChessPiece::Rook);
 
-        fake_army.pieces[ChessPiece::Bishop as usize] =
-            fake_army.pieces[ChessPiece::Queen as usize];
-        fake_army.pieces[ChessPiece::Queen as usize] = BitBoard::new();
+        fake_army.pieces_bmask[ChessPiece::Bishop as usize] = fake_army.get_pieces(ChessPiece::Queen);
+        fake_army.pieces_bmask[ChessPiece::Queen as usize] = BitBoard::new();
         let mut bb = fake_army.bishops_controlled_cells(intf_board);
 
-        fake_army.pieces[ChessPiece::Rook as usize] = fake_army.pieces[ChessPiece::Bishop as usize];
-        fake_army.pieces[ChessPiece::Bishop as usize] = BitBoard::new();
+        fake_army.pieces_bmask[ChessPiece::Rook as usize] = fake_army.get_pieces(ChessPiece::Bishop);
+        fake_army.pieces_bmask[ChessPiece::Bishop as usize] = BitBoard::new();
         bb |= fake_army.rooks_controlled_cells(intf_board);
         bb
     }
@@ -624,6 +641,7 @@ impl ChessArmy {
         }
         bb
     }
+
 }
 
 // ****************************************************************************
@@ -839,27 +857,27 @@ mod tests {
     fn check_white_initial_placement(a: &ChessArmy) {
         assert_eq!(a.colour, ArmyColour::White);
         assert_eq!(
-            a.pieces[ChessPiece::King as usize],
+            a.get_pieces(ChessPiece::King),
             BitBoard::from_cells(&[Cell::E1])
         );
         assert_eq!(
-            a.pieces[ChessPiece::Queen as usize],
+            a.get_pieces(ChessPiece::Queen),
             BitBoard::from_cells(&[Cell::D1])
         );
         assert_eq!(
-            a.pieces[ChessPiece::Bishop as usize],
+            a.get_pieces(ChessPiece::Bishop),
             BitBoard::from_cells(&[Cell::C1, Cell::F1])
         );
         assert_eq!(
-            a.pieces[ChessPiece::Knight as usize],
+            a.get_pieces(ChessPiece::Knight),
             BitBoard::from_cells(&[Cell::B1, Cell::G1])
         );
         assert_eq!(
-            a.pieces[ChessPiece::Rook as usize],
+            a.get_pieces(ChessPiece::Rook),
             BitBoard::from_cells(&[Cell::A1, Cell::H1])
         );
         assert_eq!(
-            a.pieces[ChessPiece::Pawn as usize],
+            a.get_pieces(ChessPiece::Pawn),
             BitBoard::from_cells(&[
                 Cell::A2,
                 Cell::B2,
@@ -876,27 +894,27 @@ mod tests {
     fn check_black_initial_placement(a: &ChessArmy) {
         assert_eq!(a.colour, ArmyColour::Black);
         assert_eq!(
-            a.pieces[ChessPiece::King as usize],
+            a.get_pieces(ChessPiece::King),
             BitBoard::from_cells(&[Cell::E8])
         );
         assert_eq!(
-            a.pieces[ChessPiece::Queen as usize],
+            a.get_pieces(ChessPiece::Queen),
             BitBoard::from_cells(&[Cell::D8])
         );
         assert_eq!(
-            a.pieces[ChessPiece::Bishop as usize],
+            a.get_pieces(ChessPiece::Bishop),
             BitBoard::from_cells(&[Cell::C8, Cell::F8])
         );
         assert_eq!(
-            a.pieces[ChessPiece::Knight as usize],
+            a.get_pieces(ChessPiece::Knight),
             BitBoard::from_cells(&[Cell::B8, Cell::G8])
         );
         assert_eq!(
-            a.pieces[ChessPiece::Rook as usize],
+            a.get_pieces(ChessPiece::Rook),
             BitBoard::from_cells(&[Cell::A8, Cell::H8])
         );
         assert_eq!(
-            a.pieces[ChessPiece::Pawn as usize],
+            a.get_pieces(ChessPiece::Pawn),
             BitBoard::from_cells(&[
                 Cell::A7,
                 Cell::B7,
