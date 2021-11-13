@@ -12,7 +12,7 @@ use crate::chessdefines::*;
 ///
 #[derive(Debug, Copy, Clone)]
 pub struct ChessArmy {
-    pieces_bmask: [BitBoard; NUM_PIECES_TYPES],  // private: pieces bitmask as accessed using the get_pieces() function
+    pieces_bmask: [BitBoard; NUM_PIECES_TYPES], // private: pieces bitmask as accessed using the get_pieces() function
     colour: ArmyColour,
 }
 
@@ -243,14 +243,12 @@ impl ChessArmy {
     /// assert_eq!(army.occupied_cells(), BitBoard::from(0xFF_FF_00_00_00_00_00_00));
     /// ```
     pub fn occupied_cells(&self) -> BitBoard {
-        BitBoard::from(
-            self.get_pieces(ChessPiece::King)
-                | self.get_pieces(ChessPiece::Queen)
-                | self.get_pieces(ChessPiece::Pawn)
-                | self.get_pieces(ChessPiece::Bishop)
-                | self.get_pieces(ChessPiece::Knight)
-                | self.get_pieces(ChessPiece::Rook)
-        )
+        self.get_pieces(ChessPiece::King)
+            | self.get_pieces(ChessPiece::Queen)
+            | self.get_pieces(ChessPiece::Pawn)
+            | self.get_pieces(ChessPiece::Bishop)
+            | self.get_pieces(ChessPiece::Knight)
+            | self.get_pieces(ChessPiece::Rook)
     }
 
     /// Returns the [ChessPiece] occupying the given [Cell] if one,
@@ -338,9 +336,7 @@ impl ChessArmy {
     /// because a [ChessArmy] always has the King)
     ///
     fn get_king_position(&self) -> Cell {
-        self.get_pieces(ChessPiece::King)
-            .active_cell()
-            .unwrap()
+        self.get_pieces(ChessPiece::King).active_cell().unwrap()
     }
 
     /// Returns the [BitBoard] with the [Cell]s controlled by the [ChessArmy] King.
@@ -658,14 +654,17 @@ impl ChessArmy {
         //  - place Rooks in the Queens positions and add the controlled cells
         //
         let mut fake_army = *self;
-        fake_army.pieces_bmask[ChessPiece::Pawn as usize] |= fake_army.get_pieces(ChessPiece::Bishop);
+        fake_army.pieces_bmask[ChessPiece::Pawn as usize] |=
+            fake_army.get_pieces(ChessPiece::Bishop);
         fake_army.pieces_bmask[ChessPiece::Pawn as usize] |= fake_army.get_pieces(ChessPiece::Rook);
 
-        fake_army.pieces_bmask[ChessPiece::Bishop as usize] = fake_army.get_pieces(ChessPiece::Queen);
+        fake_army.pieces_bmask[ChessPiece::Bishop as usize] =
+            fake_army.get_pieces(ChessPiece::Queen);
         fake_army.pieces_bmask[ChessPiece::Queen as usize] = BitBoard::new();
         let mut bb = fake_army.bishops_controlled_cells(intf_board);
 
-        fake_army.pieces_bmask[ChessPiece::Rook as usize] = fake_army.get_pieces(ChessPiece::Bishop);
+        fake_army.pieces_bmask[ChessPiece::Rook as usize] =
+            fake_army.get_pieces(ChessPiece::Bishop);
         fake_army.pieces_bmask[ChessPiece::Bishop as usize] = BitBoard::new();
         bb |= fake_army.rooks_controlled_cells(intf_board);
         bb
@@ -718,7 +717,6 @@ impl ChessArmy {
     fn king_possible_moves(self) -> BitBoard {
         (self.king_controlled_cells() | self.occupied_cells()) ^ self.occupied_cells()
     }
-
 }
 
 // ****************************************************************************
@@ -935,17 +933,28 @@ mod tests {
         let a_black = ChessArmy::new(ArmyColour::Black);
         assert_eq!(a_white.king_possible_moves(), BitBoard::new());
         assert_eq!(a_black.king_possible_moves(), BitBoard::new());
-   }
+    }
 
-   #[test]
-   fn test_king_possible_moves_for_a_king_alone_in_e6() {
-       let mut a_white = ChessArmy::empty(ArmyColour::White);
-       a_white.place_pieces(ChessPiece::King, &[Cell::E6]);
-       assert_eq!(a_white.king_possible_moves(), BitBoard::from_cells(
-           &[Cell::D5, Cell::E5, Cell::F5, Cell::D6, Cell::F6, Cell::D7, Cell::E7, Cell::F7]));
-  }
+    #[test]
+    fn test_king_possible_moves_for_a_king_alone_in_e6() {
+        let mut a_white = ChessArmy::empty(ArmyColour::White);
+        a_white.place_pieces(ChessPiece::King, &[Cell::E6]);
+        assert_eq!(
+            a_white.king_possible_moves(),
+            BitBoard::from_cells(&[
+                Cell::D5,
+                Cell::E5,
+                Cell::F5,
+                Cell::D6,
+                Cell::F6,
+                Cell::D7,
+                Cell::E7,
+                Cell::F7
+            ])
+        );
+    }
 
-   // ------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------
     // utility (non-test) functions
     fn check_white_initial_placement(a: &ChessArmy) {
         assert_eq!(a.colour, ArmyColour::White);
