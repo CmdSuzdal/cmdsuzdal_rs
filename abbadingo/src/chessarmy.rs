@@ -187,6 +187,33 @@ impl ChessArmy {
         self.pieces_bmask[cp as usize]
     }
 
+    /// Place some pieces of the given [ChessPiece] type to the [ChessArmy].
+    ///
+    /// No checks are done: for example if the cells is already occupied by
+    /// another piece the operation is obviously incorrect, but this method
+    /// silenty accept the operation, with the result that the resulting
+    /// Army state is invalid
+    ///
+    /// # Arguments
+    ///
+    /// * cp - The [ChessPiece] type to be placed in the [ChessArmy]
+    /// * cells - The [Cell]s where to place the pieces
+    ///
+    /// # Example:
+    /// ```
+    /// # use abbadingo::bbdefines::{Cell};
+    /// # use abbadingo::bitboard::{BitBoard};
+    /// # use abbadingo::chessdefines::{ArmyColour, ChessPiece };
+    /// # use abbadingo::chessarmy::ChessArmy;
+    /// // Place two additional Queens in position G4 and B8 in the initial white army deployment
+    /// let mut army = ChessArmy::new(ArmyColour::White);
+    /// army.place_pieces(ChessPiece::Queen, &[Cell::G4, Cell::B8]);
+    /// assert_eq!(army.get_pieces(ChessPiece::Queen), BitBoard::from_cells(&[Cell::D1, Cell::G4, Cell::B8]));
+    ///```
+    pub fn place_pieces(&mut self, cp: ChessPiece, cells: &[Cell]) {
+        self.pieces_bmask[cp as usize] |= BitBoard::from_cells(cells);
+    }
+
     /// Returns the number of Pieces (including pawn) of a [ChessArmy].
     ///
     /// # Example
@@ -679,6 +706,19 @@ impl ChessArmy {
         bb
     }
 
+    /// Returns the [BitBoard] with the possible moves of the [ChessArmy] King.
+    /// If no move are possible, the empty [BitBoard] is returned
+    ///
+    /// The king can move in any of its controlled cells that is not
+    /// occupied by a piece of its army. As for other pieces we do not
+    /// checks here for validity of moves (e.g. placing the king under check);
+    /// the "possible moves" functions return the possible moves and not
+    /// the valid ones. Check for validity shall be done from caller.
+    ///
+    fn king_possible_moves(self) -> BitBoard {
+        (self.king_controlled_cells() | self.occupied_cells()) ^ self.occupied_cells()
+    }
+
 }
 
 // ****************************************************************************
@@ -889,7 +929,23 @@ mod tests {
         );
     }
 
-    // ------------------------------------------------------------------------------
+    #[test]
+    fn test_king_possible_moves_in_initial_white_and_black_army() {
+        let a_white = ChessArmy::new(ArmyColour::White);
+        let a_black = ChessArmy::new(ArmyColour::Black);
+        assert_eq!(a_white.king_possible_moves(), BitBoard::new());
+        assert_eq!(a_black.king_possible_moves(), BitBoard::new());
+   }
+
+   #[test]
+   fn test_king_possible_moves_for_a_king_alone_in_e6() {
+       let mut a_white = ChessArmy::empty(ArmyColour::White);
+       a_white.place_pieces(ChessPiece::King, &[Cell::E6]);
+       assert_eq!(a_white.king_possible_moves(), BitBoard::from_cells(
+           &[Cell::D5, Cell::E5, Cell::F5, Cell::D6, Cell::F6, Cell::D7, Cell::E7, Cell::F7]));
+  }
+
+   // ------------------------------------------------------------------------------
     // utility (non-test) functions
     fn check_white_initial_placement(a: &ChessArmy) {
         assert_eq!(a.colour, ArmyColour::White);
