@@ -1,6 +1,6 @@
 //! Definition of the [BitBoard] structure and related methods implementation.
 
-use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign};
+use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign};
 
 use crate::num::FromPrimitive;
 use std::fmt;
@@ -464,6 +464,19 @@ impl BitAnd for BitBoard {
 impl BitAndAssign for BitBoard {
     fn bitand_assign(&mut self, rhs: Self) {
         self.state &= rhs.state;
+    }
+}
+impl BitXor for BitBoard {
+    type Output = BitBoard;
+    fn bitxor(self, rhs: Self) -> Self {
+        BitBoard {
+            state: self.state ^ rhs.state,
+        }
+    }
+}
+impl BitXorAssign for BitBoard {
+    fn bitxor_assign(&mut self, rhs: Self) {
+        self.state ^= rhs.state;
     }
 }
 
