@@ -61,6 +61,43 @@ impl ChessArmy {
         a
     }
 
+    /// Returns an empty [ChessArmy] of the given colour.
+    ///
+    /// # Arguments
+    ///
+    /// * `c` - The colour of the [ChessArmy].
+    ///
+    /// # Example:
+    /// ```
+    /// # use abbadingo::chessdefines::{ArmyColour, ChessPiece};
+    /// # use abbadingo::chessarmy::ChessArmy;
+    /// let white_empty_army = ChessArmy::empty(ArmyColour::White);
+    /// //    _________________________
+    /// // r8|  .  .  .  .  .  .  .  . |
+    /// // r7|  .  .  .  .  .  .  .  . |
+    /// // r6|  .  .  .  .  .  .  .  . |
+    /// // r5|  .  .  .  .  .  .  .  . |
+    /// // r4|  .  .  .  .  .  .  .  . |
+    /// // r3|  .  .  .  .  .  .  .  . |
+    /// // r2|  .  .  .  .  .  .  .  . |
+    /// // r1|  .  .  .  .  .  .  .  . |
+    /// //     -------------------------
+    /// //     fa fb fc fd fe ff fg fh
+    /// assert_eq!(white_empty_army.num_pieces(), 0);
+    /// assert!(white_empty_army.get_pieces(ChessPiece::King).is_empty());
+    /// assert!(white_empty_army.get_pieces(ChessPiece::Queen).is_empty());
+    /// assert!(white_empty_army.get_pieces(ChessPiece::Bishop).is_empty());
+    /// assert!(white_empty_army.get_pieces(ChessPiece::Knight).is_empty());
+    /// assert!(white_empty_army.get_pieces(ChessPiece::Rook).is_empty());
+    /// assert!(white_empty_army.get_pieces(ChessPiece::Pawn).is_empty());
+    ///```
+    pub fn empty(c: ArmyColour) -> ChessArmy {
+        ChessArmy {
+            pieces_bmask: [BitBoard::new(); NUM_PIECES_TYPES],
+            colour: c,
+        }
+    }
+
     /// Initialize an [ChessArmy] of the specified colour with the initial standard chess deployment.
     ///
     /// Can be used to reset a [ChessArmy] to initial state.
