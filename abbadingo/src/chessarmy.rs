@@ -17,7 +17,8 @@ pub struct ChessArmy {
 }
 
 impl ChessArmy {
-    /// Default constructor for the [ChessArmy] struct: instantiate a [ChessArmy] of the given colour
+    /// Default constructor for the [ChessArmy] struct.
+    /// Instantiate an empty [ChessArmy] of the given colour
     ///
     /// # Arguments
     ///
@@ -27,51 +28,6 @@ impl ChessArmy {
     /// ```
     /// # use abbadingo::chessdefines::ArmyColour;
     /// # use abbadingo::chessarmy::ChessArmy;
-    /// let white_army = ChessArmy::new(ArmyColour::White);
-    /// //    _________________________
-    /// // r8|  .  .  .  .  .  .  .  . |
-    /// // r7|  .  .  .  .  .  .  .  . |
-    /// // r6|  .  .  .  .  .  .  .  . |
-    /// // r5|  .  .  .  .  .  .  .  . |
-    /// // r4|  .  .  .  .  .  .  .  . |
-    /// // r3|  .  .  .  .  .  .  .  . |
-    /// // r2|  P  P  P  P  P  P  P  P |
-    /// // r1|  R  N  B  Q  K  B  N  R |
-    /// //     -------------------------
-    /// //     fa fb fc fd fe ff fg fh
-    ///
-    /// let black_army = ChessArmy::new(ArmyColour::Black);
-    /// //    _________________________
-    /// // r8|  r  n  b  q  k  b  n  r |
-    /// // r7|  p  p  p  p  p  p  p  p |
-    /// // r6|  .  .  .  .  .  .  .  . |
-    /// // r5|  .  .  .  .  .  .  .  . |
-    /// // r4|  .  .  .  .  .  .  .  . |
-    /// // r3|  .  .  .  .  .  .  .  . |
-    /// // r2|  .  .  .  .  .  .  .  . |
-    /// // r1|  .  .  .  .  .  .  .  . |
-    /// //     -------------------------
-    /// //     fa fb fc fd fe ff fg fh
-    pub fn new(c: ArmyColour) -> ChessArmy {
-        let mut a = ChessArmy {
-            pieces_bmask: [BitBoard::new(); NUM_PIECES_TYPES],
-            colour: c,
-        };
-        a.reset(c);
-        a
-    }
-
-    /// Returns an empty [ChessArmy] of the given colour.
-    ///
-    /// # Arguments
-    ///
-    /// * `c` - The colour of the [ChessArmy].
-    ///
-    /// # Example:
-    /// ```
-    /// # use abbadingo::chessdefines::{ArmyColour, ChessPiece};
-    /// # use abbadingo::chessarmy::ChessArmy;
-    /// let white_empty_army = ChessArmy::empty(ArmyColour::White);
     /// //    _________________________
     /// // r8|  .  .  .  .  .  .  .  . |
     /// // r7|  .  .  .  .  .  .  .  . |
@@ -84,11 +40,57 @@ impl ChessArmy {
     /// //     -------------------------
     /// //     fa fb fc fd fe ff fg fh
     ///```
-    pub fn empty(c: ArmyColour) -> ChessArmy {
+    ///
+    pub fn new(c: ArmyColour) -> ChessArmy {
         ChessArmy {
             pieces_bmask: [BitBoard::new(); NUM_PIECES_TYPES],
             colour: c,
         }
+    }
+
+    /// Returns an [ChessArmy] of the given colour with the initial chess game position.
+    ///
+    /// # Arguments
+    ///
+    /// * `c` - The colour of the [ChessArmy].
+    ///
+    /// # Example:
+    /// ```
+    /// # use abbadingo::chessdefines::{ArmyColour, ChessPiece};
+    /// # use abbadingo::chessarmy::ChessArmy;
+    /// let white_army = ChessArmy::initial(ArmyColour::White);
+    /// //    _________________________
+    /// // r8|  .  .  .  .  .  .  .  . |
+    /// // r7|  .  .  .  .  .  .  .  . |
+    /// // r6|  .  .  .  .  .  .  .  . |
+    /// // r5|  .  .  .  .  .  .  .  . |
+    /// // r4|  .  .  .  .  .  .  .  . |
+    /// // r3|  .  .  .  .  .  .  .  . |
+    /// // r2|  P  P  P  P  P  P  P  P |
+    /// // r1|  R  N  B  Q  K  B  N  R |
+    /// //     -------------------------
+    /// //     fa fb fc fd fe ff fg fh
+    ///
+    /// let black_army = ChessArmy::initial(ArmyColour::Black);
+    /// //    _________________________
+    /// // r8|  r  n  b  q  k  b  n  r |
+    /// // r7|  p  p  p  p  p  p  p  p |
+    /// // r6|  .  .  .  .  .  .  .  . |
+    /// // r5|  .  .  .  .  .  .  .  . |
+    /// // r4|  .  .  .  .  .  .  .  . |
+    /// // r3|  .  .  .  .  .  .  .  . |
+    /// // r2|  .  .  .  .  .  .  .  . |
+    /// // r1|  .  .  .  .  .  .  .  . |
+    /// //     -------------------------
+    /// //     fa fb fc fd fe ff fg fh
+    ///```
+    pub fn initial(c: ArmyColour) -> ChessArmy {
+        let mut a = ChessArmy {
+            pieces_bmask: [BitBoard::new(); NUM_PIECES_TYPES],
+            colour: c,
+        };
+        a.reset(c);
+        a
     }
 
     /// Initialize an [ChessArmy] of the specified colour with the initial standard chess deployment.
@@ -103,7 +105,7 @@ impl ChessArmy {
     /// ```
     /// # use abbadingo::chessdefines::ArmyColour;
     /// # use abbadingo::chessarmy::ChessArmy;
-    /// let mut army = ChessArmy::new(ArmyColour::White);
+    /// let mut army = ChessArmy::initial(ArmyColour::White);
     /// //    _________________________
     /// // r8|  .  .  .  .  .  .  .  . |
     /// // r7|  .  .  .  .  .  .  .  . |
@@ -173,7 +175,7 @@ impl ChessArmy {
     /// # use abbadingo::bitboard::{BitBoard};
     /// # use abbadingo::chessdefines::{ArmyColour, ChessPiece };
     /// # use abbadingo::chessarmy::ChessArmy;
-    /// let mut army = ChessArmy::new(ArmyColour::White);
+    /// let mut army = ChessArmy::initial(ArmyColour::White);
     /// assert_eq!(army.get_pieces(ChessPiece::King), BitBoard::from_cells(&[Cell::E1]));
     ///```
     pub fn get_pieces(&self, cp: ChessPiece) -> BitBoard {
@@ -199,7 +201,7 @@ impl ChessArmy {
     /// # use abbadingo::chessdefines::{ArmyColour, ChessPiece };
     /// # use abbadingo::chessarmy::ChessArmy;
     /// // Place two additional Queens in position G4 and B8 in the initial white army deployment
-    /// let mut army = ChessArmy::new(ArmyColour::White);
+    /// let mut army = ChessArmy::initial(ArmyColour::White);
     /// army.place_pieces(ChessPiece::Queen, &[Cell::G4, Cell::B8]);
     /// assert_eq!(army.get_pieces(ChessPiece::Queen), BitBoard::from_cells(&[Cell::D1, Cell::G4, Cell::B8]));
     ///```
@@ -213,7 +215,7 @@ impl ChessArmy {
     /// ```
     /// # use abbadingo::chessdefines::ArmyColour;
     /// # use abbadingo::chessarmy::ChessArmy;
-    /// let mut army = ChessArmy::new(ArmyColour::White);
+    /// let mut army = ChessArmy::initial(ArmyColour::White);
     /// assert_eq!(army.num_pieces(), 16);
     /// ```
     pub fn num_pieces(&self) -> usize {
@@ -232,7 +234,7 @@ impl ChessArmy {
     /// # use abbadingo::chessdefines::ArmyColour;
     /// # use abbadingo::bitboard::BitBoard;
     /// # use abbadingo::chessarmy::ChessArmy;
-    /// let mut army = ChessArmy::new(ArmyColour::Black);
+    /// let mut army = ChessArmy::initial(ArmyColour::Black);
     /// assert_eq!(army.occupied_cells(), BitBoard::from(0xFF_FF_00_00_00_00_00_00));
     /// ```
     pub fn occupied_cells(&self) -> BitBoard {
@@ -256,7 +258,7 @@ impl ChessArmy {
     /// # use abbadingo::bbdefines::{Cell};
     /// # use abbadingo::chessdefines::{ArmyColour, ChessPiece};
     /// # use abbadingo::chessarmy::{ChessArmy};
-    /// let army = ChessArmy::new(ArmyColour::Black);
+    /// let army = ChessArmy::initial(ArmyColour::Black);
     /// assert_eq!(army.get_piece_in_cell(Cell::C8), Some(ChessPiece::Bishop));
     /// assert_eq!(army.get_piece_in_cell(Cell::C1), None);
     /// ```
@@ -298,8 +300,8 @@ impl ChessArmy {
     /// # use abbadingo::bitboard::{BitBoard};
     /// # use abbadingo::chessdefines::{ArmyColour};
     /// # use abbadingo::chessarmy::{ChessArmy};
-    /// let w_army = ChessArmy::new(ArmyColour::White);
-    /// let b_army = ChessArmy::new(ArmyColour::Black);
+    /// let w_army = ChessArmy::initial(ArmyColour::White);
+    /// let b_army = ChessArmy::initial(ArmyColour::Black);
     /// assert_eq!(w_army.controlled_cells(b_army.occupied_cells()), BitBoard::from(0x00_00_00_00_00_FF_FF_7E));
     /// assert_eq!(b_army.controlled_cells(w_army.occupied_cells()), BitBoard::from_cells(&[
     ///     Cell::B8, Cell::C8, Cell::D8, Cell::E8, Cell::F8, Cell::G8,
@@ -905,7 +907,7 @@ mod tests {
 
     #[test]
     fn test_get_piece_in_cell_in_initial_white_army() {
-        let a = ChessArmy::new(ArmyColour::White);
+        let a = ChessArmy::initial(ArmyColour::White);
         assert_eq!(a.get_piece_in_cell(Cell::A1), Some(ChessPiece::Rook));
         assert_eq!(a.get_piece_in_cell(Cell::H1), Some(ChessPiece::Rook));
         assert_eq!(a.get_piece_in_cell(Cell::B1), Some(ChessPiece::Knight));
@@ -926,7 +928,7 @@ mod tests {
 
     #[test]
     fn test_get_piece_in_cell_in_initial_black_army() {
-        let a = ChessArmy::new(ArmyColour::Black);
+        let a = ChessArmy::initial(ArmyColour::Black);
         assert_eq!(a.get_piece_in_cell(Cell::A8), Some(ChessPiece::Rook));
         assert_eq!(a.get_piece_in_cell(Cell::H8), Some(ChessPiece::Rook));
         assert_eq!(a.get_piece_in_cell(Cell::B8), Some(ChessPiece::Knight));
@@ -947,7 +949,7 @@ mod tests {
 
     #[test]
     fn test_king_controlled_cells_in_initial_white_army() {
-        let a = ChessArmy::new(ArmyColour::White);
+        let a = ChessArmy::initial(ArmyColour::White);
         assert_eq!(
             a.king_controlled_cells(),
             BitBoard::from_cells(&[Cell::D1, Cell::F1, Cell::D2, Cell::E2, Cell::F2])
@@ -955,7 +957,7 @@ mod tests {
     }
     #[test]
     fn test_king_controlled_cells_in_initial_black_army() {
-        let a = ChessArmy::new(ArmyColour::Black);
+        let a = ChessArmy::initial(ArmyColour::Black);
         assert_eq!(
             a.king_controlled_cells(),
             BitBoard::from_cells(&[Cell::D8, Cell::F8, Cell::D7, Cell::E7, Cell::F7])
@@ -979,7 +981,7 @@ mod tests {
     }
     #[test]
     fn test_cell_controlled_by_all_pawns_of_initial_white_army() {
-        let a = ChessArmy::new(ArmyColour::White);
+        let a = ChessArmy::initial(ArmyColour::White);
         assert_eq!(
             a.pawns_controlled_cells(),
             BitBoard::from_cells(&[
@@ -996,7 +998,7 @@ mod tests {
     }
     #[test]
     fn test_cell_controlled_by_all_pawns_of_initial_black_army() {
-        let a = ChessArmy::new(ArmyColour::Black);
+        let a = ChessArmy::initial(ArmyColour::Black);
         assert_eq!(
             a.pawns_controlled_cells(),
             BitBoard::from_cells(&[
@@ -1013,7 +1015,7 @@ mod tests {
     }
     #[test]
     fn test_cell_controlled_by_all_knights_of_initial_white_army() {
-        let a = ChessArmy::new(ArmyColour::White);
+        let a = ChessArmy::initial(ArmyColour::White);
         assert_eq!(
             a.knights_controlled_cells(),
             BitBoard::from_cells(&[Cell::A3, Cell::C3, Cell::D2, Cell::E2, Cell::F3, Cell::H3])
@@ -1021,7 +1023,7 @@ mod tests {
     }
     #[test]
     fn test_cell_controlled_by_all_knights_of_initial_black_army() {
-        let a = ChessArmy::new(ArmyColour::Black);
+        let a = ChessArmy::initial(ArmyColour::Black);
         assert_eq!(
             a.knights_controlled_cells(),
             BitBoard::from_cells(&[Cell::A6, Cell::C6, Cell::D7, Cell::E7, Cell::F6, Cell::H6])
@@ -1029,8 +1031,8 @@ mod tests {
     }
     #[test]
     fn test_cell_controlled_by_all_bishops_of_initial_white_and_black_army() {
-        let a_white = ChessArmy::new(ArmyColour::White);
-        let a_black = ChessArmy::new(ArmyColour::Black);
+        let a_white = ChessArmy::initial(ArmyColour::White);
+        let a_black = ChessArmy::initial(ArmyColour::Black);
         assert_eq!(
             a_white.bishops_controlled_cells(a_black.occupied_cells()),
             BitBoard::from_cells(&[Cell::B2, Cell::D2, Cell::E2, Cell::G2])
@@ -1042,8 +1044,8 @@ mod tests {
     }
     #[test]
     fn test_cell_controlled_by_all_rooks_of_initial_white_and_black_army() {
-        let a_white = ChessArmy::new(ArmyColour::White);
-        let a_black = ChessArmy::new(ArmyColour::Black);
+        let a_white = ChessArmy::initial(ArmyColour::White);
+        let a_black = ChessArmy::initial(ArmyColour::Black);
         assert_eq!(
             a_white.rooks_controlled_cells(a_black.occupied_cells()),
             BitBoard::from_cells(&[Cell::A2, Cell::B1, Cell::G1, Cell::H2])
@@ -1055,8 +1057,8 @@ mod tests {
     }
     #[test]
     fn test_cell_controlled_by_all_queens_of_initial_white_and_black_army() {
-        let a_white = ChessArmy::new(ArmyColour::White);
-        let a_black = ChessArmy::new(ArmyColour::Black);
+        let a_white = ChessArmy::initial(ArmyColour::White);
+        let a_black = ChessArmy::initial(ArmyColour::Black);
         assert_eq!(
             a_white.queens_controlled_cells(a_black.occupied_cells()),
             BitBoard::from_cells(&[Cell::C1, Cell::C2, Cell::D2, Cell::E2, Cell::E1])
@@ -1069,8 +1071,8 @@ mod tests {
 
     #[test]
     fn test_cell_controlled_by_initial_white_and_black_army() {
-        let a_white = ChessArmy::new(ArmyColour::White);
-        let a_black = ChessArmy::new(ArmyColour::Black);
+        let a_white = ChessArmy::initial(ArmyColour::White);
+        let a_black = ChessArmy::initial(ArmyColour::Black);
         assert_eq!(
             a_white.controlled_cells(a_black.occupied_cells()),
             BitBoard::from(0x00_00_00_00_00_FF_FF_7E)
@@ -1085,8 +1087,8 @@ mod tests {
     // Possible Moves tests
     #[test]
     fn test_pieces_moves_for_armies_in_start_position() {
-        let w_army = ChessArmy::new(ArmyColour::White);
-        let b_army = ChessArmy::new(ArmyColour::Black);
+        let w_army = ChessArmy::initial(ArmyColour::White);
+        let b_army = ChessArmy::initial(ArmyColour::Black);
         assert_eq!(
             w_army.possible_move_for_piece_in_cell(
                 ChessPiece::King,
@@ -1220,7 +1222,7 @@ mod tests {
 
     #[test]
     fn test_king_possible_moves_for_a_king_alone_in_e6() {
-        let mut a = ChessArmy::empty(ArmyColour::White);
+        let mut a = ChessArmy::new(ArmyColour::White);
         a.place_pieces(ChessPiece::King, &[Cell::E6]);
         assert_eq!(a.king_possible_moves(), BitBoard::from(neighbour(Cell::E6)));
         assert_eq!(
@@ -1239,7 +1241,7 @@ mod tests {
     }
     #[test]
     fn test_king_possible_moves_for_a_king_alone_in_a1() {
-        let mut a = ChessArmy::empty(ArmyColour::Black);
+        let mut a = ChessArmy::new(ArmyColour::Black);
         a.place_pieces(ChessPiece::King, &[Cell::A1]);
         assert_eq!(a.king_possible_moves(), BitBoard::from(neighbour(Cell::A1)));
         assert_eq!(
@@ -1250,8 +1252,8 @@ mod tests {
 
     #[test]
     fn test_possible_moves_for_kings_in_opposition() {
-        let mut a_w = ChessArmy::empty(ArmyColour::White);
-        let mut a_b = ChessArmy::empty(ArmyColour::Black);
+        let mut a_w = ChessArmy::new(ArmyColour::White);
+        let mut a_b = ChessArmy::new(ArmyColour::Black);
         a_w.place_pieces(ChessPiece::King, &[Cell::E5]);
         a_b.place_pieces(ChessPiece::King, &[Cell::E7]);
         // The king_possible_moves() does not check for move validity
@@ -1294,8 +1296,8 @@ mod tests {
 
     #[test]
     fn test_possible_moves_for_kings_obstructed_by_friends() {
-        let mut a_w = ChessArmy::empty(ArmyColour::White);
-        let mut a_b = ChessArmy::empty(ArmyColour::Black);
+        let mut a_w = ChessArmy::new(ArmyColour::White);
+        let mut a_b = ChessArmy::new(ArmyColour::Black);
         a_w.place_pieces(ChessPiece::King, &[Cell::B2]);
         a_w.place_pieces(ChessPiece::Queen, &[Cell::A2]);
         a_w.place_pieces(ChessPiece::Rook, &[Cell::A1]);

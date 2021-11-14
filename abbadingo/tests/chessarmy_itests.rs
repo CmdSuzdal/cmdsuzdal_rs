@@ -6,21 +6,21 @@ use abbadingo::chessdefines::{ArmyColour, ChessPiece};
 // ------------------------------------------------------------
 #[test]
 fn itest_create_a_white_army_with_initial_position() {
-    let a = ChessArmy::new(ArmyColour::White);
+    let a = ChessArmy::initial(ArmyColour::White);
     check_white_initial_placement(&a);
 }
 
 // ------------------------------------------------------------
 #[test]
 fn itest_create_a_black_army_with_initial_position() {
-    let a = ChessArmy::new(ArmyColour::Black);
+    let a = ChessArmy::initial(ArmyColour::Black);
     check_black_initial_placement(&a);
 }
 
 // ------------------------------------------------------------
 #[test]
 fn itest_modify_a_black_army_in_a_white_army_using_the_reset_fn() {
-    let mut a = ChessArmy::new(ArmyColour::Black);
+    let mut a = ChessArmy::initial(ArmyColour::Black);
     check_black_initial_placement(&a);
     a.reset(ArmyColour::White);
     check_white_initial_placement(&a);
@@ -31,7 +31,7 @@ fn itest_modify_a_black_army_in_a_white_army_using_the_reset_fn() {
 // ------------------------------------------------------------
 #[test]
 fn itest_create_empty_armies_using_the_empty_constructor() {
-    let white_empty_army = ChessArmy::empty(ArmyColour::White);
+    let white_empty_army = ChessArmy::new(ArmyColour::White);
     assert_eq!(white_empty_army.num_pieces(), 0);
     assert_eq!(white_empty_army.colour, ArmyColour::White);
     assert!(white_empty_army.get_pieces(ChessPiece::King).is_empty());
@@ -40,7 +40,7 @@ fn itest_create_empty_armies_using_the_empty_constructor() {
     assert!(white_empty_army.get_pieces(ChessPiece::Knight).is_empty());
     assert!(white_empty_army.get_pieces(ChessPiece::Rook).is_empty());
     assert!(white_empty_army.get_pieces(ChessPiece::Pawn).is_empty());
-    let black_empty_army = ChessArmy::empty(ArmyColour::Black);
+    let black_empty_army = ChessArmy::new(ArmyColour::Black);
     assert_eq!(black_empty_army.num_pieces(), 0);
     assert_eq!(black_empty_army.colour, ArmyColour::Black);
     assert!(black_empty_army.get_pieces(ChessPiece::King).is_empty());
@@ -54,7 +54,7 @@ fn itest_create_empty_armies_using_the_empty_constructor() {
 // ------------------------------------------------------------
 #[test]
 fn itest_initial_white_army_starting_from_empty_chessboard_and_placing_pieces() {
-    let mut a = ChessArmy::empty(ArmyColour::White);
+    let mut a = ChessArmy::new(ArmyColour::White);
     a.place_pieces(ChessPiece::King, &[Cell::E1]);
     a.place_pieces(ChessPiece::Queen, &[Cell::D1]);
     a.place_pieces(ChessPiece::Bishop, &[Cell::C1, Cell::F1]);
@@ -78,7 +78,7 @@ fn itest_initial_white_army_starting_from_empty_chessboard_and_placing_pieces() 
 // ------------------------------------------------------------
 #[test]
 fn itest_initial_black_army_starting_from_empty_chessboard_and_placing_pieces() {
-    let mut a = ChessArmy::empty(ArmyColour::Black);
+    let mut a = ChessArmy::new(ArmyColour::Black);
     a.place_pieces(ChessPiece::King, &[Cell::E8]);
     a.place_pieces(ChessPiece::Queen, &[Cell::D8]);
     a.place_pieces(ChessPiece::Bishop, &[Cell::C8, Cell::F8]);
