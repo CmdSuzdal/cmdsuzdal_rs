@@ -765,7 +765,8 @@ impl ChessArmy {
     ) -> BitBoard {
         // Checks if the Army has a piece of the given type in the given position
         let piece_bb = BitBoard::from_cells(&[c]);
-        if self.get_pieces(cp) & piece_bb != BitBoard::new() {
+        if self.get_piece_in_cell(c) == Some(cp) {
+            //if self.get_pieces(cp) & piece_bb != BitBoard::new() {
             let mut fake_army = *self;
             fake_army.pieces_bmask[ChessPiece::Pawn as usize] |= self.get_pieces(cp) ^ piece_bb;
             fake_army.pieces_bmask[cp as usize] = piece_bb;
@@ -791,9 +792,13 @@ impl ChessArmy {
     /// * `intf_board`: A [BitBoard] with pieces limiting the "view" of the [ChessArmy]
     ///
     fn possible_moves_for_pawn_in_cell(&self, c: Cell, intf_board: BitBoard) -> BitBoard {
-        match self.colour {
-            ArmyColour::White => self.possible_moves_for_white_pawn_in_cell(c, intf_board),
-            ArmyColour::Black => self.possible_moves_for_black_pawn_in_cell(c, intf_board),
+        if let Some(ChessPiece::Pawn) = self.get_piece_in_cell(c) {
+            match self.colour {
+                ArmyColour::White => self.possible_moves_for_white_pawn_in_cell(c, intf_board),
+                ArmyColour::Black => self.possible_moves_for_black_pawn_in_cell(c, intf_board),
+            }
+        } else {
+            BitBoard::new()
         }
     }
 
@@ -1695,4 +1700,57 @@ mod tests {
 
     // ------------------------------------------------------------
     // PAWNS possible moves tests
+    #[test]
+    fn only_single_step_is_possible_from_start_rank_and_no_capture_white() {
+        let mut a = ChessArmy::new(ArmyColour::White);
+        a.place_pieces(ChessPiece::Pawn, &[Cell::A3, Cell::E4, Cell::G6]);
+        a.place_pieces(ChessPiece::King, &[Cell::E1]);
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::E1, BitBoard::new()),
+            BitBoard::new()
+        ); // No pawn in e1
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::B3, BitBoard::new()),
+            BitBoard::new()
+        ); // No pawn in b3
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::A3, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::A4])
+        );
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::E4, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::E5])
+        );
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::G6, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::G7])
+        );
+    }
+
+    #[test]
+    fn only_single_step_is_possible_from_start_rank_and_no_capture_black() {
+        let mut a = ChessArmy::new(ArmyColour::Black);
+        a.place_pieces(ChessPiece::Pawn, &[Cell::B6, Cell::C5, Cell::H3]);
+        a.place_pieces(ChessPiece::King, &[Cell::E8]);
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::E8, BitBoard::new()),
+            BitBoard::new()
+        ); // No pawn in e8
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::D4, BitBoard::new()),
+            BitBoard::new()
+        ); // No pawn in d4
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::B6, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::B5])
+        );
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::C5, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::C4])
+        );
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::H3, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::H2])
+        );
+    }
 }
