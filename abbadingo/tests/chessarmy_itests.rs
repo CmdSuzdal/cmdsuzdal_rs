@@ -93,6 +93,8 @@ fn itest_initial_black_army_starting_from_empty_chessboard_and_placing_pieces() 
 // utility (non-test) functions
 fn check_white_initial_placement(a: &ChessArmy) {
     assert_eq!(a.colour, ArmyColour::White);
+    assert_eq!(a.num_pieces(), 16);
+    assert_eq!(a.occupied_cells(), BitBoard::from(0x00_00_00_00_00_00_FF_FF));
     assert_eq!(
         a.get_pieces(ChessPiece::King),
         BitBoard::from_cells(&[Cell::E1])
@@ -129,6 +131,8 @@ fn check_white_initial_placement(a: &ChessArmy) {
 }
 fn check_black_initial_placement(a: &ChessArmy) {
     assert_eq!(a.colour, ArmyColour::Black);
+    assert_eq!(a.num_pieces(), 16);
+    assert_eq!(a.occupied_cells(), BitBoard::from(0xFF_FF_00_00_00_00_00_00));
     assert_eq!(
         a.get_pieces(ChessPiece::King),
         BitBoard::from_cells(&[Cell::E8])
