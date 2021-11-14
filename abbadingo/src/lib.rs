@@ -11,5 +11,6 @@ pub mod bbdefines;
 pub mod bitboard;
 pub mod chessarmy;
 pub mod chessdefines;
+pub mod chessmove;
 pub mod error;
 pub mod hexboard;
