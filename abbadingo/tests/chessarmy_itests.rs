@@ -89,6 +89,273 @@ fn itest_initial_black_army_starting_from_empty_chessboard_and_placing_pieces() 
     check_black_initial_placement(&a);
 }
 
+// ------------------------------------------------------------
+#[test]
+fn itest_test_possible_moves_for_armies_in_start_position() {
+    let w_army = ChessArmy::initial(ArmyColour::White);
+    let b_army = ChessArmy::initial(ArmyColour::Black);
+    assert_eq!(
+        w_army.possible_moves_for_piece_in_cell(
+            ChessPiece::King,
+            Cell::E1,
+            b_army.occupied_cells()
+        ),
+        BitBoard::new()
+    );
+    assert_eq!(
+        w_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Queen,
+            Cell::D1,
+            b_army.occupied_cells()
+        ),
+        BitBoard::new()
+    );
+    assert_eq!(
+        w_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Bishop,
+            Cell::C1,
+            b_army.occupied_cells()
+        ),
+        BitBoard::new()
+    );
+    assert_eq!(
+        w_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Bishop,
+            Cell::F1,
+            b_army.occupied_cells()
+        ),
+        BitBoard::new()
+    );
+    assert_eq!(
+        w_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Rook,
+            Cell::A1,
+            b_army.occupied_cells()
+        ),
+        BitBoard::new()
+    );
+    assert_eq!(
+        w_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Rook,
+            Cell::H1,
+            b_army.occupied_cells()
+        ),
+        BitBoard::new()
+    );
+    assert_eq!(
+        w_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Knight,
+            Cell::B1,
+            b_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::A3, Cell::C3])
+    );
+    assert_eq!(
+        w_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Knight,
+            Cell::G1,
+            b_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::F3, Cell::H3])
+    );
+    assert_eq!(
+        w_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Pawn,
+            Cell::A2,
+            b_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::A3, Cell::A4])
+    );
+    assert_eq!(
+        w_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Pawn,
+            Cell::B2,
+            b_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::B3, Cell::B4])
+    );
+    assert_eq!(
+        w_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Pawn,
+            Cell::C2,
+            b_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::C3, Cell::C4])
+    );
+    assert_eq!(
+        w_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Pawn,
+            Cell::D2,
+            b_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::D3, Cell::D4])
+    );
+    assert_eq!(
+        w_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Pawn,
+            Cell::E2,
+            b_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::E3, Cell::E4])
+    );
+    assert_eq!(
+        w_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Pawn,
+            Cell::F2,
+            b_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::F3, Cell::F4])
+    );
+    assert_eq!(
+        w_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Pawn,
+            Cell::G2,
+            b_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::G3, Cell::G4])
+    );
+    assert_eq!(
+        w_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Pawn,
+            Cell::H2,
+            b_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::H3, Cell::H4])
+    );
+
+    assert_eq!(
+        b_army.possible_moves_for_piece_in_cell(
+            ChessPiece::King,
+            Cell::E8,
+            w_army.occupied_cells()
+        ),
+        BitBoard::new()
+    );
+    assert_eq!(
+        b_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Queen,
+            Cell::D8,
+            w_army.occupied_cells()
+        ),
+        BitBoard::new()
+    );
+    assert_eq!(
+        b_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Bishop,
+            Cell::C8,
+            w_army.occupied_cells()
+        ),
+        BitBoard::new()
+    );
+    assert_eq!(
+        b_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Bishop,
+            Cell::F8,
+            w_army.occupied_cells()
+        ),
+        BitBoard::new()
+    );
+    assert_eq!(
+        b_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Rook,
+            Cell::A8,
+            w_army.occupied_cells()
+        ),
+        BitBoard::new()
+    );
+    assert_eq!(
+        b_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Rook,
+            Cell::H8,
+            w_army.occupied_cells()
+        ),
+        BitBoard::new()
+    );
+    assert_eq!(
+        b_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Knight,
+            Cell::B8,
+            w_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::A6, Cell::C6])
+    );
+    assert_eq!(
+        b_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Knight,
+            Cell::G8,
+            w_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::F6, Cell::H6])
+    );
+    assert_eq!(
+        b_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Pawn,
+            Cell::A7,
+            b_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::A6, Cell::A5])
+    );
+    assert_eq!(
+        b_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Pawn,
+            Cell::B7,
+            b_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::B6, Cell::B5])
+    );
+    assert_eq!(
+        b_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Pawn,
+            Cell::C7,
+            b_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::C6, Cell::C5])
+    );
+    assert_eq!(
+        b_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Pawn,
+            Cell::D7,
+            b_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::D6, Cell::D5])
+    );
+    assert_eq!(
+        b_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Pawn,
+            Cell::E7,
+            b_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::E6, Cell::E5])
+    );
+    assert_eq!(
+        b_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Pawn,
+            Cell::F7,
+            b_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::F6, Cell::F5])
+    );
+    assert_eq!(
+        b_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Pawn,
+            Cell::G7,
+            b_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::G6, Cell::G5])
+    );
+    assert_eq!(
+        b_army.possible_moves_for_piece_in_cell(
+            ChessPiece::Pawn,
+            Cell::H7,
+            b_army.occupied_cells()
+        ),
+        BitBoard::from_cells(&[Cell::H6, Cell::H5])
+    );
+}
+
+
+
+
 // ------------------------------------------------------------------------------
 // utility (non-test) functions
 fn check_white_initial_placement(a: &ChessArmy) {
