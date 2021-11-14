@@ -83,13 +83,6 @@ impl ChessArmy {
     /// // r1|  .  .  .  .  .  .  .  . |
     /// //     -------------------------
     /// //     fa fb fc fd fe ff fg fh
-    /// assert_eq!(white_empty_army.num_pieces(), 0);
-    /// assert!(white_empty_army.get_pieces(ChessPiece::King).is_empty());
-    /// assert!(white_empty_army.get_pieces(ChessPiece::Queen).is_empty());
-    /// assert!(white_empty_army.get_pieces(ChessPiece::Bishop).is_empty());
-    /// assert!(white_empty_army.get_pieces(ChessPiece::Knight).is_empty());
-    /// assert!(white_empty_army.get_pieces(ChessPiece::Rook).is_empty());
-    /// assert!(white_empty_army.get_pieces(ChessPiece::Pawn).is_empty());
     ///```
     pub fn empty(c: ArmyColour) -> ChessArmy {
         ChessArmy {
