@@ -99,7 +99,7 @@ impl ChessArmy {
     ///
     /// # Arguments
     ///
-    /// * `cp` - The [ChessPiece] type to which the [BitBoard] shalle be returned.
+    /// * `cp` - The [ChessPiece] type to which the [BitBoard] shall be returned.
     ///
     /// # Example:
     /// ```
@@ -1222,6 +1222,7 @@ mod tests {
     fn test_king_possible_moves_for_a_king_alone_in_a1() {
         let mut a = ChessArmy::new(ArmyColour::Black);
         a.place_pieces(ChessPiece::King, &[Cell::A1]);
+        assert_eq!(a.num_pieces(), 1);
         assert_eq!(a.king_possible_moves(), BitBoard::from(neighbour(Cell::A1)));
         assert_eq!(
             a.king_possible_moves(),
@@ -1235,6 +1236,9 @@ mod tests {
         let mut a_b = ChessArmy::new(ArmyColour::Black);
         a_w.place_pieces(ChessPiece::King, &[Cell::E5]);
         a_b.place_pieces(ChessPiece::King, &[Cell::E7]);
+        assert_eq!(a_w.num_pieces(), 1);
+        assert_eq!(a_b.num_pieces(), 1);
+
         // The king_possible_moves() does not check for move validity
         // so all the moves are returned, also the illegal ones
         assert_eq!(
@@ -1285,6 +1289,9 @@ mod tests {
         a_b.place_pieces(ChessPiece::King, &[Cell::H8]);
         a_b.place_pieces(ChessPiece::Pawn, &[Cell::G7, Cell::F6, Cell::E6]);
         a_b.place_pieces(ChessPiece::Rook, &[Cell::H7]);
+        assert_eq!(a_w.num_pieces(), 8);
+        assert_eq!(a_b.num_pieces(), 5);
+
         assert_eq!(
             a_w.possible_move_for_piece_in_cell(ChessPiece::King, Cell::B2, a_b.occupied_cells()),
             BitBoard::from_cells(&[Cell::B1, Cell::C2])
