@@ -1,7 +1,7 @@
 use abbadingo::bbdefines::*;
 use abbadingo::bitboard::BitBoard;
-use abbadingo::chessdefines::ArmyColour;
 use abbadingo::chessarmy::ChessArmy;
+use abbadingo::chessdefines::ArmyColour;
 use abbadingo::hexboard::HexCell;
 
 fn main() {
@@ -31,7 +31,6 @@ fn main() {
     let b_army = ChessArmy::initial(ArmyColour::Black);
     println!("Hello White Army: {}", w_army);
     println!("Hello Black Army: {}", b_army);
-
 
     println!("---------------------------------------------------");
     let xb = HexCell::new();

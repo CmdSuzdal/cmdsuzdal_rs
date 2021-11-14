@@ -12,7 +12,7 @@ use crate::chessdefines::*;
 /// A Chess Army is a group of chess pieces of the same colour placed on a Chess Board.
 /// It is represented by an [ArmyColour] and by a set of [BitBoard]s, one for each Piece type.
 ///
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct ChessArmy {
     pieces_bmask: [BitBoard; NUM_PIECES_TYPES], // private: pieces bitmask as accessed using the get_pieces() function
     pub colour: ArmyColour,
@@ -907,7 +907,7 @@ impl fmt::Display for ChessArmy {
             rook_sym = 'r';
             pawn_sym = 'p';
         }
-        bb_str.push_str(&format!("  _ _ _ _ _ _ _ _"));
+        bb_str.push_str("  _ _ _ _ _ _ _ _");
         let mut fillchar = ' ';
         for r in (0..8).rev() {
             bb_str.push_str(&format!("\n{}|", r + 1));
@@ -2113,5 +2113,43 @@ mod tests {
             b.possible_moves_for_pawn_in_cell(Cell::G7, w.occupied_cells()),
             BitBoard::from_cells(&[Cell::G6, Cell::G5, Cell::F6, Cell::H6])
         );
+    }
+
+    // **************************************************************
+    // Equality operator comparison tests
+    // **************************************************************
+    #[test]
+    fn two_empty_armies_of_different_colours_are_not_equal() {
+        let a1 = ChessArmy::new(ArmyColour::White);
+        let a2 = ChessArmy::new(ArmyColour::Black);
+        assert_ne!(a1, a2);
+    }
+    #[test]
+    fn two_white_armies_with_the_same_pieces_are_equal() {
+        let mut a1 = ChessArmy::new(ArmyColour::White);
+        let mut a2 = ChessArmy::new(ArmyColour::White);
+        assert_eq!(a1, a2);
+        // place some pieces in a1
+        a1.place_pieces(ChessPiece::King, &[Cell::E1]);
+        a1.place_pieces(ChessPiece::Queen, &[Cell::G4]);
+        a1.place_pieces(ChessPiece::Knight, &[Cell::A6, Cell::A5]);
+        a1.place_pieces(ChessPiece::Bishop, &[Cell::E3]);
+        a1.place_pieces(ChessPiece::Rook, &[Cell::A1, Cell::G7]);
+        a1.place_pieces(
+            ChessPiece::Pawn,
+            &[Cell::A2, Cell::B3, Cell::C4, Cell::D3, Cell::E2, Cell::H4],
+        );
+        assert_ne!(a1, a2);
+        // place the some pieces in a2 (different order)
+        a2.place_pieces(ChessPiece::Knight, &[Cell::A5]);
+        a2.place_pieces(ChessPiece::Rook, &[Cell::G7, Cell::A1]);
+        a2.place_pieces(ChessPiece::Pawn, &[Cell::A2, Cell::H4]);
+        a2.place_pieces(ChessPiece::Queen, &[Cell::G4]);
+        a2.place_pieces(ChessPiece::King, &[Cell::E1]);
+        a2.place_pieces(ChessPiece::Pawn, &[Cell::B3, Cell::C4]);
+        a2.place_pieces(ChessPiece::Bishop, &[Cell::E3]);
+        a2.place_pieces(ChessPiece::Knight, &[Cell::A6]);
+        a2.place_pieces(ChessPiece::Pawn, &[Cell::D3, Cell::E2]);
+        assert_eq!(a1, a2);
     }
 }
