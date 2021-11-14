@@ -440,6 +440,9 @@ impl ChessArmy {
 
         while cell_ndx <= Cell::H8 as usize && remaining > 0 {
             // We can unwrap safely here... cell_ndx is always valid
+            ////if (self.get_pieces(ChessPiece::Bishop)
+            ////    & BitBoard::from_cells(&[num::FromPrimitive::from_usize(cell_ndx).unwrap()]))
+            ////    != BitBoard::new()
             if let Some(ChessPiece::Bishop) =
                 self.get_piece_in_cell(num::FromPrimitive::from_usize(cell_ndx).unwrap())
             {
@@ -743,9 +746,10 @@ impl ChessArmy {
     /// The [ChessArmy] shall have a piece in the given position, otherwise
     /// an empty bitboard is returned. The interference board is used to limit the view of
     /// the given piece (see "controlled cells" functions). If there are no moves (e.g. blocked
-    /// piece), an empty Bitboard is returned. To avoid overhead no checks are performed on the
-    /// correcteness of the assumption above, for example if the given [Cell] does not contain
-    /// a piece of the correct type, this function can returns incorrect values.
+    /// piece), an empty Bitboard is returned.
+    /// To avoid overhead no checks are performed on the correcteness of the assumption above,
+    /// for example if the given [Cell] does not contain a piece of the correct type,
+    /// this function can returns incorrect values.
     ///
     /// # Arguments
     ///
@@ -759,12 +763,19 @@ impl ChessArmy {
         c: Cell,
         intf_board: BitBoard,
     ) -> BitBoard {
+        // Checks if the Army has a piece of the given type in the given position
         let piece_bb = BitBoard::from_cells(&[c]);
-        let mut fake_army = *self;
-        fake_army.pieces_bmask[ChessPiece::Pawn as usize] |= self.get_pieces(cp) ^ piece_bb;
-        fake_army.pieces_bmask[cp as usize] = piece_bb;
-        (fake_army.controlled_cells_by_piece_type(cp, intf_board) | self.occupied_cells())
-            ^ self.occupied_cells()
+        if self.get_pieces(cp) & piece_bb != BitBoard::new() {
+            let mut fake_army = *self;
+            fake_army.pieces_bmask[ChessPiece::Pawn as usize] |= self.get_pieces(cp) ^ piece_bb;
+            fake_army.pieces_bmask[cp as usize] = piece_bb;
+            (fake_army.controlled_cells_by_piece_type(cp, intf_board) | self.occupied_cells())
+                ^ self.occupied_cells()
+        } else {
+            // If the Army does not have a piece of the given type in the given position,
+            //  then returns the empty bitboard
+            BitBoard::new()
+        }
     }
 
     /// Returns the [BitBoard] with the possible moves of a pawn placed in the given
@@ -1163,7 +1174,10 @@ mod tests {
     fn test_possible_moves_for_a_king_alone_in_e6() {
         let mut a = ChessArmy::new(ArmyColour::White);
         a.place_pieces(ChessPiece::King, &[Cell::E6]);
-        assert_eq!(a.possible_moves_for_king(), BitBoard::from(neighbour(Cell::E6)));
+        assert_eq!(
+            a.possible_moves_for_king(),
+            BitBoard::from(neighbour(Cell::E6))
+        );
         assert_eq!(
             a.possible_moves_for_king(),
             BitBoard::from_cells(&[
@@ -1183,7 +1197,10 @@ mod tests {
         let mut a = ChessArmy::new(ArmyColour::Black);
         a.place_pieces(ChessPiece::King, &[Cell::A1]);
         assert_eq!(a.num_pieces(), 1);
-        assert_eq!(a.possible_moves_for_king(), BitBoard::from(neighbour(Cell::A1)));
+        assert_eq!(
+            a.possible_moves_for_king(),
+            BitBoard::from(neighbour(Cell::A1))
+        );
         assert_eq!(
             a.possible_moves_for_king(),
             BitBoard::from_cells(&[Cell::A2, Cell::B2, Cell::B1])
@@ -1261,4 +1278,421 @@ mod tests {
             BitBoard::from_cells(&[Cell::G8])
         );
     }
+
+    // ------------------------------------------------------------
+    // KNIGHT possible moves tests
+    #[test]
+    fn test_possible_moves_for_a_knight_in_f3() {
+        let mut a = ChessArmy::new(ArmyColour::White);
+        a.place_pieces(ChessPiece::Knight, &[Cell::F3]);
+        a.place_pieces(ChessPiece::Pawn, &[Cell::G2]);
+
+        assert_eq!(
+            a.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Knight,
+                Cell::F3,
+                BitBoard::new()
+            ),
+            BitBoard::from_cells(&[
+                Cell::E1,
+                Cell::D2,
+                Cell::D4,
+                Cell::E5,
+                Cell::G5,
+                Cell::H4,
+                Cell::H2,
+                Cell::G1
+            ])
+        );
+
+        // Negative tests: the Army does not have a piece in that position
+        assert_eq!(
+            a.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Knight,
+                Cell::G2,
+                BitBoard::new()
+            ),
+            BitBoard::new()
+        );
+    }
+    #[test]
+    fn test_possible_moves_for_knights_with_complex_interaction() {
+        let mut w = ChessArmy::new(ArmyColour::White);
+        let mut b = ChessArmy::new(ArmyColour::Black);
+
+        w.place_pieces(ChessPiece::Knight, &[Cell::D3]);
+        w.place_pieces(ChessPiece::King, &[Cell::F2]);
+        w.place_pieces(ChessPiece::Bishop, &[Cell::H5]);
+        w.place_pieces(ChessPiece::Pawn, &[Cell::A4, Cell::B4, Cell::C5, Cell::A6]);
+        b.place_pieces(ChessPiece::Knight, &[Cell::F4]);
+        b.place_pieces(ChessPiece::King, &[Cell::D5]);
+        b.place_pieces(ChessPiece::Rook, &[Cell::H3]);
+        b.place_pieces(ChessPiece::Queen, &[Cell::B2]);
+        b.place_pieces(ChessPiece::Pawn, &[Cell::E6, Cell::F7, Cell::G6, Cell::H7]);
+
+        assert_eq!(
+            w.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Knight,
+                Cell::D3,
+                b.occupied_cells()
+            ),
+            BitBoard::from_cells(&[Cell::C1, Cell::B2, Cell::E5, Cell::F4, Cell::E1])
+        );
+        assert_eq!(
+            b.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Knight,
+                Cell::F4,
+                w.occupied_cells()
+            ),
+            BitBoard::from_cells(&[Cell::D3, Cell::H5, Cell::G2, Cell::E2])
+        );
+
+        // Negative tests: the Army does not have a piece in that position
+        assert_eq!(
+            w.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Knight,
+                Cell::F4,
+                b.occupied_cells()
+            ),
+            BitBoard::new()
+        );
+        assert_eq!(
+            b.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Knight,
+                Cell::D3,
+                w.occupied_cells()
+            ),
+            BitBoard::new()
+        );
+    }
+    // ------------------------------------------------------------
+    // BISHOPS possible moves tests
+    #[test]
+    fn test_possible_moves_for_a_bishop_in_e6() {
+        let mut a = ChessArmy::new(ArmyColour::Black);
+        a.place_pieces(ChessPiece::Bishop, &[Cell::E6]);
+        a.place_pieces(ChessPiece::Pawn, &[Cell::G2]);
+
+        assert_eq!(
+            a.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Bishop,
+                Cell::E6,
+                BitBoard::new()
+            ),
+            BitBoard::from_cells(&[
+                Cell::A2,
+                Cell::B3,
+                Cell::C4,
+                Cell::D5,
+                Cell::F7,
+                Cell::G8,
+                Cell::H3,
+                Cell::G4,
+                Cell::F5,
+                Cell::D7,
+                Cell::C8
+            ])
+        );
+
+        // Negative tests: the Army does not have a piece in that position
+        assert_eq!(
+            a.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Bishop,
+                Cell::G2,
+                BitBoard::new()
+            ),
+            BitBoard::new()
+        );
+    }
+    #[test]
+    fn test_possible_moves_for_bishops_with_complex_interaction() {
+        let mut w = ChessArmy::new(ArmyColour::White);
+        let mut b = ChessArmy::new(ArmyColour::Black);
+        w.place_pieces(ChessPiece::Bishop, &[Cell::D5]);
+        w.place_pieces(ChessPiece::King, &[Cell::C4]);
+        w.place_pieces(ChessPiece::Knight, &[Cell::G3]);
+        w.place_pieces(ChessPiece::Pawn, &[Cell::E6, Cell::F5]);
+        b.place_pieces(ChessPiece::Bishop, &[Cell::F4]);
+        b.place_pieces(ChessPiece::King, &[Cell::G5]);
+        b.place_pieces(ChessPiece::Knight, &[Cell::B7]);
+        b.place_pieces(ChessPiece::Pawn, &[Cell::E3, Cell::F3]);
+
+        assert_eq!(
+            w.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Bishop,
+                Cell::D5,
+                b.occupied_cells()
+            ),
+            BitBoard::from_cells(&[Cell::F3, Cell::E4, Cell::C6, Cell::B7])
+        );
+        assert_eq!(
+            b.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Bishop,
+                Cell::F4,
+                w.occupied_cells()
+            ),
+            BitBoard::from_cells(&[Cell::G3, Cell::E5, Cell::D6, Cell::C7, Cell::B8])
+        );
+
+        // Negative tests: the Army does not have a piece in that position
+        assert_eq!(
+            w.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Bishop,
+                Cell::C4,
+                b.occupied_cells()
+            ),
+            BitBoard::new()
+        );
+        assert_eq!(
+            b.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Bishop,
+                Cell::E3,
+                w.occupied_cells()
+            ),
+            BitBoard::new()
+        );
+    }
+
+    // ------------------------------------------------------------
+    // ROOKS possible moves tests
+    #[test]
+    fn test_possible_moves_for_a_rook_in_b2() {
+        let mut a = ChessArmy::new(ArmyColour::White);
+        a.place_pieces(ChessPiece::Rook, &[Cell::B2]);
+        a.place_pieces(ChessPiece::Pawn, &[Cell::G3]);
+
+        assert_eq!(
+            a.possible_moves_for_regular_piece_in_cell(ChessPiece::Rook, Cell::B2, BitBoard::new()),
+            BitBoard::from(FILES_BBS[File::FileB as usize] ^ RANKS_BBS[Rank::Rank2 as usize])
+        );
+
+        // Negative tests: the Army does not have the given piece in that position
+        assert_eq!(
+            a.possible_moves_for_regular_piece_in_cell(ChessPiece::Rook, Cell::G3, BitBoard::new()),
+            BitBoard::new()
+        );
+    }
+    #[test]
+    fn test_possible_moves_for_rooks_with_complex_interaction() {
+        let mut w = ChessArmy::new(ArmyColour::White);
+        let mut b = ChessArmy::new(ArmyColour::Black);
+        w.place_pieces(ChessPiece::Rook, &[Cell::C3, Cell::D3]);
+        w.place_pieces(ChessPiece::King, &[Cell::A3]);
+        w.place_pieces(ChessPiece::Pawn, &[Cell::E2, Cell::H3]);
+        b.place_pieces(ChessPiece::Rook, &[Cell::G3, Cell::D5]);
+        b.place_pieces(ChessPiece::King, &[Cell::D8]);
+        b.place_pieces(ChessPiece::Pawn, &[Cell::C6, Cell::H4]);
+
+        assert_eq!(
+            w.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Rook,
+                Cell::C3,
+                b.occupied_cells()
+            ),
+            BitBoard::from_cells(&[Cell::C1, Cell::C2, Cell::C4, Cell::C5, Cell::C6, Cell::B3])
+        );
+        assert_eq!(
+            w.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Rook,
+                Cell::D3,
+                b.occupied_cells()
+            ),
+            BitBoard::from_cells(&[
+                Cell::D1,
+                Cell::D2,
+                Cell::D4,
+                Cell::D5,
+                Cell::E3,
+                Cell::F3,
+                Cell::G3
+            ])
+        );
+        assert_eq!(
+            b.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Rook,
+                Cell::G3,
+                w.occupied_cells()
+            ),
+            BitBoard::from_cells(&[
+                Cell::G1,
+                Cell::G2,
+                Cell::G4,
+                Cell::G5,
+                Cell::G6,
+                Cell::G7,
+                Cell::G8,
+                Cell::D3,
+                Cell::E3,
+                Cell::F3,
+                Cell::H3
+            ])
+        );
+        assert_eq!(
+            b.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Rook,
+                Cell::D5,
+                w.occupied_cells()
+            ),
+            BitBoard::from_cells(&[
+                Cell::D3,
+                Cell::D4,
+                Cell::D6,
+                Cell::D7,
+                Cell::A5,
+                Cell::B5,
+                Cell::C5,
+                Cell::E5,
+                Cell::F5,
+                Cell::G5,
+                Cell::H5
+            ])
+        );
+
+        // Negative tests: the Army does not have the given piece in that position
+        assert_eq!(
+            w.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Rook,
+                Cell::D5,
+                b.occupied_cells()
+            ),
+            BitBoard::new()
+        );
+        assert_eq!(
+            w.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Rook,
+                Cell::G3,
+                b.occupied_cells()
+            ),
+            BitBoard::new()
+        );
+        assert_eq!(
+            b.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Rook,
+                Cell::C3,
+                w.occupied_cells()
+            ),
+            BitBoard::new()
+        );
+        assert_eq!(
+            b.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Rook,
+                Cell::D3,
+                w.occupied_cells()
+            ),
+            BitBoard::new()
+        );
+    }
+
+    // ------------------------------------------------------------
+    // QUEENS possible moves tests
+    #[test]
+    fn test_possible_moves_for_a_queen_in_e6() {
+        let mut a = ChessArmy::new(ArmyColour::Black);
+        a.place_pieces(ChessPiece::Queen, &[Cell::E6]);
+        a.place_pieces(ChessPiece::Pawn, &[Cell::F4]);
+
+        assert_eq!(
+            a.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Queen,
+                Cell::E6,
+                BitBoard::new()
+            ),
+            BitBoard::from(
+                FILES_BBS[File::FileE as usize]
+                    ^ RANKS_BBS[Rank::Rank6 as usize]
+                    ^ DIAGS_BBS[Diagonal::Diag6 as usize]
+                    ^ ANTIDIAGS_BBS[AntiDiagonal::AntiDiag9 as usize]
+            )
+        );
+
+        // Negative tests: the Army does not have the given piece in that position
+        assert_eq!(
+            a.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Queen,
+                Cell::F4,
+                BitBoard::new()
+            ),
+            BitBoard::new()
+        );
+    }
+    #[test]
+    fn test_possible_moves_for_queens_with_complex_interaction() {
+        let mut w = ChessArmy::new(ArmyColour::White);
+        let mut b = ChessArmy::new(ArmyColour::Black);
+        w.place_pieces(ChessPiece::Queen, &[Cell::C6]);
+        w.place_pieces(ChessPiece::King, &[Cell::B6]);
+        w.place_pieces(ChessPiece::Knight, &[Cell::E8]);
+        w.place_pieces(ChessPiece::Bishop, &[Cell::F6]);
+        w.place_pieces(ChessPiece::Pawn, &[Cell::B5, Cell::C5]);
+        b.place_pieces(ChessPiece::Queen, &[Cell::F3]);
+        b.place_pieces(ChessPiece::King, &[Cell::G2]);
+        b.place_pieces(ChessPiece::Rook, &[Cell::H5]);
+        b.place_pieces(ChessPiece::Pawn, &[Cell::C3, Cell::H7]);
+
+        assert_eq!(
+            w.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Queen,
+                Cell::C6,
+                b.occupied_cells()
+            ),
+            BitBoard::from_cells(&[
+                Cell::C7,
+                Cell::C8,
+                Cell::D6,
+                Cell::E6,
+                Cell::B7,
+                Cell::A8,
+                Cell::D5,
+                Cell::E4,
+                Cell::F3,
+                Cell::D7
+            ])
+        );
+
+        assert_eq!(
+            b.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Queen,
+                Cell::F3,
+                w.occupied_cells()
+            ),
+            BitBoard::from_cells(&[
+                Cell::D3,
+                Cell::E3,
+                Cell::G3,
+                Cell::H3,
+                Cell::F1,
+                Cell::F2,
+                Cell::F4,
+                Cell::F5,
+                Cell::F6,
+                Cell::D1,
+                Cell::E2,
+                Cell::G4,
+                Cell::E4,
+                Cell::D5,
+                Cell::C6
+            ])
+        );
+
+        // Negative tests: the Army does not have the given piece in that position
+        assert_eq!(
+            w.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Queen,
+                Cell::F3,
+                b.occupied_cells()
+            ),
+            BitBoard::new()
+        );
+        assert_eq!(
+            b.possible_moves_for_regular_piece_in_cell(
+                ChessPiece::Queen,
+                Cell::C6,
+                w.occupied_cells()
+            ),
+            BitBoard::new()
+        );
+    }
+
+    // ------------------------------------------------------------
+    // PAWNS possible moves tests
 }

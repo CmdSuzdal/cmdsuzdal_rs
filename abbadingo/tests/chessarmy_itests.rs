@@ -353,9 +353,6 @@ fn itest_test_possible_moves_for_armies_in_start_position() {
     );
 }
 
-
-
-
 // ------------------------------------------------------------------------------
 // utility (non-test) functions
 fn check_white_initial_placement(a: &ChessArmy) {
