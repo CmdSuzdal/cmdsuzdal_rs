@@ -178,41 +178,6 @@ impl ChessArmy {
             | self.get_pieces(ChessPiece::Rook)
     }
 
-    /// Returns the [ChessPiece] occupying the given [Cell] if one,
-    /// or `None` if the [Cell] is free.
-    ///
-    /// # Arguments
-    ///
-    /// * `c` - The [Cell] to check.
-    ///
-    /// # Example
-    /// ```
-    /// # use abbadingo::bbdefines::{Cell};
-    /// # use abbadingo::chessdefines::{ArmyColour, ChessPiece};
-    /// # use abbadingo::chessarmy::{ChessArmy};
-    /// let army = ChessArmy::initial(ArmyColour::Black);
-    /// assert_eq!(army.get_piece_in_cell(Cell::C8), Some(ChessPiece::Bishop));
-    /// assert_eq!(army.get_piece_in_cell(Cell::C1), None);
-    /// ```
-    ///
-    pub fn get_piece_in_cell(&self, c: Cell) -> Option<ChessPiece> {
-        if self.get_pieces(ChessPiece::King).cell_is_active(c) {
-            Some(ChessPiece::King)
-        } else if self.get_pieces(ChessPiece::Queen).cell_is_active(c) {
-            Some(ChessPiece::Queen)
-        } else if self.get_pieces(ChessPiece::Bishop).cell_is_active(c) {
-            Some(ChessPiece::Bishop)
-        } else if self.get_pieces(ChessPiece::Knight).cell_is_active(c) {
-            Some(ChessPiece::Knight)
-        } else if self.get_pieces(ChessPiece::Rook).cell_is_active(c) {
-            Some(ChessPiece::Rook)
-        } else if self.get_pieces(ChessPiece::Pawn).cell_is_active(c) {
-            Some(ChessPiece::Pawn)
-        } else {
-            None
-        }
-    }
-
     /// Returns the [BitBoard] with the [Cell]s controlled by all the [ChessArmy] pieces and pawns.
     ///
     /// The "interference board" is provided to add a set of cell occupied by some
@@ -294,8 +259,30 @@ impl ChessArmy {
         }
     }
 
-
-
+    /// Returns the [ChessPiece] occupying the given [Cell] if one,
+    /// or `None` if the [Cell] is free.
+    ///
+    /// # Arguments
+    ///
+    /// * `c` - The [Cell] to check.
+    ///
+    fn get_piece_in_cell(&self, c: Cell) -> Option<ChessPiece> {
+        if self.get_pieces(ChessPiece::King).cell_is_active(c) {
+            Some(ChessPiece::King)
+        } else if self.get_pieces(ChessPiece::Queen).cell_is_active(c) {
+            Some(ChessPiece::Queen)
+        } else if self.get_pieces(ChessPiece::Bishop).cell_is_active(c) {
+            Some(ChessPiece::Bishop)
+        } else if self.get_pieces(ChessPiece::Knight).cell_is_active(c) {
+            Some(ChessPiece::Knight)
+        } else if self.get_pieces(ChessPiece::Rook).cell_is_active(c) {
+            Some(ChessPiece::Rook)
+        } else if self.get_pieces(ChessPiece::Pawn).cell_is_active(c) {
+            Some(ChessPiece::Pawn)
+        } else {
+            None
+        }
+    }
 
     /// Returns the [Cell] with the position of the King.
     ///
@@ -899,6 +886,54 @@ mod tests {
         assert_eq!(a.get_piece_in_cell(Cell::F2), Some(ChessPiece::Pawn));
         assert_eq!(a.get_piece_in_cell(Cell::G2), Some(ChessPiece::Pawn));
         assert_eq!(a.get_piece_in_cell(Cell::H2), Some(ChessPiece::Pawn));
+        assert_eq!(a.get_piece_in_cell(Cell::A3), None);
+        assert_eq!(a.get_piece_in_cell(Cell::B3), None);
+        assert_eq!(a.get_piece_in_cell(Cell::C3), None);
+        assert_eq!(a.get_piece_in_cell(Cell::D3), None);
+        assert_eq!(a.get_piece_in_cell(Cell::E3), None);
+        assert_eq!(a.get_piece_in_cell(Cell::F3), None);
+        assert_eq!(a.get_piece_in_cell(Cell::G3), None);
+        assert_eq!(a.get_piece_in_cell(Cell::H3), None);
+        assert_eq!(a.get_piece_in_cell(Cell::A4), None);
+        assert_eq!(a.get_piece_in_cell(Cell::B4), None);
+        assert_eq!(a.get_piece_in_cell(Cell::C4), None);
+        assert_eq!(a.get_piece_in_cell(Cell::D4), None);
+        assert_eq!(a.get_piece_in_cell(Cell::E4), None);
+        assert_eq!(a.get_piece_in_cell(Cell::F4), None);
+        assert_eq!(a.get_piece_in_cell(Cell::G4), None);
+        assert_eq!(a.get_piece_in_cell(Cell::H4), None);
+        assert_eq!(a.get_piece_in_cell(Cell::A5), None);
+        assert_eq!(a.get_piece_in_cell(Cell::B5), None);
+        assert_eq!(a.get_piece_in_cell(Cell::C5), None);
+        assert_eq!(a.get_piece_in_cell(Cell::D5), None);
+        assert_eq!(a.get_piece_in_cell(Cell::E5), None);
+        assert_eq!(a.get_piece_in_cell(Cell::F5), None);
+        assert_eq!(a.get_piece_in_cell(Cell::G5), None);
+        assert_eq!(a.get_piece_in_cell(Cell::H5), None);
+        assert_eq!(a.get_piece_in_cell(Cell::A6), None);
+        assert_eq!(a.get_piece_in_cell(Cell::B6), None);
+        assert_eq!(a.get_piece_in_cell(Cell::C6), None);
+        assert_eq!(a.get_piece_in_cell(Cell::D6), None);
+        assert_eq!(a.get_piece_in_cell(Cell::E6), None);
+        assert_eq!(a.get_piece_in_cell(Cell::F6), None);
+        assert_eq!(a.get_piece_in_cell(Cell::G6), None);
+        assert_eq!(a.get_piece_in_cell(Cell::H6), None);
+        assert_eq!(a.get_piece_in_cell(Cell::A7), None);
+        assert_eq!(a.get_piece_in_cell(Cell::B7), None);
+        assert_eq!(a.get_piece_in_cell(Cell::C7), None);
+        assert_eq!(a.get_piece_in_cell(Cell::D7), None);
+        assert_eq!(a.get_piece_in_cell(Cell::E7), None);
+        assert_eq!(a.get_piece_in_cell(Cell::F7), None);
+        assert_eq!(a.get_piece_in_cell(Cell::G7), None);
+        assert_eq!(a.get_piece_in_cell(Cell::H7), None);
+        assert_eq!(a.get_piece_in_cell(Cell::A8), None);
+        assert_eq!(a.get_piece_in_cell(Cell::B8), None);
+        assert_eq!(a.get_piece_in_cell(Cell::C8), None);
+        assert_eq!(a.get_piece_in_cell(Cell::D8), None);
+        assert_eq!(a.get_piece_in_cell(Cell::E8), None);
+        assert_eq!(a.get_piece_in_cell(Cell::F8), None);
+        assert_eq!(a.get_piece_in_cell(Cell::G8), None);
+        assert_eq!(a.get_piece_in_cell(Cell::H8), None);
     }
 
     // ------------------------------------------------------------
@@ -921,6 +956,54 @@ mod tests {
         assert_eq!(a.get_piece_in_cell(Cell::F7), Some(ChessPiece::Pawn));
         assert_eq!(a.get_piece_in_cell(Cell::G7), Some(ChessPiece::Pawn));
         assert_eq!(a.get_piece_in_cell(Cell::H7), Some(ChessPiece::Pawn));
+        assert_eq!(a.get_piece_in_cell(Cell::A6), None);
+        assert_eq!(a.get_piece_in_cell(Cell::B6), None);
+        assert_eq!(a.get_piece_in_cell(Cell::C6), None);
+        assert_eq!(a.get_piece_in_cell(Cell::D6), None);
+        assert_eq!(a.get_piece_in_cell(Cell::E6), None);
+        assert_eq!(a.get_piece_in_cell(Cell::F6), None);
+        assert_eq!(a.get_piece_in_cell(Cell::G6), None);
+        assert_eq!(a.get_piece_in_cell(Cell::H6), None);
+        assert_eq!(a.get_piece_in_cell(Cell::A5), None);
+        assert_eq!(a.get_piece_in_cell(Cell::B5), None);
+        assert_eq!(a.get_piece_in_cell(Cell::C5), None);
+        assert_eq!(a.get_piece_in_cell(Cell::D5), None);
+        assert_eq!(a.get_piece_in_cell(Cell::E5), None);
+        assert_eq!(a.get_piece_in_cell(Cell::F5), None);
+        assert_eq!(a.get_piece_in_cell(Cell::G5), None);
+        assert_eq!(a.get_piece_in_cell(Cell::H5), None);
+        assert_eq!(a.get_piece_in_cell(Cell::A4), None);
+        assert_eq!(a.get_piece_in_cell(Cell::B4), None);
+        assert_eq!(a.get_piece_in_cell(Cell::C4), None);
+        assert_eq!(a.get_piece_in_cell(Cell::D4), None);
+        assert_eq!(a.get_piece_in_cell(Cell::E4), None);
+        assert_eq!(a.get_piece_in_cell(Cell::F4), None);
+        assert_eq!(a.get_piece_in_cell(Cell::G4), None);
+        assert_eq!(a.get_piece_in_cell(Cell::H4), None);
+        assert_eq!(a.get_piece_in_cell(Cell::A3), None);
+        assert_eq!(a.get_piece_in_cell(Cell::B3), None);
+        assert_eq!(a.get_piece_in_cell(Cell::C3), None);
+        assert_eq!(a.get_piece_in_cell(Cell::D3), None);
+        assert_eq!(a.get_piece_in_cell(Cell::E3), None);
+        assert_eq!(a.get_piece_in_cell(Cell::F3), None);
+        assert_eq!(a.get_piece_in_cell(Cell::G3), None);
+        assert_eq!(a.get_piece_in_cell(Cell::H3), None);
+        assert_eq!(a.get_piece_in_cell(Cell::A2), None);
+        assert_eq!(a.get_piece_in_cell(Cell::B2), None);
+        assert_eq!(a.get_piece_in_cell(Cell::C2), None);
+        assert_eq!(a.get_piece_in_cell(Cell::D2), None);
+        assert_eq!(a.get_piece_in_cell(Cell::E2), None);
+        assert_eq!(a.get_piece_in_cell(Cell::F2), None);
+        assert_eq!(a.get_piece_in_cell(Cell::G2), None);
+        assert_eq!(a.get_piece_in_cell(Cell::H2), None);
+        assert_eq!(a.get_piece_in_cell(Cell::A1), None);
+        assert_eq!(a.get_piece_in_cell(Cell::B1), None);
+        assert_eq!(a.get_piece_in_cell(Cell::C1), None);
+        assert_eq!(a.get_piece_in_cell(Cell::D1), None);
+        assert_eq!(a.get_piece_in_cell(Cell::E1), None);
+        assert_eq!(a.get_piece_in_cell(Cell::F1), None);
+        assert_eq!(a.get_piece_in_cell(Cell::G1), None);
+        assert_eq!(a.get_piece_in_cell(Cell::H1), None);
     }
 
     // ------------------------------------------------------------
