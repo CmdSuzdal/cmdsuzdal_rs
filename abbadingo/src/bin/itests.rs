@@ -1,21 +1,23 @@
 use abbadingo::bbdefines::*;
 use abbadingo::bitboard::BitBoard;
+use abbadingo::chessdefines::ArmyColour;
+use abbadingo::chessarmy::ChessArmy;
 use abbadingo::hexboard::HexCell;
 
 fn main() {
-    println!("--------------------------------------------------");
+    println!("---------------------------------------------------");
     let f = File::FileA;
     println!("Hello File: {:?} = '{}'", f, f);
     println!("Hello Rank: {:?} = '{}'", Rank::Rank3, Rank::Rank3);
     println!("Hello Cell: {:?} = '{}'", Cell::D4, Cell::D4);
 
-    println!("--------------------------------------------------");
+    println!("---------------------------------------------------");
     let f = File::FileG;
     let r = Rank::Rank3;
     let c = to_cell(f, r);
     println!("File is {:?}, Rank is {:?}, Cell is {:?}", f, r, c);
 
-    println!("--------------------------------------------------");
+    println!("---------------------------------------------------");
     let mut bb = BitBoard::new();
     bb.set_file(File::FileH);
     bb.set_rank(Rank::Rank8);
@@ -24,9 +26,16 @@ fn main() {
     println!("Hello BitBoard: {:?}", bb);
     println!("Bitboard: {}", bb);
 
-    println!("--------------------------------------------------");
+    println!("---------------------------------------------------");
+    let w_army = ChessArmy::initial(ArmyColour::White);
+    let b_army = ChessArmy::initial(ArmyColour::Black);
+    println!("Hello White Army: {}", w_army);
+    println!("Hello Black Army: {}", b_army);
+
+
+    println!("---------------------------------------------------");
     let xb = HexCell::new();
     println!("Hello HexCell: {:?}", xb);
 
-    println!("--------------------------------------------------");
+    println!("---------------------------------------------------");
 }

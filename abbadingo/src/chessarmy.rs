@@ -1,6 +1,8 @@
 //! Definition of the [ChessArmy] structure and related methods implementation.
 //!
 
+use std::fmt;
+
 use crate::bbdefines::*;
 use crate::bitboard::BitBoard;
 use crate::chessdefines::*;
@@ -878,6 +880,58 @@ impl ChessArmy {
             }
         }
         bb | (ChessArmy::pawn_controlled_cells(c, self.colour) & intf_board)
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Traits implementation for ChessArmy structure
+
+/// Display trait for [ChessArmy] structure.
+///
+/// Represent a bitboard in "ascii" form.
+///
+impl fmt::Display for ChessArmy {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut bb_str: String = "\n".to_owned();
+        let mut king_sym = 'K';
+        let mut queen_sym = 'Q';
+        let mut bishop_sym = 'B';
+        let mut knight_sym = 'N';
+        let mut rook_sym = 'R';
+        let mut pawn_sym = 'P';
+        if self.colour == ArmyColour::Black {
+            king_sym = 'k';
+            queen_sym = 'q';
+            bishop_sym = 'b';
+            knight_sym = 'n';
+            rook_sym = 'r';
+            pawn_sym = 'p';
+        }
+        bb_str.push_str(&format!("  _ _ _ _ _ _ _ _"));
+        let mut fillchar = ' ';
+        for r in (0..8).rev() {
+            bb_str.push_str(&format!("\n{}|", r + 1));
+            if r == 0 {
+                fillchar = '_';
+            }
+            for c in 0..8 {
+                match self.get_piece_in_cell(to_cell(
+                    num::FromPrimitive::from_i32(c).unwrap(),
+                    num::FromPrimitive::from_i32(r).unwrap(),
+                )) {
+                    Some(ChessPiece::King) => bb_str.push(king_sym),
+                    Some(ChessPiece::Queen) => bb_str.push(queen_sym),
+                    Some(ChessPiece::Bishop) => bb_str.push(bishop_sym),
+                    Some(ChessPiece::Knight) => bb_str.push(knight_sym),
+                    Some(ChessPiece::Rook) => bb_str.push(rook_sym),
+                    Some(ChessPiece::Pawn) => bb_str.push(pawn_sym),
+                    _ => bb_str.push(fillchar),
+                }
+                bb_str.push('|');
+            }
+        }
+        bb_str.push_str("\n  a b c d e f g h\n");
+        write!(f, "{}", bb_str)
     }
 }
 
