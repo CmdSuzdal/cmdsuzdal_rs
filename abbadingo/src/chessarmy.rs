@@ -216,6 +216,42 @@ impl ChessArmy {
             | self.pawns_controlled_cells()
     }
 
+    /// Returns the [BitBoard] with the possible moves of a piece placed in the given
+    /// position. The piece can be of amy [ChessPiece] type.
+    ///
+    /// The [ChessArmy] shall have a piece in the given position, otherwise
+    /// an empty bitboard is returned. The interference board is used to limit the view of
+    /// the given piece (see "controlled cells" functions). If there are no moves (e.g. blocked
+    /// piece), an empty Bitboard is returned
+    ///
+    /// # Arguments
+    ///
+    /// * `cp`: the [ChessPiece] type of the piece to which the possible moves shall be determined
+    /// * `c`: the [Cell] where the Piece is placed
+    /// * `intf_board`: A [BitBoard] with pieces limiting the "view" of the [ChessArmy]
+    ///
+    /// # Example
+    /// ```
+    /// # use abbadingo::bbdefines::{Cell};
+    /// # use abbadingo::bitboard::{BitBoard};
+    /// # use abbadingo::chessdefines::{ArmyColour, ChessPiece};
+    /// # use abbadingo::chessarmy::{ChessArmy};
+    /// let a = ChessArmy::initial(ArmyColour::White);
+    /// assert_eq!(a.possible_moves_for_piece_in_cell(ChessPiece::Pawn, Cell::E2, BitBoard::new()), BitBoard::from_cells(&[Cell::E3, Cell::E4]));
+    /// ```
+    pub fn possible_moves_for_piece_in_cell(
+        &self,
+        cp: ChessPiece,
+        c: Cell,
+        intf_board: BitBoard,
+    ) -> BitBoard {
+        match cp {
+            ChessPiece::King => self.possible_moves_for_king(),
+            ChessPiece::Pawn => self.possible_moves_for_pawn_in_cell(c, intf_board),
+            _ => self.possible_moves_for_regular_piece_in_cell(cp, c, intf_board),
+        }
+    }
+
     // ---------------------------------------------------------------------------
     // PRIVATE METHODS
     // ---------------------------------------------------------------------------
@@ -687,33 +723,6 @@ impl ChessArmy {
         }
     }
 
-    /// Returns the [BitBoard] with the possible moves of a piece placed in the given
-    /// position. The piece can be of amy [ChessPiece] type.
-    ///
-    /// The [ChessArmy] shall have a piece in the given position, otherwise
-    /// an empty bitboard is returned. The interference board is used to limit the view of
-    /// the given piece (see "controlled cells" functions). If there are no moves (e.g. blocked
-    /// piece), an empty Bitboard is returned
-    ///
-    /// # Arguments
-    ///
-    /// * `cp`: the [ChessPiece] type of the piece to which the possible moves shall be determined
-    /// * `c`: the [Cell] where the Piece is placed
-    /// * `intf_board`: A [BitBoard] with pieces limiting the "view" of the [ChessArmy]
-    ///
-    fn possible_move_for_piece_in_cell(
-        &self,
-        cp: ChessPiece,
-        c: Cell,
-        intf_board: BitBoard,
-    ) -> BitBoard {
-        match cp {
-            ChessPiece::King => self.possible_moves_for_king(),
-            ChessPiece::Pawn => self.possible_moves_for_pawn_in_cell(c, intf_board),
-            _ => self.possible_moves_for_regular_piece_in_cell(cp, c, intf_board),
-        }
-    }
-
     /// Returns the [BitBoard] with the possible moves of the [ChessArmy] King.
     /// If no move are possible, the empty [BitBoard] is returned
     ///
@@ -794,7 +803,7 @@ impl ChessArmy {
         let mut bb = BitBoard::new();
         if let Some(tentative_cell) = n(c) {
             if ((self.occupied_cells() | intf_board) & BitBoard::from_cells(&[tentative_cell]))
-                != BitBoard::new()
+                == BitBoard::new()
             {
                 // the north cell is free. Add to the BitBoard of possible moves
                 bb.set_cell(tentative_cell);
@@ -804,7 +813,7 @@ impl ChessArmy {
                     if let Some(tentative_cell) = n(tentative_cell) {
                         if ((self.occupied_cells() | intf_board)
                             & BitBoard::from_cells(&[tentative_cell]))
-                            != BitBoard::new()
+                            == BitBoard::new()
                         {
                             // the north-north cell is free. Add to the BitBoard of possible moves
                             bb.set_cell(tentative_cell);
@@ -833,7 +842,7 @@ impl ChessArmy {
         let mut bb = BitBoard::new();
         if let Some(tentative_cell) = s(c) {
             if ((self.occupied_cells() | intf_board) & BitBoard::from_cells(&[tentative_cell]))
-                != BitBoard::new()
+                == BitBoard::new()
             {
                 // the south cell is free. Add to the BitBoard of possible moves
                 bb.set_cell(tentative_cell);
@@ -843,7 +852,7 @@ impl ChessArmy {
                     if let Some(tentative_cell) = s(tentative_cell) {
                         if ((self.occupied_cells() | intf_board)
                             & BitBoard::from_cells(&[tentative_cell]))
-                            != BitBoard::new()
+                            == BitBoard::new()
                         {
                             // the south-south cell is free. Add to the BitBoard of possible moves
                             bb.set_cell(tentative_cell);
@@ -1151,7 +1160,7 @@ mod tests {
         let w_army = ChessArmy::initial(ArmyColour::White);
         let b_army = ChessArmy::initial(ArmyColour::Black);
         assert_eq!(
-            w_army.possible_move_for_piece_in_cell(
+            w_army.possible_moves_for_piece_in_cell(
                 ChessPiece::King,
                 Cell::E1,
                 b_army.occupied_cells()
@@ -1159,7 +1168,7 @@ mod tests {
             BitBoard::new()
         );
         assert_eq!(
-            w_army.possible_move_for_piece_in_cell(
+            w_army.possible_moves_for_piece_in_cell(
                 ChessPiece::Queen,
                 Cell::D1,
                 b_army.occupied_cells()
@@ -1167,7 +1176,7 @@ mod tests {
             BitBoard::new()
         );
         assert_eq!(
-            w_army.possible_move_for_piece_in_cell(
+            w_army.possible_moves_for_piece_in_cell(
                 ChessPiece::Bishop,
                 Cell::C1,
                 b_army.occupied_cells()
@@ -1175,7 +1184,7 @@ mod tests {
             BitBoard::new()
         );
         assert_eq!(
-            w_army.possible_move_for_piece_in_cell(
+            w_army.possible_moves_for_piece_in_cell(
                 ChessPiece::Bishop,
                 Cell::F1,
                 b_army.occupied_cells()
@@ -1183,7 +1192,7 @@ mod tests {
             BitBoard::new()
         );
         assert_eq!(
-            w_army.possible_move_for_piece_in_cell(
+            w_army.possible_moves_for_piece_in_cell(
                 ChessPiece::Rook,
                 Cell::A1,
                 b_army.occupied_cells()
@@ -1191,7 +1200,7 @@ mod tests {
             BitBoard::new()
         );
         assert_eq!(
-            w_army.possible_move_for_piece_in_cell(
+            w_army.possible_moves_for_piece_in_cell(
                 ChessPiece::Rook,
                 Cell::H1,
                 b_army.occupied_cells()
@@ -1199,7 +1208,7 @@ mod tests {
             BitBoard::new()
         );
         assert_eq!(
-            w_army.possible_move_for_piece_in_cell(
+            w_army.possible_moves_for_piece_in_cell(
                 ChessPiece::Knight,
                 Cell::B1,
                 b_army.occupied_cells()
@@ -1207,7 +1216,7 @@ mod tests {
             BitBoard::from_cells(&[Cell::A3, Cell::C3])
         );
         assert_eq!(
-            w_army.possible_move_for_piece_in_cell(
+            w_army.possible_moves_for_piece_in_cell(
                 ChessPiece::Knight,
                 Cell::G1,
                 b_army.occupied_cells()
@@ -1216,7 +1225,7 @@ mod tests {
         );
 
         assert_eq!(
-            b_army.possible_move_for_piece_in_cell(
+            b_army.possible_moves_for_piece_in_cell(
                 ChessPiece::King,
                 Cell::E8,
                 w_army.occupied_cells()
@@ -1224,7 +1233,7 @@ mod tests {
             BitBoard::new()
         );
         assert_eq!(
-            b_army.possible_move_for_piece_in_cell(
+            b_army.possible_moves_for_piece_in_cell(
                 ChessPiece::Queen,
                 Cell::D8,
                 w_army.occupied_cells()
@@ -1232,7 +1241,7 @@ mod tests {
             BitBoard::new()
         );
         assert_eq!(
-            b_army.possible_move_for_piece_in_cell(
+            b_army.possible_moves_for_piece_in_cell(
                 ChessPiece::Bishop,
                 Cell::C8,
                 w_army.occupied_cells()
@@ -1240,7 +1249,7 @@ mod tests {
             BitBoard::new()
         );
         assert_eq!(
-            b_army.possible_move_for_piece_in_cell(
+            b_army.possible_moves_for_piece_in_cell(
                 ChessPiece::Bishop,
                 Cell::F8,
                 w_army.occupied_cells()
@@ -1248,7 +1257,7 @@ mod tests {
             BitBoard::new()
         );
         assert_eq!(
-            b_army.possible_move_for_piece_in_cell(
+            b_army.possible_moves_for_piece_in_cell(
                 ChessPiece::Rook,
                 Cell::A8,
                 w_army.occupied_cells()
@@ -1256,7 +1265,7 @@ mod tests {
             BitBoard::new()
         );
         assert_eq!(
-            b_army.possible_move_for_piece_in_cell(
+            b_army.possible_moves_for_piece_in_cell(
                 ChessPiece::Rook,
                 Cell::H8,
                 w_army.occupied_cells()
@@ -1264,7 +1273,7 @@ mod tests {
             BitBoard::new()
         );
         assert_eq!(
-            b_army.possible_move_for_piece_in_cell(
+            b_army.possible_moves_for_piece_in_cell(
                 ChessPiece::Knight,
                 Cell::B8,
                 w_army.occupied_cells()
@@ -1272,7 +1281,7 @@ mod tests {
             BitBoard::from_cells(&[Cell::A6, Cell::C6])
         );
         assert_eq!(
-            b_army.possible_move_for_piece_in_cell(
+            b_army.possible_moves_for_piece_in_cell(
                 ChessPiece::Knight,
                 Cell::G8,
                 w_army.occupied_cells()
@@ -1376,11 +1385,11 @@ mod tests {
         assert_eq!(a_b.num_pieces(), 5);
 
         assert_eq!(
-            a_w.possible_move_for_piece_in_cell(ChessPiece::King, Cell::B2, a_b.occupied_cells()),
+            a_w.possible_moves_for_piece_in_cell(ChessPiece::King, Cell::B2, a_b.occupied_cells()),
             BitBoard::from_cells(&[Cell::B1, Cell::C2])
         );
         assert_eq!(
-            a_b.possible_move_for_piece_in_cell(ChessPiece::King, Cell::H8, a_w.occupied_cells()),
+            a_b.possible_moves_for_piece_in_cell(ChessPiece::King, Cell::H8, a_w.occupied_cells()),
             BitBoard::from_cells(&[Cell::G8])
         );
     }
