@@ -1701,7 +1701,7 @@ mod tests {
     // ------------------------------------------------------------
     // PAWNS possible moves tests
     #[test]
-    fn only_single_step_is_possible_from_start_rank_and_no_capture_white() {
+    fn only_single_step_is_possible_from_not_start_rank_and_no_capture_white() {
         let mut a = ChessArmy::new(ArmyColour::White);
         a.place_pieces(ChessPiece::Pawn, &[Cell::A3, Cell::E4, Cell::G6]);
         a.place_pieces(ChessPiece::King, &[Cell::E1]);
@@ -1726,9 +1726,8 @@ mod tests {
             BitBoard::from_cells(&[Cell::G7])
         );
     }
-
     #[test]
-    fn only_single_step_is_possible_from_start_rank_and_no_capture_black() {
+    fn only_single_step_is_possible_from_not_start_rank_and_no_capture_black() {
         let mut a = ChessArmy::new(ArmyColour::Black);
         a.place_pieces(ChessPiece::Pawn, &[Cell::B6, Cell::C5, Cell::H3]);
         a.place_pieces(ChessPiece::King, &[Cell::E8]);
@@ -1751,6 +1750,314 @@ mod tests {
         assert_eq!(
             a.possible_moves_for_pawn_in_cell(Cell::H3, BitBoard::new()),
             BitBoard::from_cells(&[Cell::H2])
+        );
+    }
+    #[test]
+    fn one_or_two_steps_are_possible_from_start_rank_and_no_capture_white() {
+        let mut a = ChessArmy::new(ArmyColour::White);
+        a.place_pieces(ChessPiece::Pawn, &[Cell::C2, Cell::F2]);
+        a.place_pieces(ChessPiece::King, &[Cell::E1]);
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::A2, BitBoard::new()),
+            BitBoard::new()
+        ); // No pawn in a2
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::C2, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::C3, Cell::C4])
+        );
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::F2, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::F3, Cell::F4])
+        );
+    }
+    #[test]
+    fn one_or_two_steps_are_possible_from_start_rank_and_no_capture_black() {
+        let mut a = ChessArmy::new(ArmyColour::Black);
+        a.place_pieces(ChessPiece::Pawn, &[Cell::D7, Cell::H7]);
+        a.place_pieces(ChessPiece::King, &[Cell::E8]);
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::B7, BitBoard::new()),
+            BitBoard::new()
+        ); // No pawn in b7
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::D7, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::D6, Cell::D5])
+        );
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::H7, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::H6, Cell::H5])
+        );
+    }
+    #[test]
+    fn no_pawn_moves_are_possible_blocking_piece_white() {
+        let mut a = ChessArmy::new(ArmyColour::White);
+        a.place_pieces(ChessPiece::Pawn, &[Cell::D3]);
+        a.place_pieces(ChessPiece::King, &[Cell::D4]);
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::D3, BitBoard::new()),
+            BitBoard::new()
+        );
+    }
+    #[test]
+    fn no_pawn_moves_are_possible_blocking_piece_black() {
+        let mut a = ChessArmy::new(ArmyColour::Black);
+        a.place_pieces(ChessPiece::Pawn, &[Cell::G5]);
+        a.place_pieces(ChessPiece::King, &[Cell::G4]);
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::G5, BitBoard::new()),
+            BitBoard::new()
+        );
+    }
+    #[test]
+    fn limited_pawn_moves_when_blocking_pieces_of_the_same_color_white() {
+        let mut a = ChessArmy::new(ArmyColour::White);
+        a.place_pieces(ChessPiece::Pawn, &[Cell::B2, Cell::G2, Cell::H2]);
+        a.place_pieces(ChessPiece::King, &[Cell::B3]);
+        a.place_pieces(ChessPiece::Knight, &[Cell::G4]);
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::B2, BitBoard::new()),
+            BitBoard::new()
+        );
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::G2, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::G3])
+        );
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::H2, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::H3, Cell::H4])
+        );
+    }
+    #[test]
+    fn limited_pawn_moves_when_blocking_pieces_of_the_same_color_black() {
+        let mut a = ChessArmy::new(ArmyColour::Black);
+        a.place_pieces(ChessPiece::Pawn, &[Cell::A7, Cell::B7, Cell::E7]);
+        a.place_pieces(ChessPiece::King, &[Cell::A6]);
+        a.place_pieces(ChessPiece::Rook, &[Cell::B5]);
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::A7, BitBoard::new()),
+            BitBoard::new()
+        );
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::B7, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::B6])
+        );
+        assert_eq!(
+            a.possible_moves_for_pawn_in_cell(Cell::E7, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::E6, Cell::E5])
+        );
+    }
+    #[test]
+    fn limited_pawn_moves_when_blocking_pieces_of_the_opposite_colour_white() {
+        let mut w = ChessArmy::new(ArmyColour::White);
+        w.place_pieces(ChessPiece::Pawn, &[Cell::C3, Cell::G7]);
+        w.place_pieces(ChessPiece::King, &[Cell::G1]);
+        assert_eq!(
+            w.possible_moves_for_pawn_in_cell(Cell::C3, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::C4])
+        );
+        assert_eq!(
+            w.possible_moves_for_pawn_in_cell(Cell::G7, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::G8])
+        );
+
+        let mut b = ChessArmy::new(ArmyColour::Black);
+        b.place_pieces(ChessPiece::Pawn, &[Cell::C4]);
+        b.place_pieces(ChessPiece::King, &[Cell::G8]);
+        assert_eq!(
+            w.possible_moves_for_pawn_in_cell(Cell::C3, b.occupied_cells()),
+            BitBoard::new()
+        );
+        assert_eq!(
+            w.possible_moves_for_pawn_in_cell(Cell::G7, b.occupied_cells()),
+            BitBoard::new()
+        );
+    }
+    #[test]
+    fn limited_pawn_moves_when_blocking_pieces_of_the_opposite_colour_black() {
+        let mut b = ChessArmy::new(ArmyColour::Black);
+        b.place_pieces(ChessPiece::Pawn, &[Cell::C5, Cell::F3]);
+        b.place_pieces(ChessPiece::King, &[Cell::G8]);
+        assert_eq!(
+            b.possible_moves_for_pawn_in_cell(Cell::C5, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::C4])
+        );
+        assert_eq!(
+            b.possible_moves_for_pawn_in_cell(Cell::F3, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::F2])
+        );
+
+        let mut w = ChessArmy::new(ArmyColour::White);
+        w.place_pieces(ChessPiece::Pawn, &[Cell::C4]);
+        w.place_pieces(ChessPiece::King, &[Cell::F2]);
+        assert_eq!(
+            b.possible_moves_for_pawn_in_cell(Cell::C5, w.occupied_cells()),
+            BitBoard::new()
+        );
+        assert_eq!(
+            b.possible_moves_for_pawn_in_cell(Cell::F3, w.occupied_cells()),
+            BitBoard::new()
+        );
+    }
+    #[test]
+    fn limited_pawn_moves_when_blocking_pieces_of_the_opposite_colour_start_line_white() {
+        let mut w = ChessArmy::new(ArmyColour::White);
+        w.place_pieces(ChessPiece::Pawn, &[Cell::B2, Cell::E2, Cell::H2]);
+        w.place_pieces(ChessPiece::King, &[Cell::G1]);
+        assert_eq!(
+            w.possible_moves_for_pawn_in_cell(Cell::B2, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::B3, Cell::B4])
+        );
+        assert_eq!(
+            w.possible_moves_for_pawn_in_cell(Cell::E2, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::E3, Cell::E4])
+        );
+        assert_eq!(
+            w.possible_moves_for_pawn_in_cell(Cell::H2, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::H3, Cell::H4])
+        );
+
+        let mut b = ChessArmy::new(ArmyColour::Black);
+        b.place_pieces(ChessPiece::Pawn, &[Cell::E3]);
+        b.place_pieces(ChessPiece::King, &[Cell::B4]);
+        assert_eq!(
+            w.possible_moves_for_pawn_in_cell(Cell::B2, b.occupied_cells()),
+            BitBoard::from_cells(&[Cell::B3])
+        );
+        assert_eq!(
+            w.possible_moves_for_pawn_in_cell(Cell::E2, b.occupied_cells()),
+            BitBoard::new()
+        );
+        assert_eq!(
+            w.possible_moves_for_pawn_in_cell(Cell::H2, b.occupied_cells()),
+            BitBoard::from_cells(&[Cell::H3, Cell::H4])
+        );
+    }
+    #[test]
+    fn limited_pawn_moves_when_blocking_pieces_of_the_opposite_colour_start_line_black() {
+        let mut b = ChessArmy::new(ArmyColour::Black);
+        b.place_pieces(ChessPiece::Pawn, &[Cell::B7, Cell::D7, Cell::H7]);
+        b.place_pieces(ChessPiece::King, &[Cell::G8]);
+        assert_eq!(
+            b.possible_moves_for_pawn_in_cell(Cell::B7, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::B6, Cell::B5])
+        );
+        assert_eq!(
+            b.possible_moves_for_pawn_in_cell(Cell::D7, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::D6, Cell::D5])
+        );
+        assert_eq!(
+            b.possible_moves_for_pawn_in_cell(Cell::H7, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::H6, Cell::H5])
+        );
+
+        let mut w = ChessArmy::new(ArmyColour::White);
+        w.place_pieces(ChessPiece::Pawn, &[Cell::B6]);
+        w.place_pieces(ChessPiece::King, &[Cell::D5]);
+        assert_eq!(
+            b.possible_moves_for_pawn_in_cell(Cell::B7, w.occupied_cells()),
+            BitBoard::new()
+        );
+        assert_eq!(
+            b.possible_moves_for_pawn_in_cell(Cell::D7, w.occupied_cells()),
+            BitBoard::from_cells(&[Cell::D6])
+        );
+        assert_eq!(
+            b.possible_moves_for_pawn_in_cell(Cell::H7, w.occupied_cells()),
+            BitBoard::from_cells(&[Cell::H6, Cell::H5])
+        );
+    }
+    #[test]
+    fn pawn_moves_with_pawn_capture_no_start_line() {
+        let mut w = ChessArmy::new(ArmyColour::White);
+        w.place_pieces(ChessPiece::Pawn, &[Cell::D4]);
+        w.place_pieces(ChessPiece::King, &[Cell::C5]);
+        let mut b = ChessArmy::new(ArmyColour::Black);
+        b.place_pieces(ChessPiece::Pawn, &[Cell::E5]);
+        b.place_pieces(ChessPiece::King, &[Cell::E6]);
+        assert_eq!(
+            w.possible_moves_for_pawn_in_cell(Cell::D4, b.occupied_cells()),
+            BitBoard::from_cells(&[Cell::D5, Cell::E5])
+        );
+        assert_eq!(
+            b.possible_moves_for_pawn_in_cell(Cell::E5, w.occupied_cells()),
+            BitBoard::from_cells(&[Cell::E4, Cell::D4])
+        );
+    }
+    #[test]
+    fn pawn_moves_with_multiple_captures_no_start_line() {
+        let mut w = ChessArmy::new(ArmyColour::White);
+        w.place_pieces(ChessPiece::Pawn, &[Cell::B5]);
+        w.place_pieces(ChessPiece::King, &[Cell::B4]);
+        w.place_pieces(ChessPiece::Queen, &[Cell::D5]);
+        let mut b = ChessArmy::new(ArmyColour::Black);
+        b.place_pieces(ChessPiece::Pawn, &[Cell::C6]);
+        b.place_pieces(ChessPiece::King, &[Cell::C7]);
+        b.place_pieces(ChessPiece::Bishop, &[Cell::A6]);
+        assert_eq!(
+            w.possible_moves_for_pawn_in_cell(Cell::B5, b.occupied_cells()),
+            BitBoard::from_cells(&[Cell::A6, Cell::B6, Cell::C6])
+        );
+        assert_eq!(
+            b.possible_moves_for_pawn_in_cell(Cell::C6, w.occupied_cells()),
+            BitBoard::from_cells(&[Cell::B5, Cell::C5, Cell::D5])
+        );
+    }
+    #[test]
+    fn pawn_moves_with_multiple_captures_with_some_on_start_line() {
+        let mut w = ChessArmy::new(ArmyColour::White);
+        w.place_pieces(ChessPiece::Pawn, &[Cell::C2, Cell::D2, Cell::H5]);
+        w.place_pieces(ChessPiece::King, &[Cell::E1]);
+        w.place_pieces(ChessPiece::Knight, &[Cell::C6, Cell::E6]);
+        w.place_pieces(ChessPiece::Bishop, &[Cell::C5, Cell::E5]);
+        w.place_pieces(ChessPiece::Rook, &[Cell::F6, Cell::H6]);
+        w.place_pieces(ChessPiece::Queen, &[Cell::F5]);
+        assert_eq!(
+            w.possible_moves_for_pawn_in_cell(Cell::C2, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::C3, Cell::C4])
+        );
+        assert_eq!(
+            w.possible_moves_for_pawn_in_cell(Cell::D2, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::D3, Cell::D4])
+        );
+        assert_eq!(
+            w.possible_moves_for_pawn_in_cell(Cell::H5, BitBoard::new()),
+            BitBoard::new()
+        );
+
+        let mut b = ChessArmy::new(ArmyColour::Black);
+        b.place_pieces(ChessPiece::Pawn, &[Cell::D7, Cell::G7]);
+        b.place_pieces(ChessPiece::King, &[Cell::E8]);
+        b.place_pieces(ChessPiece::Knight, &[Cell::B3, Cell::E3]);
+        b.place_pieces(ChessPiece::Bishop, &[Cell::B4]);
+        b.place_pieces(ChessPiece::Queen, &[Cell::E4]);
+        assert_eq!(
+            b.possible_moves_for_pawn_in_cell(Cell::D7, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::D6, Cell::D5])
+        );
+        assert_eq!(
+            b.possible_moves_for_pawn_in_cell(Cell::G7, BitBoard::new()),
+            BitBoard::from_cells(&[Cell::G6, Cell::G5])
+        );
+
+        assert_eq!(
+            w.possible_moves_for_pawn_in_cell(Cell::C2, b.occupied_cells()),
+            BitBoard::from_cells(&[Cell::C3, Cell::C4, Cell::B3])
+        );
+        assert_eq!(
+            w.possible_moves_for_pawn_in_cell(Cell::D2, b.occupied_cells()),
+            BitBoard::from_cells(&[Cell::D3, Cell::D4, Cell::E3])
+        );
+        assert_eq!(
+            w.possible_moves_for_pawn_in_cell(Cell::H5, b.occupied_cells()),
+            BitBoard::new()
+        );
+        assert_eq!(
+            b.possible_moves_for_pawn_in_cell(Cell::D7, w.occupied_cells()),
+            BitBoard::from_cells(&[Cell::D6, Cell::D5, Cell::C6, Cell::E6])
+        );
+        assert_eq!(
+            b.possible_moves_for_pawn_in_cell(Cell::G7, w.occupied_cells()),
+            BitBoard::from_cells(&[Cell::G6, Cell::G5, Cell::F6, Cell::H6])
         );
     }
 }
