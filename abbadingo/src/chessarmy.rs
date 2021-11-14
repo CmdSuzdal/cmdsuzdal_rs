@@ -13,7 +13,7 @@ use crate::chessdefines::*;
 #[derive(Debug, Copy, Clone)]
 pub struct ChessArmy {
     pieces_bmask: [BitBoard; NUM_PIECES_TYPES], // private: pieces bitmask as accessed using the get_pieces() function
-    colour: ArmyColour,
+    pub colour: ArmyColour,
 }
 
 impl ChessArmy {
@@ -911,26 +911,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn default_constructor_building_a_white_army() {
-        let a = ChessArmy::new(ArmyColour::White);
-        check_white_initial_placement(&a);
-    }
-
-    #[test]
-    fn default_constructor_building_a_black_army() {
-        let a = ChessArmy::new(ArmyColour::Black);
-        check_black_initial_placement(&a);
-    }
-
-    #[test]
-    fn test_reset_to_white_method() {
-        let mut a = ChessArmy::new(ArmyColour::Black);
-        check_black_initial_placement(&a);
-        a.reset(ArmyColour::White);
-        check_white_initial_placement(&a);
-    }
-
-    #[test]
     fn test_get_piece_in_cell_in_initial_white_army() {
         let a = ChessArmy::new(ArmyColour::White);
         assert_eq!(a.get_piece_in_cell(Cell::A1), Some(ChessPiece::Rook));
@@ -1338,82 +1318,6 @@ mod tests {
         assert_eq!(
             a_b.possible_move_for_piece_in_cell(ChessPiece::King, Cell::H8, a_w.occupied_cells()),
             BitBoard::from_cells(&[Cell::G8])
-        );
-    }
-
-    // ------------------------------------------------------------------------------
-    // utility (non-test) functions
-    fn check_white_initial_placement(a: &ChessArmy) {
-        assert_eq!(a.colour, ArmyColour::White);
-        assert_eq!(
-            a.get_pieces(ChessPiece::King),
-            BitBoard::from_cells(&[Cell::E1])
-        );
-        assert_eq!(
-            a.get_pieces(ChessPiece::Queen),
-            BitBoard::from_cells(&[Cell::D1])
-        );
-        assert_eq!(
-            a.get_pieces(ChessPiece::Bishop),
-            BitBoard::from_cells(&[Cell::C1, Cell::F1])
-        );
-        assert_eq!(
-            a.get_pieces(ChessPiece::Knight),
-            BitBoard::from_cells(&[Cell::B1, Cell::G1])
-        );
-        assert_eq!(
-            a.get_pieces(ChessPiece::Rook),
-            BitBoard::from_cells(&[Cell::A1, Cell::H1])
-        );
-        assert_eq!(
-            a.get_pieces(ChessPiece::Pawn),
-            BitBoard::from_cells(&[
-                Cell::A2,
-                Cell::B2,
-                Cell::C2,
-                Cell::D2,
-                Cell::E2,
-                Cell::F2,
-                Cell::G2,
-                Cell::H2
-            ])
-        );
-    }
-
-    fn check_black_initial_placement(a: &ChessArmy) {
-        assert_eq!(a.colour, ArmyColour::Black);
-        assert_eq!(
-            a.get_pieces(ChessPiece::King),
-            BitBoard::from_cells(&[Cell::E8])
-        );
-        assert_eq!(
-            a.get_pieces(ChessPiece::Queen),
-            BitBoard::from_cells(&[Cell::D8])
-        );
-        assert_eq!(
-            a.get_pieces(ChessPiece::Bishop),
-            BitBoard::from_cells(&[Cell::C8, Cell::F8])
-        );
-        assert_eq!(
-            a.get_pieces(ChessPiece::Knight),
-            BitBoard::from_cells(&[Cell::B8, Cell::G8])
-        );
-        assert_eq!(
-            a.get_pieces(ChessPiece::Rook),
-            BitBoard::from_cells(&[Cell::A8, Cell::H8])
-        );
-        assert_eq!(
-            a.get_pieces(ChessPiece::Pawn),
-            BitBoard::from_cells(&[
-                Cell::A7,
-                Cell::B7,
-                Cell::C7,
-                Cell::D7,
-                Cell::E7,
-                Cell::F7,
-                Cell::G7,
-                Cell::H7
-            ])
         );
     }
 }
