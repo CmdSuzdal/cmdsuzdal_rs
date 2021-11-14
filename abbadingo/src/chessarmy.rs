@@ -93,74 +93,6 @@ impl ChessArmy {
         a
     }
 
-    /// Initialize an [ChessArmy] of the specified colour with the initial standard chess deployment.
-    ///
-    /// Can be used to reset a [ChessArmy] to initial state.
-    ///
-    /// # Arguments
-    ///
-    /// * `c` - The [ArmyColour] of the new arrangement of the [ChessArmy].
-    ///
-    /// # Example:
-    /// ```
-    /// # use abbadingo::chessdefines::ArmyColour;
-    /// # use abbadingo::chessarmy::ChessArmy;
-    /// let mut army = ChessArmy::initial(ArmyColour::White);
-    /// //    _________________________
-    /// // r8|  .  .  .  .  .  .  .  . |
-    /// // r7|  .  .  .  .  .  .  .  . |
-    /// // r6|  .  .  .  .  .  .  .  . |
-    /// // r5|  .  .  .  .  .  .  .  . |
-    /// // r4|  .  .  .  .  .  .  .  . |
-    /// // r3|  .  .  .  .  .  .  .  . |
-    /// // r2|  P  P  P  P  P  P  P  P |
-    /// // r1|  R  N  B  Q  K  B  N  R |
-    /// //     -------------------------
-    /// //     fa fb fc fd fe ff fg fh
-    ///
-    /// army.reset(ArmyColour::Black);
-    /// //    _________________________
-    /// // r8|  r  n  b  q  k  b  n  r |
-    /// // r7|  p  p  p  p  p  p  p  p |
-    /// // r6|  .  .  .  .  .  .  .  . |
-    /// // r5|  .  .  .  .  .  .  .  . |
-    /// // r4|  .  .  .  .  .  .  .  . |
-    /// // r3|  .  .  .  .  .  .  .  . |
-    /// // r2|  .  .  .  .  .  .  .  . |
-    /// // r1|  .  .  .  .  .  .  .  . |
-    /// //     -------------------------
-    /// //     fa fb fc fd fe ff fg fh
-    /// ```
-    pub fn reset(&mut self, c: ArmyColour) {
-        self.colour = c;
-        match c {
-            ArmyColour::White => {
-                self.pieces_bmask[ChessPiece::King as usize] = BitBoard::from_cells(&[Cell::E1]);
-                self.pieces_bmask[ChessPiece::Queen as usize] = BitBoard::from_cells(&[Cell::D1]);
-                self.pieces_bmask[ChessPiece::Bishop as usize] =
-                    BitBoard::from_cells(&[Cell::C1, Cell::F1]);
-                self.pieces_bmask[ChessPiece::Knight as usize] =
-                    BitBoard::from_cells(&[Cell::B1, Cell::G1]);
-                self.pieces_bmask[ChessPiece::Rook as usize] =
-                    BitBoard::from_cells(&[Cell::A1, Cell::H1]);
-                self.pieces_bmask[ChessPiece::Pawn as usize] = BitBoard::new();
-                self.pieces_bmask[ChessPiece::Pawn as usize].set_rank(Rank::Rank2);
-            }
-            ArmyColour::Black => {
-                self.pieces_bmask[ChessPiece::King as usize] = BitBoard::from_cells(&[Cell::E8]);
-                self.pieces_bmask[ChessPiece::Queen as usize] = BitBoard::from_cells(&[Cell::D8]);
-                self.pieces_bmask[ChessPiece::Bishop as usize] =
-                    BitBoard::from_cells(&[Cell::C8, Cell::F8]);
-                self.pieces_bmask[ChessPiece::Knight as usize] =
-                    BitBoard::from_cells(&[Cell::B8, Cell::G8]);
-                self.pieces_bmask[ChessPiece::Rook as usize] =
-                    BitBoard::from_cells(&[Cell::A8, Cell::H8]);
-                self.pieces_bmask[ChessPiece::Pawn as usize] = BitBoard::new();
-                self.pieces_bmask[ChessPiece::Pawn as usize].set_rank(Rank::Rank7);
-            }
-        }
-    }
-
     /// Gets the BitBoard of the pieces for a [ChessArmy].
     /// This is a convenience method to avoid to continuously cast the
     /// [ChessPiece] to usize when directly accessing the `pieces` bitmasks
@@ -322,6 +254,48 @@ impl ChessArmy {
     // ---------------------------------------------------------------------------
     // PRIVATE METHODS
     // ---------------------------------------------------------------------------
+
+    /// Initialize a [ChessArmy] of the specified colour with the initial standard chess deployment.
+    ///
+    /// Can be used to reset an already existing [ChessArmy] to initial state
+    /// instead to create a new army using the [initial()](crate::chessarmy::ChessArmy::initial) constructor.
+    ///
+    /// # Arguments
+    ///
+    /// * `c` - The [ArmyColour] of the new arrangement of the [ChessArmy].
+    ///
+    fn reset(&mut self, c: ArmyColour) {
+        self.colour = c;
+        match c {
+            ArmyColour::White => {
+                self.pieces_bmask[ChessPiece::King as usize] = BitBoard::from_cells(&[Cell::E1]);
+                self.pieces_bmask[ChessPiece::Queen as usize] = BitBoard::from_cells(&[Cell::D1]);
+                self.pieces_bmask[ChessPiece::Bishop as usize] =
+                    BitBoard::from_cells(&[Cell::C1, Cell::F1]);
+                self.pieces_bmask[ChessPiece::Knight as usize] =
+                    BitBoard::from_cells(&[Cell::B1, Cell::G1]);
+                self.pieces_bmask[ChessPiece::Rook as usize] =
+                    BitBoard::from_cells(&[Cell::A1, Cell::H1]);
+                self.pieces_bmask[ChessPiece::Pawn as usize] = BitBoard::new();
+                self.pieces_bmask[ChessPiece::Pawn as usize].set_rank(Rank::Rank2);
+            }
+            ArmyColour::Black => {
+                self.pieces_bmask[ChessPiece::King as usize] = BitBoard::from_cells(&[Cell::E8]);
+                self.pieces_bmask[ChessPiece::Queen as usize] = BitBoard::from_cells(&[Cell::D8]);
+                self.pieces_bmask[ChessPiece::Bishop as usize] =
+                    BitBoard::from_cells(&[Cell::C8, Cell::F8]);
+                self.pieces_bmask[ChessPiece::Knight as usize] =
+                    BitBoard::from_cells(&[Cell::B8, Cell::G8]);
+                self.pieces_bmask[ChessPiece::Rook as usize] =
+                    BitBoard::from_cells(&[Cell::A8, Cell::H8]);
+                self.pieces_bmask[ChessPiece::Pawn as usize] = BitBoard::new();
+                self.pieces_bmask[ChessPiece::Pawn as usize].set_rank(Rank::Rank7);
+            }
+        }
+    }
+
+
+
 
     /// Returns the [Cell] with the position of the King.
     ///
@@ -905,6 +879,7 @@ impl ChessArmy {
 mod tests {
     use super::*;
 
+    // ------------------------------------------------------------
     #[test]
     fn test_get_piece_in_cell_in_initial_white_army() {
         let a = ChessArmy::initial(ArmyColour::White);
@@ -926,6 +901,7 @@ mod tests {
         assert_eq!(a.get_piece_in_cell(Cell::H2), Some(ChessPiece::Pawn));
     }
 
+    // ------------------------------------------------------------
     #[test]
     fn test_get_piece_in_cell_in_initial_black_army() {
         let a = ChessArmy::initial(ArmyColour::Black);
@@ -947,6 +923,7 @@ mod tests {
         assert_eq!(a.get_piece_in_cell(Cell::H7), Some(ChessPiece::Pawn));
     }
 
+    // ------------------------------------------------------------
     #[test]
     fn test_king_controlled_cells_in_initial_white_army() {
         let a = ChessArmy::initial(ArmyColour::White);
@@ -964,6 +941,7 @@ mod tests {
         );
     }
 
+    // ------------------------------------------------------------
     #[test]
     fn test_cell_controlled_by_single_pawn() {
         assert_eq!(
@@ -1220,6 +1198,7 @@ mod tests {
         );
     }
 
+    // ------------------------------------------------------------
     #[test]
     fn test_king_possible_moves_for_a_king_alone_in_e6() {
         let mut a = ChessArmy::new(ArmyColour::White);

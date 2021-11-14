@@ -19,17 +19,6 @@ fn itest_create_a_black_army_with_initial_position() {
 
 // ------------------------------------------------------------
 #[test]
-fn itest_modify_a_black_army_in_a_white_army_using_the_reset_fn() {
-    let mut a = ChessArmy::initial(ArmyColour::Black);
-    check_black_initial_placement(&a);
-    a.reset(ArmyColour::White);
-    check_white_initial_placement(&a);
-    a.reset(ArmyColour::Black);
-    check_black_initial_placement(&a);
-}
-
-// ------------------------------------------------------------
-#[test]
 fn itest_create_empty_armies_using_the_empty_constructor() {
     let white_empty_army = ChessArmy::new(ArmyColour::White);
     assert_eq!(white_empty_army.num_pieces(), 0);
