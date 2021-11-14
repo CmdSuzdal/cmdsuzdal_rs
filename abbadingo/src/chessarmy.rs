@@ -708,7 +708,7 @@ impl ChessArmy {
         intf_board: BitBoard,
     ) -> BitBoard {
         match cp {
-            ChessPiece::King => self.king_possible_moves(),
+            ChessPiece::King => self.possible_moves_for_king(),
             ChessPiece::Pawn => self.possible_moves_for_pawn_in_cell(c, intf_board),
             _ => self.possible_moves_for_regular_piece_in_cell(cp, c, intf_board),
         }
@@ -723,7 +723,7 @@ impl ChessArmy {
     /// the "possible moves" functions return the possible moves and not
     /// the valid ones. Check for validity shall be done from caller.
     ///
-    fn king_possible_moves(&self) -> BitBoard {
+    fn possible_moves_for_king(&self) -> BitBoard {
         (self.king_controlled_cells() | self.occupied_cells()) ^ self.occupied_cells()
     }
 
@@ -1283,12 +1283,12 @@ mod tests {
 
     // ------------------------------------------------------------
     #[test]
-    fn test_king_possible_moves_for_a_king_alone_in_e6() {
+    fn test_possible_moves_for_a_king_alone_in_e6() {
         let mut a = ChessArmy::new(ArmyColour::White);
         a.place_pieces(ChessPiece::King, &[Cell::E6]);
-        assert_eq!(a.king_possible_moves(), BitBoard::from(neighbour(Cell::E6)));
+        assert_eq!(a.possible_moves_for_king(), BitBoard::from(neighbour(Cell::E6)));
         assert_eq!(
-            a.king_possible_moves(),
+            a.possible_moves_for_king(),
             BitBoard::from_cells(&[
                 Cell::D5,
                 Cell::E5,
@@ -1302,13 +1302,13 @@ mod tests {
         );
     }
     #[test]
-    fn test_king_possible_moves_for_a_king_alone_in_a1() {
+    fn test_possible_moves_for_a_king_alone_in_a1() {
         let mut a = ChessArmy::new(ArmyColour::Black);
         a.place_pieces(ChessPiece::King, &[Cell::A1]);
         assert_eq!(a.num_pieces(), 1);
-        assert_eq!(a.king_possible_moves(), BitBoard::from(neighbour(Cell::A1)));
+        assert_eq!(a.possible_moves_for_king(), BitBoard::from(neighbour(Cell::A1)));
         assert_eq!(
-            a.king_possible_moves(),
+            a.possible_moves_for_king(),
             BitBoard::from_cells(&[Cell::A2, Cell::B2, Cell::B1])
         );
     }
@@ -1322,18 +1322,18 @@ mod tests {
         assert_eq!(a_w.num_pieces(), 1);
         assert_eq!(a_b.num_pieces(), 1);
 
-        // The king_possible_moves() does not check for move validity
+        // The possible_moves_for_king() does not check for move validity
         // so all the moves are returned, also the illegal ones
         assert_eq!(
-            a_w.king_possible_moves(),
+            a_w.possible_moves_for_king(),
             BitBoard::from(neighbour(Cell::E5))
         );
         assert_eq!(
-            a_b.king_possible_moves(),
+            a_b.possible_moves_for_king(),
             BitBoard::from(neighbour(Cell::E7))
         );
         assert_eq!(
-            a_w.king_possible_moves(),
+            a_w.possible_moves_for_king(),
             BitBoard::from_cells(&[
                 Cell::D4,
                 Cell::E4,
@@ -1346,7 +1346,7 @@ mod tests {
             ])
         );
         assert_eq!(
-            a_b.king_possible_moves(),
+            a_b.possible_moves_for_king(),
             BitBoard::from_cells(&[
                 Cell::D6,
                 Cell::E6,
