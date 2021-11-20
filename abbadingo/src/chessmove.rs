@@ -8,6 +8,19 @@ use crate::chessdefines::*;
 pub const EMPTY_CHESSMOVE: u32 = 0;
 pub const INVALID_CHESSMOVE: u32 = 0x80_00_00_00;
 
+const TAKEN_PIECE_OFFSET: u32 = 3;
+const PROMOTED_PIECE_OFFSET: u32 = 6;
+const START_CELL_OFFSET: u32 = 12;
+const DESTINATION_CELL_OFFSET: u32 = 18;
+const EN_PASSANT_CELL_OFFSET: u32 = 24;
+
+const PIECE_MASK: u32 = 0x00000007;
+const VALID_CELL_MASK: u32 = 0x0000003F;
+const VALID_AND_INVALID_CELL_MASK: u32 = 0x0000007F;
+
+const INVALID_PIECE: u32 = 0x00000006;
+const INVALID_CELL: u32 = 0x00000040;
+
 /// Struct used to represent a Chess Move in a compact 32-bits wide representation.
 ///
 /// The 32-bits wide bitmask uses the following bits:
@@ -27,25 +40,13 @@ pub const INVALID_CHESSMOVE: u32 = 0x80_00_00_00;
 ///                     `0100 0000 0101 0000 1100 0001 1011 0101` = `0x4050C1B5`
 ///
 
-const TAKEN_PIECE_OFFSET: u32 = 3;
-const PROMOTED_PIECE_OFFSET: u32 = 6;
-const START_CELL_OFFSET: u32 = 12;
-const DESTINATION_CELL_OFFSET: u32 = 18;
-const EN_PASSANT_CELL_OFFSET: u32 = 24;
-
-const PIECE_MASK: u32 = 0x00000007;
-const VALID_CELL_MASK: u32 = 0x0000003F;
-const VALID_AND_INVALID_CELL_MASK: u32 = 0x0000007F;
-
-const INVALID_PIECE: u32 = 0x00000006;
-const INVALID_CELL: u32 = 0x00000040;
-
 #[derive(Default, Debug, PartialEq)]
 pub struct ChessMove {
     pub m: u32,
 }
 
 impl ChessMove {
+
     /// Default constructor of the [ChessMove] structure
     ///
     /// # Arguments
@@ -89,42 +90,42 @@ impl ChessMove {
         ChessMove { m }
     }
 
-    /// Returns the moved [ChessPiece]
+    /// Returns the moved [ChessPiece].
     ///
     pub fn moved_piece(&self) -> ChessPiece {
         // Moved piece cannot be invalid
         num::FromPrimitive::from_u32(self.m & PIECE_MASK).unwrap()
     }
 
-    /// Returns the start [Cell]
+    /// Returns the start [Cell].
     ///
     pub fn start_cell(&self) -> Cell {
         // Start cell cannot be invalid
         num::FromPrimitive::from_u32((self.m >> START_CELL_OFFSET) & VALID_CELL_MASK).unwrap()
     }
 
-    /// Returns the destination [Cell]
+    /// Returns the destination [Cell].
     ///
     pub fn destination_cell(&self) -> Cell {
         // Destination cell cannot be invalid
         num::FromPrimitive::from_u32((self.m >> DESTINATION_CELL_OFFSET) & VALID_CELL_MASK).unwrap()
     }
 
-    /// Returns the taken [ChessPiece] if any, `None` otherwise
+    /// Returns the taken [ChessPiece] if any, `None` otherwise.
     ///
     pub fn taken_piece(&self) -> Option<ChessPiece> {
         num::FromPrimitive::from_u32((self.m >> TAKEN_PIECE_OFFSET) & PIECE_MASK)
     }
 
     /// Returns the [ChessPiece] type of the promoted piece if the move is a promotion,
-    /// `None` otherwise
+    /// `None` otherwise.
     ///
     pub fn promoted_piece(&self) -> Option<ChessPiece> {
         num::FromPrimitive::from_u32((self.m >> PROMOTED_PIECE_OFFSET) & PIECE_MASK)
     }
 
     /// Returns the en-passant [Cell], if the move causes an en-passant condition,
-    /// `None` otherwise
+    /// `None` otherwise.
     ///
     pub fn en_passant_cell(&self) -> Option<Cell> {
         num::FromPrimitive::from_u32(
@@ -132,21 +133,19 @@ impl ChessMove {
         )
     }
 
-    // TODO Functions Still to be converted in Rust
-    //    inline Cell chessMoveGetEnPassantCell(ChessMove cm) { return static_cast<Cell>((cm.to_ullong() >> EnPassantCellOffset)  & ValidAndInvalidCellMask); }
-    //    inline bool isACastlingMove(ChessMove cm)
-    //    {
-    //        // It is (maybe) a castling move if moved piece is king and there is one of the following movements:
-    //        //    e1 --> g1 or e1 --> c1 or e8 --> g8 or e8 --> c8
-    //        if ((chessMoveGetMovedPiece(cm) == King) && (
-    //                 (chessMoveGetStartingCell(cm) == e1 &&
-    //                    ((chessMoveGetDestinationCell(cm) == g1) || (chessMoveGetDestinationCell(cm) == c1))) ||
-    //                 (chessMoveGetStartingCell(cm) == e8 &&
-    //                    ((chessMoveGetDestinationCell(cm) == g8) || (chessMoveGetDestinationCell(cm) == c8)))))
-    //            return true;
-    //        return false;
-    //    }
-    //
+    /// Returns true if a [ChessMove] is a King castling.
+    ///
+    pub fn is_a_castling_move(&self) -> bool {
+        // It is (maybe) a castling move if moved piece is king and there is one of the following movements:
+        //    e1 --> g1 or e1 --> c1 or e8 --> g8 or e8 --> c8
+        (self.moved_piece() == ChessPiece::King)
+            && ((self.start_cell() == Cell::E1
+                && ((self.destination_cell() == Cell::G1)
+                    || (self.destination_cell() == Cell::C1)))
+                || (self.start_cell() == Cell::E8
+                    && ((self.destination_cell() == Cell::G8)
+                        || (self.destination_cell() == Cell::C8))))
+    }
 
     // ---------------------------------------------------------------------------
     // PRIVATE METHODS
@@ -186,7 +185,7 @@ mod tests {
     }
 
     #[test]
-    fn panw_from_e2_to_e3_move() {
+    fn pawn_from_e2_to_e3_move() {
         //    - Pawn (5 = 101) e2 (12 = 001100) to e3 (20 010100)
         //      0 1000000 010100 001100 000 110 110 101
         //      0100 0000 0101 0000 1100 0001 1011 0101 = 0x4050C1B5
@@ -390,166 +389,231 @@ mod tests {
         assert_eq!(cm.en_passant_cell(), Some(Cell::E3));
     }
 
-    // TODO: tests still to be converted in Rust
-    //TEST(ChessMoveTester, TestThatTheGetElementHelpersWorksGood_PawnB4toC5TakingAKnight)
-    //{
-    //    ChessMove cm = chessMove(Pawn, b4, c5, Knight);
-    //    ASSERT_EQ(chessMoveGetMovedPiece(cm), Pawn);
-    //    ASSERT_EQ(chessMoveGetTakenPiece(cm), Knight);
-    //    ASSERT_EQ(chessMoveGetPromotedPiece(cm), InvalidPiece);
-    //    ASSERT_EQ(chessMoveGetStartingCell(cm), b4);
-    //    ASSERT_EQ(chessMoveGetDestinationCell(cm), c5);
-    //    ASSERT_EQ(chessMoveGetEnPassantCell(cm), InvalidCell);
-    //}
-    //TEST(ChessMoveTester, TestThatTheGetElementHelpersWorksGood_PawnF7toF8PromotingToQueen)
-    //{
-    //    ChessMove cm = chessMove(Pawn, f7, f8, InvalidPiece, Queen);
-    //    ASSERT_EQ(chessMoveGetMovedPiece(cm), Pawn);
-    //    ASSERT_EQ(chessMoveGetTakenPiece(cm), InvalidPiece);
-    //    ASSERT_EQ(chessMoveGetPromotedPiece(cm), Queen);
-    //    ASSERT_EQ(chessMoveGetStartingCell(cm), f7);
-    //    ASSERT_EQ(chessMoveGetDestinationCell(cm), f8);
-    //    ASSERT_EQ(chessMoveGetEnPassantCell(cm), InvalidCell);
-    //}
-    //TEST(ChessMoveTester, TestThatTheGetElementHelpersWorksGood_PawnB2toC1TakingABishopPromotingToKnight)
-    //{
-    //    ChessMove cm = chessMove(Pawn, b2, c1, Bishop, Knight);
-    //    ASSERT_EQ(chessMoveGetMovedPiece(cm), Pawn);
-    //    ASSERT_EQ(chessMoveGetTakenPiece(cm), Bishop);
-    //    ASSERT_EQ(chessMoveGetPromotedPiece(cm), Knight);
-    //    ASSERT_EQ(chessMoveGetStartingCell(cm), b2);
-    //    ASSERT_EQ(chessMoveGetDestinationCell(cm), c1);
-    //    ASSERT_EQ(chessMoveGetEnPassantCell(cm), InvalidCell);
-    //}
-    //TEST(ChessMoveTester, TestThatTheGetElementHelpersWorksGood_RookG3toB3)
-    //{
-    //    ChessMove cm = chessMove(Rook, g3, b3);
-    //    ASSERT_EQ(chessMoveGetMovedPiece(cm), Rook);
-    //    ASSERT_EQ(chessMoveGetTakenPiece(cm), InvalidPiece);
-    //    ASSERT_EQ(chessMoveGetPromotedPiece(cm), InvalidPiece);
-    //    ASSERT_EQ(chessMoveGetStartingCell(cm), g3);
-    //    ASSERT_EQ(chessMoveGetDestinationCell(cm), b3);
-    //    ASSERT_EQ(chessMoveGetEnPassantCell(cm), InvalidCell);
-    //}
-    //TEST(ChessMoveTester, TestThatTheGetElementHelpersWorksGood_KnightE4toC5TakingPawn)
-    //{
-    //    ChessMove cm = chessMove(Knight, e4, c5, Pawn);
-    //    ASSERT_EQ(chessMoveGetMovedPiece(cm), Knight);
-    //    ASSERT_EQ(chessMoveGetTakenPiece(cm), Pawn);
-    //    ASSERT_EQ(chessMoveGetPromotedPiece(cm), InvalidPiece);
-    //    ASSERT_EQ(chessMoveGetStartingCell(cm), e4);
-    //    ASSERT_EQ(chessMoveGetDestinationCell(cm), c5);
-    //    ASSERT_EQ(chessMoveGetEnPassantCell(cm), InvalidCell);
-    //}
-    //TEST(ChessMoveTester, TestThatTheGetElementHelpersWorksGood_BishopA3toF8TakingQueen)
-    //{
-    //    ChessMove cm = chessMove(Bishop, a3, f8, Queen);
-    //    ASSERT_EQ(chessMoveGetMovedPiece(cm), Bishop);
-    //    ASSERT_EQ(chessMoveGetTakenPiece(cm), Queen);
-    //    ASSERT_EQ(chessMoveGetPromotedPiece(cm), InvalidPiece);
-    //    ASSERT_EQ(chessMoveGetStartingCell(cm), a3);
-    //    ASSERT_EQ(chessMoveGetDestinationCell(cm), f8);
-    //    ASSERT_EQ(chessMoveGetEnPassantCell(cm), InvalidCell);
-    //}
-    //TEST(ChessMoveTester, TestThatTheGetElementHelpersWorksGood_QueenA6toE2)
-    //{
-    //    ChessMove cm = chessMove(Queen, a6, e2);
-    //    ASSERT_EQ(chessMoveGetMovedPiece(cm), Queen);
-    //    ASSERT_EQ(chessMoveGetTakenPiece(cm), InvalidPiece);
-    //    ASSERT_EQ(chessMoveGetPromotedPiece(cm), InvalidPiece);
-    //    ASSERT_EQ(chessMoveGetStartingCell(cm), a6);
-    //    ASSERT_EQ(chessMoveGetDestinationCell(cm), e2);
-    //    ASSERT_EQ(chessMoveGetEnPassantCell(cm), InvalidCell);
-    //}
-    //TEST(ChessMoveTester, TestThatTheGetElementHelpersWorksGood_KingD5toE4TakingRook)
-    //{
-    //    ChessMove cm = chessMove(King, d5, e4, Rook);
-    //    ASSERT_EQ(chessMoveGetMovedPiece(cm), King);
-    //    ASSERT_EQ(chessMoveGetTakenPiece(cm), Rook);
-    //    ASSERT_EQ(chessMoveGetPromotedPiece(cm), InvalidPiece);
-    //    ASSERT_EQ(chessMoveGetStartingCell(cm), d5);
-    //    ASSERT_EQ(chessMoveGetDestinationCell(cm), e4);
-    //    ASSERT_EQ(chessMoveGetEnPassantCell(cm), InvalidCell);
-    //}
-    //
-    //// --- isACastlingMove() method testing ---
-    //TEST(ChessMoveTester, White_00_IsACastlingMove)
-    //{
-    //    ChessMove cm = chessMove(King, e1, g1);
-    //    ASSERT_TRUE(isACastlingMove(cm));
-    //}
-    //TEST(ChessMoveTester, White_000_IsACastlingMove)
-    //{
-    //    ChessMove cm = chessMove(King, e1, c1);
-    //    ASSERT_TRUE(isACastlingMove(cm));
-    //}
-    //TEST(ChessMoveTester, Black_00_IsACastlingMove)
-    //{
-    //    ChessMove cm = chessMove(King, e8, g8);
-    //    ASSERT_TRUE(isACastlingMove(cm));
-    //}
-    //TEST(ChessMoveTester, Black_000_IsACastlingMove)
-    //{
-    //    ChessMove cm = chessMove(King, e8, c8);
-    //    ASSERT_TRUE(isACastlingMove(cm));
-    //}
-    //TEST(ChessMoveTester, CheckThatOtherKingMovesAreNotCastlingMove)
-    //{
-    //    ChessMove cm = chessMove(King, e1, f1);
-    //    ASSERT_FALSE(isACastlingMove(cm));
-    //    cm = chessMove(King, e1, d1);
-    //    ASSERT_FALSE(isACastlingMove(cm));
-    //    cm = chessMove(King, e8, e7);
-    //    ASSERT_FALSE(isACastlingMove(cm));
-    //    cm = chessMove(King, e8, d7);
-    //    ASSERT_FALSE(isACastlingMove(cm));
-    //    cm = chessMove(King, f5, f4);
-    //    ASSERT_FALSE(isACastlingMove(cm));
-    //    cm = chessMove(King, c3, d4);
-    //    ASSERT_FALSE(isACastlingMove(cm));
-    //    cm = chessMove(King, g7, h8);
-    //    ASSERT_FALSE(isACastlingMove(cm));
-    //}
-    //TEST(ChessMoveTester, CheckThatOtherPiecesMovesAreNotCastlingMove)
-    //{
-    //    ChessMove cm = chessMove(Rook, h1, f1);
-    //    ASSERT_FALSE(isACastlingMove(cm));
-    //    cm = chessMove(Rook, a1, d1);
-    //    ASSERT_FALSE(isACastlingMove(cm));
-    //    cm = chessMove(Rook, a8, d8);
-    //    ASSERT_FALSE(isACastlingMove(cm));
-    //    cm = chessMove(Rook, a8, f8);
-    //    ASSERT_FALSE(isACastlingMove(cm));
-    //    cm = chessMove(Knight, d3, e5, Pawn);
-    //    ASSERT_FALSE(isACastlingMove(cm));
-    //    cm = chessMove(Bishop, f6, a1, Rook);
-    //    ASSERT_FALSE(isACastlingMove(cm));
-    //    cm = chessMove(Bishop, f6, a1, Rook);
-    //    ASSERT_FALSE(isACastlingMove(cm));
-    //}
-    //
+    #[test]
+    fn test_get_helpers_pawn_b4_to_c5_taking_a_knight() {
+        let cm = ChessMove::new(
+            ChessPiece::Pawn,
+            Cell::B4,
+            Cell::C5,
+            Some(ChessPiece::Knight),
+            None,
+        );
+        assert_eq!(cm.moved_piece(), ChessPiece::Pawn);
+        assert_eq!(cm.taken_piece(), Some(ChessPiece::Knight));
+        assert_eq!(cm.promoted_piece(), None);
+        assert_eq!(cm.start_cell(), Cell::B4);
+        assert_eq!(cm.destination_cell(), Cell::C5);
+        assert_eq!(cm.en_passant_cell(), None);
+    }
+
+    #[test]
+    fn test_get_helpers_pawn_pawn_f7_to_f8_promoting_to_queen() {
+        let cm = ChessMove::new(
+            ChessPiece::Pawn,
+            Cell::F7,
+            Cell::F8,
+            None,
+            Some(ChessPiece::Queen),
+        );
+        assert_eq!(cm.moved_piece(), ChessPiece::Pawn);
+        assert_eq!(cm.taken_piece(), None);
+        assert_eq!(cm.promoted_piece(), Some(ChessPiece::Queen));
+        assert_eq!(cm.start_cell(), Cell::F7);
+        assert_eq!(cm.destination_cell(), Cell::F8);
+        assert_eq!(cm.en_passant_cell(), None);
+    }
+
+    #[test]
+    fn test_get_helpers_pawn_b2_to_c1_taking_bishop_promoting_to_knight() {
+        let cm = ChessMove::new(
+            ChessPiece::Pawn,
+            Cell::B2,
+            Cell::C1,
+            Some(ChessPiece::Bishop),
+            Some(ChessPiece::Knight),
+        );
+        assert_eq!(cm.moved_piece(), ChessPiece::Pawn);
+        assert_eq!(cm.taken_piece(), Some(ChessPiece::Bishop));
+        assert_eq!(cm.promoted_piece(), Some(ChessPiece::Knight));
+        assert_eq!(cm.start_cell(), Cell::B2);
+        assert_eq!(cm.destination_cell(), Cell::C1);
+        assert_eq!(cm.en_passant_cell(), None);
+    }
+
+    #[test]
+    fn test_get_helpers_rook_g3_to_b3() {
+        let cm = ChessMove::new(ChessPiece::Rook, Cell::G3, Cell::B3, None, None);
+        assert_eq!(cm.moved_piece(), ChessPiece::Rook);
+        assert_eq!(cm.taken_piece(), None);
+        assert_eq!(cm.promoted_piece(), None);
+        assert_eq!(cm.start_cell(), Cell::G3);
+        assert_eq!(cm.destination_cell(), Cell::B3);
+        assert_eq!(cm.en_passant_cell(), None);
+    }
+
+    #[test]
+    fn test_get_helpers_knight_e4_to_c5_taking_pawn() {
+        let cm = ChessMove::new(
+            ChessPiece::Knight,
+            Cell::E4,
+            Cell::C5,
+            Some(ChessPiece::Pawn),
+            None,
+        );
+        assert_eq!(cm.moved_piece(), ChessPiece::Knight);
+        assert_eq!(cm.taken_piece(), Some(ChessPiece::Pawn));
+        assert_eq!(cm.promoted_piece(), None);
+        assert_eq!(cm.start_cell(), Cell::E4);
+        assert_eq!(cm.destination_cell(), Cell::C5);
+        assert_eq!(cm.en_passant_cell(), None);
+    }
+
+    #[test]
+    fn test_get_helpers_bishop_a3_to_f8_taking_queen() {
+        let cm = ChessMove::new(
+            ChessPiece::Bishop,
+            Cell::A3,
+            Cell::F8,
+            Some(ChessPiece::Queen),
+            None,
+        );
+        assert_eq!(cm.moved_piece(), ChessPiece::Bishop);
+        assert_eq!(cm.taken_piece(), Some(ChessPiece::Queen));
+        assert_eq!(cm.promoted_piece(), None);
+        assert_eq!(cm.start_cell(), Cell::A3);
+        assert_eq!(cm.destination_cell(), Cell::F8);
+        assert_eq!(cm.en_passant_cell(), None);
+    }
+
+    #[test]
+    fn test_get_helpers_queen_a6_to_e2() {
+        let cm = ChessMove::new(ChessPiece::Queen, Cell::A6, Cell::E2, None, None);
+        assert_eq!(cm.moved_piece(), ChessPiece::Queen);
+        assert_eq!(cm.taken_piece(), None);
+        assert_eq!(cm.promoted_piece(), None);
+        assert_eq!(cm.start_cell(), Cell::A6);
+        assert_eq!(cm.destination_cell(), Cell::E2);
+        assert_eq!(cm.en_passant_cell(), None);
+    }
+
+    #[test]
+    fn test_get_helpers_king_d5_to_e4_taking_rook() {
+        let cm = ChessMove::new(
+            ChessPiece::King,
+            Cell::D5,
+            Cell::E4,
+            Some(ChessPiece::Rook),
+            None,
+        );
+        assert_eq!(cm.moved_piece(), ChessPiece::King);
+        assert_eq!(cm.taken_piece(), Some(ChessPiece::Rook));
+        assert_eq!(cm.promoted_piece(), None);
+        assert_eq!(cm.start_cell(), Cell::D5);
+        assert_eq!(cm.destination_cell(), Cell::E4);
+        assert_eq!(cm.en_passant_cell(), None);
+    }
+
+    // --- isACastlingMove() method testing ---
+    #[test]
+    fn white_00_is_a_castling_move() {
+        let cm = ChessMove::new(ChessPiece::King, Cell::E1, Cell::G1, None, None);
+        assert!(cm.is_a_castling_move());
+    }
+
+    #[test]
+    fn white_000_is_a_castling_move() {
+        let cm = ChessMove::new(ChessPiece::King, Cell::E1, Cell::C1, None, None);
+        assert!(cm.is_a_castling_move());
+    }
+
+    #[test]
+    fn black_00_is_a_castling_move() {
+        let cm = ChessMove::new(ChessPiece::King, Cell::E8, Cell::G8, None, None);
+        assert!(cm.is_a_castling_move());
+    }
+
+    #[test]
+    fn black_000_is_a_castling_move() {
+        let cm = ChessMove::new(ChessPiece::King, Cell::E8, Cell::C8, None, None);
+        assert!(cm.is_a_castling_move());
+    }
+
+    #[test]
+    fn normal_one_step_king_moves_are_not_castling_move() {
+        let cm = ChessMove::new(ChessPiece::King, Cell::E1, Cell::F1, None, None);
+        assert!(!cm.is_a_castling_move());
+        let cm = ChessMove::new(ChessPiece::King, Cell::E1, Cell::D1, None, None);
+        assert!(!cm.is_a_castling_move());
+        let cm = ChessMove::new(ChessPiece::King, Cell::E8, Cell::E7, None, None);
+        assert!(!cm.is_a_castling_move());
+        let cm = ChessMove::new(ChessPiece::King, Cell::E8, Cell::D7, None, None);
+        assert!(!cm.is_a_castling_move());
+        let cm = ChessMove::new(ChessPiece::King, Cell::F5, Cell::F4, None, None);
+        assert!(!cm.is_a_castling_move());
+        let cm = ChessMove::new(ChessPiece::King, Cell::C3, Cell::D4, None, None);
+        assert!(!cm.is_a_castling_move());
+        let cm = ChessMove::new(ChessPiece::King, Cell::G7, Cell::H8, None, None);
+        assert!(!cm.is_a_castling_move());
+    }
+
+    #[test]
+    fn check_that_other_pieces_moves_are_not_castlings() {
+        let cm = ChessMove::new(ChessPiece::Rook, Cell::H1, Cell::F1, None, None);
+        assert!(!cm.is_a_castling_move());
+        let cm = ChessMove::new(ChessPiece::Rook, Cell::A1, Cell::D1, None, None);
+        assert!(!cm.is_a_castling_move());
+        let cm = ChessMove::new(ChessPiece::Rook, Cell::A8, Cell::D8, None, None);
+        assert!(!cm.is_a_castling_move());
+        let cm = ChessMove::new(ChessPiece::Rook, Cell::A8, Cell::F8, None, None);
+        assert!(!cm.is_a_castling_move());
+        let cm = ChessMove::new(
+            ChessPiece::Knight,
+            Cell::D3,
+            Cell::E5,
+            Some(ChessPiece::Pawn),
+            None,
+        );
+        assert!(!cm.is_a_castling_move());
+        let cm = ChessMove::new(
+            ChessPiece::Bishop,
+            Cell::F6,
+            Cell::A1,
+            Some(ChessPiece::Rook),
+            None,
+        );
+        assert!(!cm.is_a_castling_move());
+        let cm = ChessMove::new(
+            ChessPiece::Bishop,
+            Cell::F6,
+            Cell::A1,
+            Some(ChessPiece::Rook),
+            None,
+        );
+        assert!(!cm.is_a_castling_move());
+    }
+
     //// Test print function
-    //TEST(ChessMoveTester, TestPrintFunction)
+    //fn TestPrintFunction)
     //{
     //    std::ostringstream os;
     //    printChessMove(os, chessMove(King, e1, d1));
-    //    ASSERT_EQ(os.str(), "King e1-d1");
+    //    assert_eq!(os.str(), "King e1-d1");
     //
     //    os.str(std::string());
     //    printChessMove(os, chessMove(Queen, d1, d5, Bishop));
-    //    ASSERT_EQ(os.str(), "Queen d1-d5 x Bishop");
+    //    assert_eq!(os.str(), "Queen d1-d5 x Bishop");
     //
     //    os.str(std::string());
     //    printChessMove(os, chessMove(Pawn, e7, e8, InvalidPiece, Queen));
-    //    ASSERT_EQ(os.str(), "Pawn e7-e8 = Queen");
+    //    assert_eq!(os.str(), "Pawn e7-e8 = Queen");
     //
     //    os.str(std::string());
     //    printChessMove(os, chessMove(Pawn, g2, h1, Rook, Knight));
-    //    ASSERT_EQ(os.str(), "Pawn g2-h1 x Rook = Knight");
+    //    assert_eq!(os.str(), "Pawn g2-h1 x Rook = Knight");
     //
     //    os.str(std::string());
     //    printChessMove(os, InvalidMove);
-    //    ASSERT_EQ(os.str(), "InvalidMove");
+    //    assert_eq!(os.str(), "InvalidMove");
     //}
     //
     //
