@@ -2,6 +2,8 @@
 //!
 //! In this module there are for example definition for Chess pieces, and Army colours
 
+use std::fmt;
+
 use crate::error::AbbaDingoError;
 use std::convert::TryFrom;
 
@@ -42,18 +44,19 @@ pub const NUM_PIECES_TYPES: usize = 6;
 // ********************************************************************************
 // ********************************************************************************
 
-/// Converts a [ChessPiece] into its String representation ("King", "Queen", ...,"pawn").
+/// Display trait for [ChessPiece] structure.
+///
+/// Display a [ChessPiece] into its String representation ("King", "Queen", ...,"pawn").
 ///
 /// # Example
 /// ```
 /// # use abbadingo::chessdefines::*;
-/// assert_eq!(Into::<String>::into(ChessPiece::Queen), "Queen");
-/// assert_eq!(Into::<String>::into(ChessPiece::Pawn), "pawn");
-/// ```
-#[allow(clippy::from_over_into)]
-impl Into<String> for ChessPiece {
-    fn into(self) -> String {
-        (match self {
+/// assert_eq!(format!("{}", ChessPiece::Queen), "Queen");
+/// assert_eq!(format!("{}", ChessPiece::Pawn), "pawn");
+///
+impl fmt::Display for ChessPiece {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let str_repr = (match self {
             ChessPiece::King => "King",
             ChessPiece::Queen => "Queen",
             ChessPiece::Bishop => "Bishop",
@@ -61,7 +64,8 @@ impl Into<String> for ChessPiece {
             ChessPiece::Rook => "Rook",
             ChessPiece::Pawn => "pawn",
         })
-        .to_string()
+        .to_string();
+        write!(f, "{}", str_repr)
     }
 }
 

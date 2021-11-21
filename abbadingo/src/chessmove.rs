@@ -2,6 +2,8 @@
 //! and related methods implementation.
 //!
 
+use std::fmt;
+
 use crate::bbdefines::*;
 use crate::chessdefines::*;
 
@@ -46,7 +48,6 @@ pub struct ChessMove {
 }
 
 impl ChessMove {
-
     /// Default constructor of the [ChessMove] structure
     ///
     /// # Arguments
@@ -167,6 +168,41 @@ impl ChessMove {
             return s(from);
         }
         None
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Traits implementation for ChessMove structure
+
+/// Display trait for [ChessMove] structure.
+///
+/// Display the [ChessMove] in an human-readable format.
+///
+/// # Example
+/// ```
+/// # use abbadingo::bbdefines::{Cell};
+/// # use abbadingo::chessdefines::{ChessPiece};
+/// # use abbadingo::chessmove::*;
+/// assert_eq!(format!("{}", ChessMove::new(ChessPiece::Rook, Cell::C2, Cell::C7, None, None)), "Rook c2-c7");
+/// assert_eq!(format!("{}", ChessMove::new(ChessPiece::Bishop, Cell::B3, Cell::G8, Some(ChessPiece::Queen), None)), "Bishop b3-g8 take Queen");
+/// assert_eq!(format!("{}", ChessMove::new(ChessPiece::Pawn, Cell::F2, Cell::F1, None, Some(ChessPiece::Queen))), "pawn f2-f1 promote to Queen");
+/// assert_eq!(format!("{}", ChessMove::new(ChessPiece::Pawn, Cell::A7, Cell::B8, Some(ChessPiece::Rook), Some(ChessPiece::Knight))), "pawn a7-b8 take Rook promote to Knight");
+///```
+///
+impl fmt::Display for ChessMove {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let piece_moved = self.moved_piece();
+        let start_cell = self.start_cell();
+        let dest_cell = self.destination_cell();
+
+        write!(f, "{} {}-{}", piece_moved, start_cell, dest_cell)?;
+        if let Some(p) = self.taken_piece() {
+            write!(f, " take {}", p)?;
+        }
+        if let Some(p) = self.promoted_piece() {
+            write!(f, " promote to {}", p)?;
+        }
+        Ok(())
     }
 }
 
