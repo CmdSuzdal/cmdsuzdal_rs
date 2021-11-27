@@ -1,4 +1,7 @@
 # cmdsuzdal_rs
+
+![example](https://github.com/CmdSuzdal/cmdsuzdal_rs/actions/workflows/CIszd.yml/badge.svg)
+
 **CmdSuzdal**: A project to write board games support software in Rust.
 
 This workspace is (currently) composed by the following crates:
