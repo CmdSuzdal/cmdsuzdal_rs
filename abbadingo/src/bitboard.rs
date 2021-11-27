@@ -2,6 +2,16 @@
 
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign};
 
+// -----------------------------------------------------------------------------------
+// ansi-term on crates.io
+// This is a library for controlling colours and formatting,
+// such as red bold text or blue underlined text, on ANSI terminals.
+// Rustdoc: https://docs.rs/ansi_term
+// Unicode box-drawing characters: https://en.wikipedia.org/wiki/Box-drawing_character
+// Chess symbols on unicode: https://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
+use ansi_term::Colour::{Black, Fixed};
+// -----------------------------------------------------------------------------------
+
 use crate::num::FromPrimitive;
 use std::fmt;
 
@@ -414,26 +424,66 @@ impl From<BitBoardState> for BitBoard {
 ///
 impl fmt::Display for BitBoard {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut bb_str: String = "\n  _ _ _ _ _ _ _ _".to_owned();
-        let mut fillchar = ' ';
+        let bg_style = Black.on(Fixed(252));
+        let mut bb_str: String = "\n".to_string();
+        bb_str.push_str(&format!(
+            "{}",
+            bg_style.paint("                                       ")
+        ));
+        bb_str.push_str(&"\n".to_string());
+        bb_str.push_str(&format!(
+            "{}",
+            bg_style.paint("     a   b   c   d   e   f   g   h     ")
+        ));
+        bb_str.push_str(&"\n".to_string());
+        bb_str.push_str(&format!(
+            "{}",
+            bg_style.paint("   ╭───┬───┬───┬───┬───┬───┬───┬───╮   ")
+        ));
         for r in (0..8).rev() {
-            bb_str.push_str(&format!("\n{}|", r + 1));
-            if r == 0 {
-                fillchar = '_';
-            }
+            bb_str.push_str(&"\n".to_string());
+            bb_str.push_str(&format!("{}", bg_style.paint(" ")));
+            bb_str.push_str(&format!("{}", bg_style.paint((r + 1).to_string())));
+            bb_str.push_str(&format!("{}", bg_style.paint(" │ ")));
+
+            //bb_str.push_str(&format!("\n {} │", r + 1));
             for c in 0..8 {
                 if self.cell_is_active(to_cell(
                     num::FromPrimitive::from_i32(c).unwrap(),
                     num::FromPrimitive::from_i32(r).unwrap(),
                 )) {
-                    bb_str.push('x');
+                    bb_str.push_str(&format!("{}", bg_style.paint("♟︎ ")));
                 } else {
-                    bb_str.push(fillchar);
+                    bb_str.push_str(&format!("{}", bg_style.paint("  ")));
                 }
-                bb_str.push('|');
+                bb_str.push_str(&format!("{}", bg_style.paint("│ ")));
+            }
+            bb_str.push_str(&format!("{}", bg_style.paint((r + 1).to_string())));
+            bb_str.push_str(&format!("{}", bg_style.paint(" ")));
+            if r > 0 {
+                bb_str.push_str(&"\n".to_string());
+                bb_str.push_str(&format!(
+                    "{}",
+                    bg_style.paint("   ├───┼───┼───┼───┼───┼───┼───┼───┤   ")
+                ));
             }
         }
-        bb_str.push_str("\n  a b c d e f g h\n");
+        bb_str.push_str(&"\n".to_string());
+        bb_str.push_str(&format!(
+            "{}",
+            bg_style.paint("   ╰───┴───┴───┴───┴───┴───┴───┴───╯   ")
+        ));
+        bb_str.push_str(&"\n".to_string());
+        bb_str.push_str(&format!(
+            "{}",
+            bg_style.paint("     a   b   c   d   e   f   g   h     ")
+        ));
+        bb_str.push_str(&"\n".to_string());
+        bb_str.push_str(&format!(
+            "{}",
+            bg_style.paint("                                       ")
+        ));
+        bb_str.push_str(&"\n".to_string());
         write!(f, "{}", bb_str)
     }
 }

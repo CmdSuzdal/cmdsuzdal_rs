@@ -1,7 +1,36 @@
 //! Definition of the [ChessArmy] structure and related methods implementation.
 //!
 
+//   ╭───┬───┬───┬───┬───┬───┬───┬───╮
+// 8 │ ♜ │ ♞ │ ♝ │ ♛ │ ♚ │ ♝ │ ♞ │ ♜ │
+//   ├───┼───┼───┼───┼───┼───┼───┼───┤
+// 7 │ ♟︎ │ ♟︎ │ ♟︎ │ ♟︎ │ ♟︎ │ ♟︎ │ ♟︎ │ ♟︎ │
+//   ├───┼───┼───┼───┼───┼───┼───┼───┤
+// 6 │   │   │   │   │   │   │   │   │
+//   ├───┼───┼───┼───┼───┼───┼───┼───┤
+// 5 │   │   │   │   │   │   │   │   │
+//   ├───┼───┼───┼───┼───┼───┼───┼───┤
+// 4 │   │   │   │   │   │   │   │   │
+//   ├───┼───┼───┼───┼───┼───┼───┼───┤
+// 3 │   │   │   │   │   │   │   │   │
+//   ├───┼───┼───┼───┼───┼───┼───┼───┤
+// 2 │ ♙ │ ♙ │ ♙ │ ♙ │ ♙ │ ♙ │ ♙ │ ♙ │
+//   ├───┼───┼───┼───┼───┼───┼───┼───┤
+// 1 │ ♖ │ ♘ │ ♗ │ ♕ │ ♔ │ ♗ │ ♘ │ ♖ │
+//   ╰───┴───┴───┴───┴───┴───┴───┴───╯
+//     a   b   c   d   e   f   g   h
+
 use std::fmt;
+
+// -----------------------------------------------------------------------------------
+// ansi-term on crates.io
+// This is a library for controlling colours and formatting,
+// such as red bold text or blue underlined text, on ANSI terminals.
+// Rustdoc: https://docs.rs/ansi_term
+// Unicode box-drawing characters: https://en.wikipedia.org/wiki/Box-drawing_character
+// Chess symbols on unicode: https://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
+use ansi_term::Colour::{Black, Fixed};
+// -----------------------------------------------------------------------------------
 
 use crate::bbdefines::*;
 use crate::bitboard::BitBoard;
@@ -892,45 +921,97 @@ impl ChessArmy {
 ///
 impl fmt::Display for ChessArmy {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut bb_str: String = "\n".to_owned();
-        let mut king_sym = 'K';
-        let mut queen_sym = 'Q';
-        let mut bishop_sym = 'B';
-        let mut knight_sym = 'N';
-        let mut rook_sym = 'R';
-        let mut pawn_sym = 'P';
+        let mut king_sym = "♔";
+        let mut queen_sym = "♕";
+        let mut bishop_sym = "♗";
+        let mut knight_sym = "♘";
+        let mut rook_sym = "♖";
+        let mut pawn_sym = "♙";
         if self.colour == ArmyColour::Black {
-            king_sym = 'k';
-            queen_sym = 'q';
-            bishop_sym = 'b';
-            knight_sym = 'n';
-            rook_sym = 'r';
-            pawn_sym = 'p';
+            king_sym = "♚";
+            queen_sym = "♛";
+            bishop_sym = "♝";
+            knight_sym = "♞";
+            rook_sym = "♜";
+            pawn_sym = "♟︎";
         }
-        bb_str.push_str("  _ _ _ _ _ _ _ _");
-        let mut fillchar = ' ';
+
+        let bg_style = Black.on(Fixed(252));
+        let mut bb_str: String = "\n".to_string();
+        bb_str.push_str(&format!(
+            "{}",
+            bg_style.paint("                                       ")
+        ));
+        bb_str.push_str(&"\n".to_string());
+        bb_str.push_str(&format!(
+            "{}",
+            bg_style.paint("     a   b   c   d   e   f   g   h     ")
+        ));
+        bb_str.push_str(&"\n".to_string());
+        bb_str.push_str(&format!(
+            "{}",
+            bg_style.paint("   ╭───┬───┬───┬───┬───┬───┬───┬───╮   ")
+        ));
         for r in (0..8).rev() {
-            bb_str.push_str(&format!("\n{}|", r + 1));
-            if r == 0 {
-                fillchar = '_';
-            }
+            bb_str.push_str(&"\n".to_string());
+            bb_str.push_str(&format!("{}", bg_style.paint(" ")));
+            bb_str.push_str(&format!("{}", bg_style.paint((r + 1).to_string())));
+            bb_str.push_str(&format!("{}", bg_style.paint(" │ ")));
+
+            //bb_str.push_str(&format!("\n {} │", r + 1));
             for c in 0..8 {
                 match self.get_piece_in_cell(to_cell(
                     num::FromPrimitive::from_i32(c).unwrap(),
                     num::FromPrimitive::from_i32(r).unwrap(),
                 )) {
-                    Some(ChessPiece::King) => bb_str.push(king_sym),
-                    Some(ChessPiece::Queen) => bb_str.push(queen_sym),
-                    Some(ChessPiece::Bishop) => bb_str.push(bishop_sym),
-                    Some(ChessPiece::Knight) => bb_str.push(knight_sym),
-                    Some(ChessPiece::Rook) => bb_str.push(rook_sym),
-                    Some(ChessPiece::Pawn) => bb_str.push(pawn_sym),
-                    _ => bb_str.push(fillchar),
+                    Some(ChessPiece::King) => {
+                        bb_str.push_str(&format!("{}", bg_style.paint(king_sym)))
+                    }
+                    Some(ChessPiece::Queen) => {
+                        bb_str.push_str(&format!("{}", bg_style.paint(queen_sym)))
+                    }
+                    Some(ChessPiece::Bishop) => {
+                        bb_str.push_str(&format!("{}", bg_style.paint(bishop_sym)))
+                    }
+                    Some(ChessPiece::Knight) => {
+                        bb_str.push_str(&format!("{}", bg_style.paint(knight_sym)))
+                    }
+                    Some(ChessPiece::Rook) => {
+                        bb_str.push_str(&format!("{}", bg_style.paint(rook_sym)))
+                    }
+                    Some(ChessPiece::Pawn) => {
+                        bb_str.push_str(&format!("{}", bg_style.paint(pawn_sym)))
+                    }
+                    _ => bb_str.push_str(&format!("{}", bg_style.paint(" "))),
                 }
-                bb_str.push('|');
+                bb_str.push_str(&format!("{}", bg_style.paint(" │ ")));
+            }
+            bb_str.push_str(&format!("{}", bg_style.paint((r + 1).to_string())));
+            bb_str.push_str(&format!("{}", bg_style.paint(" ")));
+            if r > 0 {
+                bb_str.push_str(&"\n".to_string());
+                bb_str.push_str(&format!(
+                    "{}",
+                    bg_style.paint("   ├───┼───┼───┼───┼───┼───┼───┼───┤   ")
+                ));
             }
         }
-        bb_str.push_str("\n  a b c d e f g h\n");
+        bb_str.push_str(&"\n".to_string());
+        bb_str.push_str(&format!(
+            "{}",
+            bg_style.paint("   ╰───┴───┴───┴───┴───┴───┴───┴───╯   ")
+        ));
+        bb_str.push_str(&"\n".to_string());
+        bb_str.push_str(&format!(
+            "{}",
+            bg_style.paint("     a   b   c   d   e   f   g   h     ")
+        ));
+        bb_str.push_str(&"\n".to_string());
+        bb_str.push_str(&format!(
+            "{}",
+            bg_style.paint("                                       ")
+        ));
+        bb_str.push_str(&"\n".to_string());
         write!(f, "{}", bb_str)
     }
 }
