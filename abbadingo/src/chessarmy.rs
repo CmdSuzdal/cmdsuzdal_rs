@@ -49,28 +49,15 @@ pub struct ChessArmy {
 
 impl ChessArmy {
     /// Default constructor for the [ChessArmy] struct.
-    /// Instantiate an empty [ChessArmy] of the given colour
+    ///
+    /// Instantiate an empty [ChessArmy] of the given colour.
+    /// The colour is set, so when pieces will be later added
+    /// them will be the given colour
+    ///
     ///
     /// # Arguments
     ///
     /// * `c` - The colour of the [ChessArmy].
-    ///
-    /// # Example:
-    /// ```
-    /// # use abbadingo::chessdefines::ArmyColour;
-    /// # use abbadingo::chessarmy::ChessArmy;
-    /// //    _________________________
-    /// // r8|  .  .  .  .  .  .  .  . |
-    /// // r7|  .  .  .  .  .  .  .  . |
-    /// // r6|  .  .  .  .  .  .  .  . |
-    /// // r5|  .  .  .  .  .  .  .  . |
-    /// // r4|  .  .  .  .  .  .  .  . |
-    /// // r3|  .  .  .  .  .  .  .  . |
-    /// // r2|  .  .  .  .  .  .  .  . |
-    /// // r1|  .  .  .  .  .  .  .  . |
-    /// //     -------------------------
-    /// //     fa fb fc fd fe ff fg fh
-    ///```
     ///
     pub fn new(c: ArmyColour) -> ChessArmy {
         ChessArmy {
