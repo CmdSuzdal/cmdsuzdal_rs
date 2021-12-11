@@ -13,4 +13,5 @@ pub mod chessarmy;
 pub mod chessdefines;
 pub mod chessmove;
 pub mod error;
+pub mod fenrecord;
 pub mod hexboard;
